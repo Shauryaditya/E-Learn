@@ -24,7 +24,7 @@ export async function PATCH(
           ...values,
         }
       });
-      console.log("Course update>>>",course);
+   
       return NextResponse.json(course);
     } catch (error) {
       console.log("[COURSE_ID]", error);
