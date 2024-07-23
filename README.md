@@ -1,4 +1,4 @@
-Here's a sample README for a Next.js project that serves as a Learning Management System (LMS) with separate portals for students and teachers:
+Here's the updated README to reflect the use of PostgreSQL and Prisma:
 
 ---
 
@@ -31,8 +31,9 @@ This is a Learning Management System built with Next.js, providing separate port
 ## Tech Stack
 
 - **Frontend:** Next.js, React
-- **Backend:** Node.js, Express (if applicable)
-- **Database:** MongoDB (or any preferred database)
+- **Backend:** Next.js API Routes
+- **Database:** PostgreSQL
+- **ORM:** Prisma
 - **Authentication:** NextAuth.js (or any preferred authentication library)
 - **Styling:** CSS Modules, Tailwind CSS (or any preferred styling framework)
 
@@ -44,6 +45,7 @@ To get a local copy of the project up and running, follow these steps.
 
 - Node.js (v14 or later)
 - npm or yarn
+- PostgreSQL
 
 ### Installation
 
@@ -68,16 +70,29 @@ To get a local copy of the project up and running, follow these steps.
    yarn install
    ```
 
-3. **Environment Variables:**
+3. **Setup PostgreSQL Database:**
+
+   Create a new PostgreSQL database and note the connection details.
+
+4. **Environment Variables:**
 
    Create a `.env.local` file in the root directory and add the following variables:
 
    ```
-   DATABASE_URL=your_database_url
+   DATABASE_URL=postgresql://username:password@localhost:5432/your_database
    NEXTAUTH_SECRET=your_secret_key
    ```
 
-4. **Run the application:**
+5. **Prisma Setup:**
+
+   Run Prisma commands to generate client and apply migrations:
+
+   ```bash
+   npx prisma generate
+   npx prisma migrate dev --name init
+   ```
+
+6. **Run the application:**
 
    Using npm:
 
@@ -102,6 +117,7 @@ To get a local copy of the project up and running, follow these steps.
 │   ├── /api       # API routes
 │   ├── /students  # Student portal pages
 │   └── /teachers  # Teacher portal pages
+├── /prisma        # Prisma schema and migrations
 ├── /public        # Public assets
 ├── /styles        # Styling files
 └── /utils         # Utility functions and helpers
@@ -133,4 +149,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-Feel free to adjust the details according to your specific project setup and requirements. Let me know if you need any further customization or additional sections!
+Feel free to customize this further according to your project's specifics!
