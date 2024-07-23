@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { courseId: string, attachmentId: string } }
+  { params }: { params: { courseId: string; attachmentId: string } }
 ) {
   try {
     const { userId } = auth();
@@ -13,10 +13,11 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    // Check if the user is the owner of the course
     const courseOwner = await db.course.findUnique({
       where: {
         id: params.courseId,
-        userId: userId,
+        userId: userId, // Assuming userId is part of the composite key
       },
     });
 
@@ -24,10 +25,10 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    // Delete the attachment
     const attachment = await db.attachment.delete({
       where: {
-        id: params.attachmentId,
-        courseId: params.courseId, // Assuming attachment has a courseId field for the relationship
+        id: params.attachmentId, // Use the unique attachment ID for deletion
       },
     });
 
