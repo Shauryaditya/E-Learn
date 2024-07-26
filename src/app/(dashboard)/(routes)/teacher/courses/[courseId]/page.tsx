@@ -63,13 +63,13 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-y-2">
+      <div className="flex md:flex-row flex-col items-center justify-between gap-x-4">
+        <div className="w-full flex flex-col gap-y-2">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Course Setup
           </h1>
           <span>Complete All fields {completionText}</span>
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mt-16">
+          <div className=" grid grid-cols-1 md:grid-cols-1 gap-6 mt-16">
             <div className="flex items-center gap-x-2">
               <IconBadge icon={LayoutDashboard} />
               <h2 className="text-xl">Customize your course</h2>
@@ -87,9 +87,9 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
             />
           </div>
         </div>
-        <div className="space-y-6">
+        <div className="w-full space-y-6">
           <div className="">
-            <div className="flex flex-col items-center gap-x-2">
+            <div className=" flex flex-col items-center gap-x-2">
               <IconBadge icon={ListChecks} />
               <h2 className="text-xl">Course Chapters</h2>
               <ChaptersForm initialData={course} courseId={course.id} />

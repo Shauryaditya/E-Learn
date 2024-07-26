@@ -108,15 +108,14 @@ model Purchase {
   id String @id @default(uuid())
   userId String
 
-  courseId String
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  couseId String
+  course Course @relation(fields: [couseId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 
-  @@index([courseId])
+  @@index([couseId])
 }
-
 
 
 model StripeCustomer {
