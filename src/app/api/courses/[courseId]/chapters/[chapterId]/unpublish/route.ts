@@ -34,6 +34,23 @@ export async function PATCH (
             }
         });
 
+        const publishedChaptersInCourse = await db.chapter.findMany({
+            where: {
+                courseId: params.courseId,
+                isPublished: true,
+            }
+        })
+
+        if(!publishedChaptersInCourse.length){
+            await db.course.update({
+                where: {
+                    id: params.courseId,
+                    },
+                    data: {
+                        isPublished: false,
+                    }
+            })
+        }
 
         return NextResponse.json(unpublishedChapter)
     } catch (error) {

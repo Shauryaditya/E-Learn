@@ -67,6 +67,7 @@ export const CategoryForm = ({
   const selectedOption = options.find(
     (option) => option.value === initialData.categoryId
   );
+  const safeOptions = options ?? [];
 
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
@@ -106,8 +107,8 @@ export const CategoryForm = ({
                 <FormItem>
                   <FormControl>
                     <Combobox
-                      options={options} // Correct way to pass options
-                      {...field}
+                    options={safeOptions} 
+                    {...field}
                     />
                   </FormControl>
                   <FormMessage />

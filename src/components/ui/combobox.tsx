@@ -50,22 +50,24 @@ console.log("Onchange>>>",onChange)
           <CommandEmpty>No option found.</CommandEmpty>
           <CommandGroup>
             {options?.map((option) => (
-              <CommandItem
-                key={option?.value}
-                value={option?.value}
-                onSelect={(currentValue) => {
-                  onChange(option?.value === value ? "" : option?.value);
-                  setOpen(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === option.value ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {option.label}
-              </CommandItem>
+             <CommandItem
+             key={option?.value}
+             value={option?.value}
+             onSelect={() => {
+               // Log the value being selected
+               console.log("Selected option value:", option?.value);
+               onChange(option?.value === value ? "" : option?.value);
+               setOpen(false);
+             }}
+           >
+             <Check
+               className={cn(
+                 "mr-2 h-4 w-4",
+                 value === option.value ? "opacity-100" : "opacity-0"
+               )}
+             />
+             {option.label}
+           </CommandItem>
             ))}
           </CommandGroup>
         </Command>

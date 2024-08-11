@@ -9,6 +9,7 @@ async function main(){
                 {name: "Computer Science"},
                 {name: "Physics"},
                 {name: "Chemistry"},
+                {name: "Mathematics"},
                 {name: "Biology"},
                 {name: "Engineering"} 
             ]
