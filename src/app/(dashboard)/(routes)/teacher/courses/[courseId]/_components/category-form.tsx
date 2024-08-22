@@ -21,6 +21,16 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Combobox } from "@/components/ui/combobox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface CategoryFormProps {
   initialData: Course;
@@ -37,7 +47,6 @@ export const CategoryForm = ({
   courseId,
   options,
 }: CategoryFormProps) => {
-  console.log("Options>>>", options);
   const [isEditing, setIsEditing] = useState(false);
 
   const toggleEdit = () => setIsEditing((current) => !current);
@@ -52,10 +61,10 @@ export const CategoryForm = ({
   });
 
   const { isSubmitting, isValid } = form.formState;
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const [catId, setCatId] = useState<any>();
+  const onSubmit = async () => {
     try {
-      await axios.patch(`/api/courses/${courseId}`, values);
+      await axios.patch(`/api/courses/${courseId}`, catId);
       toast.success("Course updated");
       toggleEdit();
       router.refresh();
@@ -106,19 +115,48 @@ export const CategoryForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Combobox
-                    options={safeOptions} 
+                    {/* <Combobox
+                    options={safeOptions}
                     {...field}
-                    />
+                    /> */}
+                    {/* <select name="" id="">
+                      {safeOptions?.map((ele, index) => {
+                        return (
+                          <option key={index} value={ele.value}>
+                            {ele.label}
+                          </option>
+                        );
+                      })}
+                    </select> */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline">
+                          {catId ? catId: "Select Category"}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56">
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioGroup
+                          value={catId}
+                          onValueChange={setCatId}
+                        >
+                          {safeOptions?.map((ele, index) => {
+                            return (
+                              <DropdownMenuRadioItem value={ele?.value} key={index}>
+                                {ele?.label}
+                              </DropdownMenuRadioItem>
+                            );
+                          })}
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <div className="flex items-center gap-x-2">
-              <Button disabled={!isValid || isSubmitting} type="submit">
-                Save
-              </Button>
+              <Button type="submit">Save</Button>
             </div>
           </form>
         </Form>
