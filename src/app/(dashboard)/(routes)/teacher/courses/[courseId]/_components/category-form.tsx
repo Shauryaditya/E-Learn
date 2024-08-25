@@ -19,13 +19,9 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
-import { Combobox } from "@/components/ui/combobox";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
@@ -39,7 +35,7 @@ interface CategoryFormProps {
 }
 
 const formSchema = z.object({
-  categoryId: z.string().min(1),
+  categoryId: z.string().min(1, "Category must be selected"),
 });
 
 export const CategoryForm = ({
@@ -60,11 +56,12 @@ export const CategoryForm = ({
     },
   });
 
-  const { isSubmitting, isValid } = form.formState;
-  const [catId, setCatId] = useState<any>();
-  const onSubmit = async () => {
+  const { isSubmitting } = form.formState;
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
+
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/courses/${courseId}`, catId);
+      await axios.patch(`/api/courses/${courseId}`, { categoryId: data.categoryId });
       toast.success("Course updated");
       toggleEdit();
       router.refresh();
@@ -100,7 +97,7 @@ export const CategoryForm = ({
             !initialData.categoryId && "text-slate-500 italic"
           )}
         >
-          {selectedOption?.label || "No category"}
+          {selectedCategory?.label || selectedOption?.label || "No category"}
         </p>
       )}
       {isEditing && (
@@ -115,38 +112,28 @@ export const CategoryForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    {/* <Combobox
-                    options={safeOptions}
-                    {...field}
-                    /> */}
-                    {/* <select name="" id="">
-                      {safeOptions?.map((ele, index) => {
-                        return (
-                          <option key={index} value={ele.value}>
-                            {ele.label}
-                          </option>
-                        );
-                      })}
-                    </select> */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="outline">
-                          {catId ? catId: "Select Category"}
+                          {selectedCategory ? selectedCategory.label : "Select Category"}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="w-56">
                         <DropdownMenuSeparator />
                         <DropdownMenuRadioGroup
-                          value={catId}
-                          onValueChange={setCatId}
+                          value={selectedCategory?.value}
+                          onValueChange={(value) => {
+                            const category = options.find((option) => option.value === value);
+                            setSelectedCategory(category);
+                            // Update the form value when a category is selected
+                            field.onChange(value);
+                          }}
                         >
-                          {safeOptions?.map((ele, index) => {
-                            return (
-                              <DropdownMenuRadioItem value={ele?.value} key={index}>
-                                {ele?.label}
-                              </DropdownMenuRadioItem>
-                            );
-                          })}
+                          {safeOptions?.map((ele, index) => (
+                            <DropdownMenuRadioItem value={ele?.value} key={index}>
+                              {ele?.label}
+                            </DropdownMenuRadioItem>
+                          ))}
                         </DropdownMenuRadioGroup>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -156,7 +143,7 @@ export const CategoryForm = ({
               )}
             />
             <div className="flex items-center gap-x-2">
-              <Button type="submit">Save</Button>
+              <Button type="submit" disabled={isSubmitting}>Save</Button>
             </div>
           </form>
         </Form>
