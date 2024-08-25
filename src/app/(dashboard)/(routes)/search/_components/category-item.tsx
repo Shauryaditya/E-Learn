@@ -23,7 +23,7 @@ export const CategoryItem = ({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const currentCategoryId = searchParams.get("CategoryId");
+  const currentCategoryId = searchParams.get("categoryId");
   const currentTitle = searchParams.get("title");
 
   const isSelected = currentCategoryId === value;
@@ -34,7 +34,7 @@ export const CategoryItem = ({
         url: pathName,
         query: {
           title: currentTitle,
-          CategoryId: isSelected ? null : value,
+          categoryId: isSelected ? null : value,
         },
       },
       { skipNull: true, skipEmptyString: true }
