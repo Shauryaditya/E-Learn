@@ -108,13 +108,14 @@ model Purchase {
   id String @id @default(uuid())
   userId String
 
-  couseId String
-  course Course @relation(fields: [couseId], references: [id], onDelete: Cascade)
+  courseId String
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
 
-  @@index([couseId])
+  @@unique([userId, courseId])
+  @@index([courseId])
 }
 
 
