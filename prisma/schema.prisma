@@ -119,11 +119,26 @@ model Purchase {
 }
 
 
-model StripeCustomer {
+model RazorpayCustomer {
   id String @id @default(uuid())
   userId String @unique
-  stripeCustomerId String @unique
+  razorpayCustomerId String @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model RazorpayOrder {
+  id String @id @default(uuid())
+  userId String
+  razorpayOrderId String @unique
+  amount Float
+  currency String @default("INR")
+  status String
+  receipt String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
