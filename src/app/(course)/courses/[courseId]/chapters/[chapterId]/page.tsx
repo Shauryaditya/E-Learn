@@ -65,7 +65,7 @@ const ChapterIdPage = async ({
           <div className="p-4 flex flex-col md:flex-row items-center justify-between">
             <h2 className="text-2xl font-semibold mb-2">{chapter.title}</h2>
             {purchase ? (
-              <div className="">//Todo: Add Course Progress Button</div>
+              <div className="">{/* Todo: Add Course Progress Button */}</div>
             ) : (
               <CourseEnrollButton
                 courseId={params.courseId}
