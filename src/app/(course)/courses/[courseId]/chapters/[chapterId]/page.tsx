@@ -35,7 +35,7 @@ const ChapterIdPage = async ({
   if (!chapter || !course) {
     return redirect("/");
   }
-
+console.log("Attachments>>>???",attachments,chapter)
   const isLocked = !chapter.isFree && !purchase;
   const completeOnEnd = !!purchase && !userProgress?.isCompleted;
   return (
@@ -51,21 +51,29 @@ const ChapterIdPage = async ({
       )}
       <div className="flex flex-col max-w-4xl mx-auto pb-20">
         <div className="p-4">
+          {muxData?.playbackId ? (
           <VideoPlayer
-            chapterId={params.chapterId}
-            title={chapter.title}
-            courseId={params.courseId}
-            nextChapterId={nextChapter?.id!}
-            playbackId={muxData?.playbackId!}
-            isLocked={isLocked}
-            completeOnEnd={completeOnEnd}
-          />
+          chapterId={params.chapterId}
+          title={chapter.title}
+          courseId={params.courseId}
+          nextChapterId={nextChapter?.id!}
+          playbackId={muxData?.playbackId!}
+          isLocked={isLocked}
+          completeOnEnd={completeOnEnd}
+        />
+          ):(
+            <>
+            </>
+          )}
+
         </div>
         <div className="">
           <div className="p-4 flex flex-col md:flex-row items-center justify-between">
             <h2 className="text-2xl font-semibold mb-2">{chapter.title}</h2>
             {purchase ? (
-              <div className="">{/* Todo: Add Course Progress Button */}</div>
+              <div className="">
+                
+              </div>
             ) : (
               <CourseEnrollButton
                 courseId={params.courseId}
@@ -80,7 +88,9 @@ const ChapterIdPage = async ({
           {!!attachments.length && (
             <>
               <Separator />
+  
               <div className="p-4">
+              <h1 className="text-sm font-semibold text-blue-800">Notes and Assessments</h1>
                 {attachments.map((attachment) => (
                   <a
                     href={attachment.url}
