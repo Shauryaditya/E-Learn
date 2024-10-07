@@ -3,10 +3,11 @@ import { Banner } from "@/components/banner";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { VideoPlayer } from "./_components/video-player";
-import { CourseEnrollButton } from "./_components/course-enroll-bitton";
+import { CourseEnrollButton } from "./_components/course-enroll-button";
 import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
+import { CourseProgressButton } from "./_components/course-progress-button";
 
 const ChapterIdPage = async ({
   params,
@@ -70,16 +71,19 @@ console.log("Attachments>>>???",attachments,chapter)
         <div className="">
           <div className="p-4 flex flex-col md:flex-row items-center justify-between">
             <h2 className="text-2xl font-semibold mb-2">{chapter.title}</h2>
-            {purchase ? (
-              <div className="">
-                
-              </div>
-            ) : (
+            {/* {purchase ? ( */}
+              <CourseProgressButton
+              chapterId={params.chapterId}
+              courseId={params.courseId}
+              nextChapterId={nextChapter?.id}
+              isCompleted={!!userProgress?.isCompleted}
+              />
+            {/* ) : (
               <CourseEnrollButton
                 courseId={params.courseId}
                 price={course.price!}
               />
-            )}
+            )} */}
           </div>
           <Separator />
           <div className="">
