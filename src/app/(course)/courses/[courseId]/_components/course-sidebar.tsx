@@ -22,7 +22,7 @@ export const CourseSidebar = async({
     if(!userId){
         return redirect("/")
     }
-
+    
     const purchase = await db.purchase.findUnique({
         where: {
             userId_courseId: {
