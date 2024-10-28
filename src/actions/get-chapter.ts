@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { Attachment, Chapter } from "@prisma/client";
+
 interface GetChapterProps {
   userId: string;
   courseId: string;
@@ -46,9 +47,11 @@ export const getChapter = async ({
     let attachments: Attachment[] = [];
     let nextChapter: Chapter | null = null;
 
+    // Filter attachments by both courseId and chapterId
     attachments = await db.attachment.findMany({
       where: {
         courseId: courseId,
+        chapterId: chapterId,
       },
     });
 
@@ -64,7 +67,7 @@ export const getChapter = async ({
           courseId: courseId,
           isPublished: true,
           position: {
-            gt: chapter?.position,
+            gt: chapter.position,
           },
         },
         orderBy: {

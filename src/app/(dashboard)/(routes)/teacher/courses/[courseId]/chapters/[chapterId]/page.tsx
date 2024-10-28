@@ -13,6 +13,7 @@ import { ChapterAccessForm } from "./_components/chapter-access-form";
 import { ChapterVideoForm } from "./_components/chapter-video-form";
 import { Banner } from "@/components/banner";
 import { ChapterActions } from "./_components/chapter-actions";
+import { ChapterAttachmentForm } from "./_components/chapter-attachment-form";
 
 const ChapterIdPage = async ({
   params,
@@ -32,6 +33,7 @@ const ChapterIdPage = async ({
     },
     include: {
       muxData: true,
+      attachments: true,
     },
   });
 
@@ -93,6 +95,11 @@ const ChapterIdPage = async ({
                 chapterId={params.chapterId}
                 />
                 <ChapterDescriptionForm 
+                initialData={chapter}
+                courseId={params.courseId}
+                chapterId={params.chapterId}
+                />
+              <ChapterAttachmentForm 
                 initialData={chapter}
                 courseId={params.courseId}
                 chapterId={params.chapterId}
