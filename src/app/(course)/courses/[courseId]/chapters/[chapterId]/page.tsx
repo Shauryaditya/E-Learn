@@ -36,7 +36,7 @@ const ChapterIdPage = async ({
   if (!chapter || !course) {
     return redirect("/");
   }
-console.log("Attachments>>>???",attachments,chapter)
+  console.log("Attachments>>>???", attachments);
   const isLocked = !chapter.isFree && !purchase;
   const completeOnEnd = !!purchase && !userProgress?.isCompleted;
   return (
@@ -53,31 +53,29 @@ console.log("Attachments>>>???",attachments,chapter)
       <div className="flex flex-col max-w-4xl mx-auto pb-20">
         <div className="p-4">
           {muxData?.playbackId ? (
-          <VideoPlayer
-          chapterId={params.chapterId}
-          title={chapter.title}
-          courseId={params.courseId}
-          nextChapterId={nextChapter?.id!}
-          playbackId={muxData?.playbackId!}
-          isLocked={isLocked}
-          completeOnEnd={completeOnEnd}
-        />
-          ):(
-            <>
-            </>
+            <VideoPlayer
+              chapterId={params.chapterId}
+              title={chapter.title}
+              courseId={params.courseId}
+              nextChapterId={nextChapter?.id!}
+              playbackId={muxData?.playbackId!}
+              isLocked={isLocked}
+              completeOnEnd={completeOnEnd}
+            />
+          ) : (
+            <></>
           )}
-
         </div>
         <div className="">
           <div className="p-4 flex flex-col md:flex-row items-center justify-between">
             <h2 className="text-2xl font-semibold mb-2">{chapter.title}</h2>
             {/* {purchase ? ( */}
-              <CourseProgressButton
+            <CourseProgressButton
               chapterId={params.chapterId}
               courseId={params.courseId}
               nextChapterId={nextChapter?.id}
               isCompleted={!!userProgress?.isCompleted}
-              />
+            />
             {/* ) : (
               <CourseEnrollButton
                 courseId={params.courseId}
@@ -92,20 +90,32 @@ console.log("Attachments>>>???",attachments,chapter)
           {!!attachments.length && (
             <>
               <Separator />
-  
               <div className="p-4">
-              <h1 className="text-sm font-semibold text-blue-800">Notes and Assessments</h1>
-                {attachments.map((attachment) => (
-                  <a
-                    href={attachment.url}
-                    target="_blank"
-                    key={attachment.id}
-                    className="flex items-center p-3 w-full bg-sky-200 border text-sky-700 rounded-md hover:underline"
-                  >
-                    <File />
-                    <p className="line-clamp-1">{attachment.name}</p>
-                  </a>
-                ))}
+                <h1 className="text-sm font-semibold text-blue-800">
+                  Notes and Assessments
+                </h1>
+                <div className="flex flex-wrap gap-4">
+                  {attachments.map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className="bg-white w-48 p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
+                    >
+                      <p className="text-lg font-semibold text-gray-800 mb-2">
+                        {chapter.title}
+                      </p>
+                      <a
+                        href={attachment.url}
+                        target="_blank"
+                        className="flex items-center gap-2 p-2 w-full bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors duration-300"
+                      >
+                        <File className="w-5 h-5 text-blue-600" />
+                        <p className="line-clamp-1 font-medium">
+                          {attachment.name}
+                        </p>
+                      </a>
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           )}
