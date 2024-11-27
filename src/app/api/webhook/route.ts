@@ -1,65 +1,77 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { db } from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { db } from "@/lib/db";
+import { currentUser } from "@clerk/nextjs";
 
-const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET!;
+const generatedSignature = (
+  razorpayOrderId: string,
+  razorpayPaymentId: string
+) => {
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keySecret) {
+    throw new Error(
+      "Razorpay key secret is not defined in environment variables."
+    );
+  }
+  const sig = crypto
+    .createHmac("sha256", keySecret)
+    .update(razorpayOrderId + "|" + razorpayPaymentId)
+    .digest("hex");
+  return sig;
+};
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== "POST") {
-        return res.status(405).json({ message: "Method Not Allowed" });
-    }
+export async function POST(request: NextRequest) {
+  const {
+    orderCreationId,
+    razorpayPaymentId,
+    razorpaySignature,
+    userId,
+    courseId,
+  } = await request.json();
 
-    const signature = req.headers["x-razorpay-signature"];
-    const body = JSON.stringify(req.body);
+  const signature = generatedSignature(orderCreationId, razorpayPaymentId);
+  if (signature !== razorpaySignature) {
+    return NextResponse.json(
+      { message: "payment verification failed", isOk: false },
+      { status: 400 }
+    );
+  }
 
-    // Verify the webhook signature
-    const expectedSignature = crypto
-        .createHmac("sha256", RAZORPAY_WEBHOOK_SECRET)
-        .update(body)
-        .digest("hex");
-
-    if (signature !== expectedSignature) {
-        return res.status(400).json({ message: "Invalid signature" });
-    }
-
-    const { event, payload } = req.body;
-
-    try {
-        if (event === "payment.captured") {
-            const paymentId = payload.payment.entity.id;
-            const razorpayOrderId = payload.payment.entity.order_id;
-
-            // Find the corresponding Razorpay order
-            const razorpayOrder = await db.razorpayOrder.findUnique({
-                where: { razorpayOrderId }
-            });
-
-            if (!razorpayOrder) {
-                return res.status(404).json({ message: "Order not found" });
-            }
-
-            // Mark the purchase as completed
-            await db.purchase.create({
-                data: {
-                    userId: razorpayOrder.userId,
-                    courseId: razorpayOrder.courseId,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                }
-            });
-
-            // Optionally, update the Razorpay order's status
-            await db.razorpayOrder.update({
-                where: { id: razorpayOrder.id },
-                data: { status: "captured" }
-            });
-
-            return res.status(200).json({ message: "Payment processed successfully" });
-        }
-        
-        // Handle other events as needed
-    } catch (error) {
-        console.error("Error handling Razorpay webhook:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
-    }
+      // Validate user ID server-side
+      const user = await currentUser(); // Fetch the current user
+      if (!user || !user.id) {
+        return NextResponse.json(
+          { message: "User not authenticated", isOk: false },
+          { status: 401 }
+        );
+      }
+    // Check if purchase already exists
+    const existingPurchase = await db.purchase.findUnique({
+        where: {
+          userId_courseId: {
+            userId,
+            courseId,
+          },
+        },
+      });
+  
+      if (existingPurchase) {
+        return NextResponse.json(
+          { message: "Payment verified. Purchase already exists.", isOk: true },
+          { status: 200 }
+        );
+      }
+  
+      // Create a new purchase record
+      await db.purchase.create({
+        data: {
+          userId,
+          courseId,
+        },
+      });
+  
+      return NextResponse.json(
+        { message: "Payment verified and purchase recorded successfully!", isOk: true },
+        { status: 200 }
+      );
 }

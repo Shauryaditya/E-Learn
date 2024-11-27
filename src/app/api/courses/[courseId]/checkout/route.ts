@@ -1,16 +1,16 @@
 import { db } from "@/lib/db";
 import { currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import razorpay from "@/lib/razorpay";
+import Razorpay from "razorpay";
 
 export async function POST(
   req: Request,
   { params }: { params: { courseId: string } }
 ) {
   try {
-    // Log at the start of the function
     console.log("Starting POST request for course checkout");
 
+    // Fetch the current user
     const user = await currentUser();
     if (!user || !user.id || !user.emailAddresses?.[0]?.emailAddress) {
       console.error("Unauthorized: User not logged in or missing email");
@@ -18,17 +18,20 @@ export async function POST(
     }
     console.log("User fetched:", user.id);
 
+    // Fetch the course details
     const course = await db.course.findUnique({
       where: {
         id: params.courseId,
         isPublished: true,
       },
     });
-
+    if (!course) {
+      console.error("Course not found:", params.courseId);
+      return new NextResponse("Course not found", { status: 404 });
+    }
     console.log("Course fetched:", course);
-    console.log("Key ID:", process.env.RAZORPAY_KEY_ID);
-    console.log("Key Secret:", process.env.RAZORPAY_KEY_SECRET);
 
+    // Check for existing purchase
     const purchase = await db.purchase.findUnique({
       where: {
         userId_courseId: {
@@ -42,36 +45,46 @@ export async function POST(
       return new NextResponse("Already purchased", { status: 400 });
     }
 
-    if (!course) {
-      console.error("Course not found:", params.courseId);
-      return new NextResponse("Course not found", { status: 404 });
-    }
+    // Initialize Razorpay instance
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID!,
+      key_secret: process.env.RAZORPAY_KEY_SECRET!,
+    });
+    console.log("Razorpay instance initialized");
 
-    // Razorpay Order Creation
-    const order = await razorpay.orders.create({
-      amount: Math.round(course.price! * 100),
+    // Define Razorpay order options
+    const orderOptions = {
+      amount: Math.round(course.price! * 100), // Convert price to paise
       currency: "INR",
-      receipt: `receipt_${params.courseId}_${Date.now()}`,
+      receipt: `rec_${params.courseId}`, // Shortened unique receipt
       notes: {
         userId: user.id,
         courseId: params.courseId,
       },
-    });
+    };
+    console.log("Razorpay order options created:", orderOptions);
+
+    // Create Razorpay order using async/await
+    const order = await razorpay.orders.create(orderOptions);
     console.log("Razorpay order created:", order);
 
-    await db.razorpayOrder.create({
-      data: {
-        userId: user.id,
-        razorpayOrderId: order.id,
-        amount: course.price!,
-        currency: "INR",
-        status: order.status,
-        receipt: order.receipt,
-        courseId: params.courseId,
-      },
-    });
+    // console.log("Razorpay order created:", order);
+
+    // Save the Razorpay order to the database
+    // await db.razorpayOrder.create({
+    //   data: {
+    //     userId: user.id,
+    //     razorpayOrderId: order.id,
+    //     amount: course.price!,
+    //     currency: "INR",
+    //     status: order.status,
+    //     receipt: order.receipt,
+    //     courseId: params.courseId,
+    //   },
+    // });
     console.log("Order saved in database successfully");
 
+    // Return the Razorpay order details
     return NextResponse.json({ order });
   } catch (error: any) {
     console.error("[COURSE_ID_CHECKOUT]", error);
