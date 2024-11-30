@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/lib/db";
-import { currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs";
 
 const generatedSignature = (
   razorpayOrderId: string,
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     orderCreationId,
     razorpayPaymentId,
     razorpaySignature,
-    userId,
+
     courseId,
   } = await request.json();
 
@@ -37,41 +37,44 @@ export async function POST(request: NextRequest) {
     );
   }
 
-      // Validate user ID server-side
-      const user = await currentUser(); // Fetch the current user
-      if (!user || !user.id) {
-        return NextResponse.json(
-          { message: "User not authenticated", isOk: false },
-          { status: 401 }
-        );
-      }
-    // Check if purchase already exists
-    const existingPurchase = await db.purchase.findUnique({
-        where: {
-          userId_courseId: {
-            userId,
-            courseId,
-          },
-        },
-      });
-  
-      if (existingPurchase) {
-        return NextResponse.json(
-          { message: "Payment verified. Purchase already exists.", isOk: true },
-          { status: 200 }
-        );
-      }
-  
-      // Create a new purchase record
-      await db.purchase.create({
-        data: {
-          userId,
-          courseId,
-        },
-      });
-  
-      return NextResponse.json(
-        { message: "Payment verified and purchase recorded successfully!", isOk: true },
-        { status: 200 }
-      );
+  // Validate user ID server-side
+  const { userId } = auth();
+  if (!userId) {
+    return NextResponse.json(
+      { message: "User not authenticated", isOk: false },
+      { status: 401 }
+    );
+  }
+  // Check if purchase already exists
+  const existingPurchase = await db.purchase.findUnique({
+    where: {
+      userId_courseId: {
+        userId,
+        courseId,
+      },
+    },
+  });
+
+  if (existingPurchase) {
+    return NextResponse.json(
+      { message: "Payment verified. Purchase already exists.", isOk: true },
+      { status: 200 }
+    );
+  }
+
+  // Create a new purchase record
+  await db.purchase.create({
+    data: {
+      userId,
+      courseId,
+    },
+  });
+
+  return NextResponse.json(
+    {
+      message: "Payment verified and purchase recorded successfully!",
+      isOk: true,
+    },
+    { status: 200 }
+  );
 }

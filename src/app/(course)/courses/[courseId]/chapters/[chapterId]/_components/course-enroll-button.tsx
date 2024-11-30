@@ -6,6 +6,7 @@ import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import Script from "next/script";
+import { auth } from "@clerk/nextjs";
 
 interface CourseEnrollButtonProps {
   price: number;
@@ -47,6 +48,7 @@ export const CourseEnrollButton = ({
   // Trigger payment processing
   const processPayment = async () => {
     const orderId = orderIdRef.current;
+   
     if (!orderIdRef.current) {
       toast.error("Order not created. Please try again.");
       return;
@@ -67,7 +69,7 @@ export const CourseEnrollButton = ({
             razorpayPaymentId: response.razorpay_payment_id,
             razorpayOrderId: response.razorpay_order_id,
             razorpaySignature: response.razorpay_signature,
-
+         
             courseId: courseId, // Replace with current course ID
           };
 
