@@ -9,49 +9,50 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
 model Course {
-  id String @id @default(uuid())
-  userId String
-  title String @db.Text
+  id          String  @id @default(uuid())
+  userId      String
+  title       String  @db.Text
   description String? @db.Text
-  imageUrl String? @db.Text
-  price Float?
+  imageUrl    String? @db.Text
+  price       Float?
   isPublished Boolean @default(false)
 
   categoryId String?
-  category Category? @relation(fields: [categoryId], references: [id])
+  category   Category? @relation(fields: [categoryId], references: [id])
 
-  chapters Chapter[]
+  chapters    Chapter[]
   attachments Attachment[]
-  purchases Purchase[]
+  purchases   Purchase[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  RazorpayOrder RazorpayOrder[]
 
   @@index([categoryId])
 }
 
 model Category {
-  id String @id @default(uuid())
-  name String @unique
+  id      String   @id @default(uuid())
+  name    String   @unique
   courses Course[]
 }
 
 model Attachment {
-  id String @id @default(uuid())
+  id   String @id @default(uuid())
   name String
-  url String @db.Text
-  
-  courseId String?
-  course Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  url  String @db.Text
 
-  chapterId String?  // New field to relate attachments to chapters
-  chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  courseId String?
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  chapterId String? // New field to relate attachments to chapters
+  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -60,22 +61,21 @@ model Attachment {
   @@index([chapterId]) // Index for chapterId
 }
 
-
 model Chapter {
-  id String @id @default(uuid())
-  title String
-  description String? @db.Text
-  videoUrl String? @db.Text
-  position Int
-  isPublished Boolean @default(false)
-  isFree Boolean @default(false)
-  muxData MuxData?
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  videoUrl    String?  @db.Text
+  position    Int
+  isPublished Boolean  @default(false)
+  isFree      Boolean  @default(false)
+  muxData     MuxData?
 
   courseId String
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   userProgress UserProgress[]
-  attachments Attachment[] // New relation to manage attachments for chapters
+  attachments  Attachment[] // New relation to manage attachments for chapters
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -83,38 +83,37 @@ model Chapter {
   @@index([courseId])
 }
 
-
 model MuxData {
-  id String @id @default(uuid())
-  assetId String
+  id         String  @id @default(uuid())
+  assetId    String
   playbackId String?
 
-  chapterId String @unique
-  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 }
 
 model UserProgress {
-  id String @id @default(uuid())
+  id     String @id @default(uuid())
   userId String
 
   chapterId String
-  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   isCompleted Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([chapterId])
   @@unique([userId, chapterId])
+  @@index([chapterId])
 }
 
 model Purchase {
-  id String @id @default(uuid())
+  id     String @id @default(uuid())
   userId String
 
   courseId String
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
@@ -123,10 +122,9 @@ model Purchase {
   @@index([courseId])
 }
 
-
 model RazorpayCustomer {
-  id String @id @default(uuid())
-  userId String @unique
+  id                 String @id @default(uuid())
+  userId             String @unique
   razorpayCustomerId String @unique
 
   createdAt DateTime @default(now())
@@ -134,16 +132,21 @@ model RazorpayCustomer {
 }
 
 model RazorpayOrder {
-  id String @id @default(uuid())
-  userId String
-  razorpayOrderId String @unique
-  amount Float
-  currency String @default("INR")
-  status String
-  receipt String?
+  id              String  @id @default(uuid())
+  userId          String
+  razorpayOrderId String  @unique
+  amount          Float
+  currency        String  @default("INR")
+  status          String
+  receipt         String? // Nullable field
+
+  // Add the courseId field to link RazorpayOrder to Course
+  courseId String // Reference to the Course
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+  @@index([courseId]) // Manually add an index for courseId
 }
