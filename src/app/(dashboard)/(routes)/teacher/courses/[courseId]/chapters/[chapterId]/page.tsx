@@ -14,6 +14,7 @@ import { ChapterVideoForm } from "./_components/chapter-video-form";
 import { Banner } from "@/components/banner";
 import { ChapterActions } from "./_components/chapter-actions";
 import { ChapterAttachmentForm } from "./_components/chapter-attachment-form";
+import { ChapterVideoLink } from "./_components/chapter-video-link-form";
 
 const ChapterIdPage = async ({
   params,
@@ -104,6 +105,14 @@ const ChapterIdPage = async ({
                 courseId={params.courseId}
                 chapterId={params.chapterId}
                 />
+              <ChapterVideoLink
+                initialData={{
+                  title: chapter.title,
+                  videoUrl: chapter.videoUrl || "", // Pass videoUrl if available
+                }}
+                courseId={params.courseId}
+                chapterId={params.chapterId}
+              />
             </div>
             <div className="">
               <div className="flex items-center gap-x-2">
