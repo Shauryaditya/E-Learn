@@ -90,43 +90,43 @@ const ChapterIdPage = async ({
           <div className="">
             <Preview value={chapter.description!} />
           </div>
-          {!!attachments.length && (
-            <>
-              <Separator />
-              <div className="p-4">
-                <h1 className="text-sm font-semibold text-blue-800">
-                  Notes and Assessments
-                </h1>
-                <div className="flex flex-wrap gap-4">
-                  {attachments.map((attachment) => (
-                    <div
-                      key={attachment.id}
-                      className="bg-white w-48 p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
-                    >
-                      <p className="text-lg font-semibold text-gray-800 mb-2">
-                        {chapter.title}
-                      </p>
-                      <a
-                        href={attachment.url}
-                        target="_blank"
-                        className="flex items-center gap-2 p-2 w-full bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors duration-300"
+          {!!attachments.length &&
+            !isLocked && ( // Check if not locked before showing attachments
+              <>
+                <Separator />
+                <div className="p-4">
+                  <h1 className="text-sm font-semibold text-blue-800">
+                    Notes and Assessments
+                  </h1>
+                  <div className="flex flex-wrap gap-4">
+                    {attachments.map((attachment) => (
+                      <div
+                        key={attachment.id}
+                        className="bg-white w-48 p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
                       >
-                        <File className="w-5 h-5 text-blue-600" />
-                        <p className="line-clamp-1 font-medium">
-                          {attachment.name}
+                        <p className="text-lg font-semibold text-gray-800 mb-2">
+                          {chapter.title}
                         </p>
-                      </a>
-                    </div>
-                  ))}
+                        <a
+                          href={attachment.url}
+                          target="_blank"
+                          className="flex items-center gap-2 p-2 w-full bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors duration-300"
+                        >
+                          <File className="w-5 h-5 text-blue-600" />
+                          <p className="line-clamp-1 font-medium">
+                            {attachment.name}
+                          </p>
+                        </a>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
         </div>
       </div>
     </div>
   );
 };
-
 
 export default ChapterIdPage;
