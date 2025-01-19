@@ -36,9 +36,12 @@ const ChapterIdPage = async ({
   if (!chapter || !course) {
     return redirect("/");
   }
-  
+
+  console.log("Chapter ID>>", chapter);
+
   const isLocked = !chapter.isFree && !purchase;
   const completeOnEnd = !!purchase && !userProgress?.isCompleted;
+
   return (
     <div className="">
       {userProgress?.isCompleted && (
@@ -52,13 +55,13 @@ const ChapterIdPage = async ({
       )}
       <div className="flex flex-col max-w-4xl mx-auto pb-20">
         <div className="p-4">
-          {muxData?.playbackId ? (
+          {chapter.videoUrl ? ( // Use videoUrl instead of playbackId
             <VideoPlayer
+              videoUrl={chapter.videoUrl}
               chapterId={params.chapterId}
               title={chapter.title}
               courseId={params.courseId}
               nextChapterId={nextChapter?.id!}
-              playbackId={muxData?.playbackId!}
               isLocked={isLocked}
               completeOnEnd={completeOnEnd}
             />
@@ -70,12 +73,12 @@ const ChapterIdPage = async ({
           <div className="p-4 flex flex-col md:flex-row items-center justify-between">
             <h2 className="text-2xl font-semibold mb-2">{chapter.title}</h2>
             {purchase ? (
-            <CourseProgressButton
-              chapterId={params.chapterId}
-              courseId={params.courseId}
-              nextChapterId={nextChapter?.id}
-              isCompleted={!!userProgress?.isCompleted}
-            />
+              <CourseProgressButton
+                chapterId={params.chapterId}
+                courseId={params.courseId}
+                nextChapterId={nextChapter?.id}
+                isCompleted={!!userProgress?.isCompleted}
+              />
             ) : (
               <CourseEnrollButton
                 courseId={params.courseId}
@@ -124,5 +127,6 @@ const ChapterIdPage = async ({
     </div>
   );
 };
+
 
 export default ChapterIdPage;
