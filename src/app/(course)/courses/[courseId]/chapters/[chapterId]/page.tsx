@@ -8,6 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import { File } from "lucide-react";
 import { CourseProgressButton } from "./_components/course-progress-button";
+import DocumentPreview from "@/components/document-preview";
+
 
 const ChapterIdPage = async ({
   params,
@@ -101,21 +103,14 @@ const ChapterIdPage = async ({
                   {attachments.map((attachment) => (
                     <div
                       key={attachment.id}
-                      className="bg-white w-48 p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
+                      className="bg-white w-full md:w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
                     >
                       <p className="text-lg font-semibold text-gray-800 mb-2">
-                        {chapter.title}
+                        {attachment.name}
                       </p>
-                      <a
-                        href={attachment.url}
-                        target="_blank"
-                        className="flex items-center gap-2 p-2 w-full bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors duration-300"
-                      >
-                        <File className="w-5 h-5 text-blue-600" />
-                        <p className="line-clamp-1 font-medium">
-                          {attachment.name}
-                        </p>
-                      </a>
+
+                      {/* Render PDF Preview instead of just a link */}
+                      <DocumentPreview fileUrl={attachment.url} />
                     </div>
                   ))}
                 </div>
@@ -127,6 +122,5 @@ const ChapterIdPage = async ({
     </div>
   );
 };
-
 
 export default ChapterIdPage;

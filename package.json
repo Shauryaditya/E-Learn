@@ -25,6 +25,8 @@
     "@radix-ui/react-progress": "^1.1.0",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.0.2",
+    "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/default-layout": "^3.12.0",
     "@tanstack/react-table": "^8.20.5",
     "@uploadthing/react": "^6.4.1",
     "axios": "^1.6.7",
