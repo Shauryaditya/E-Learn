@@ -10,7 +10,6 @@ import { File } from "lucide-react";
 import { CourseProgressButton } from "./_components/course-progress-button";
 import DocumentPreview from "@/components/document-preview";
 
-
 const ChapterIdPage = async ({
   params,
 }: {
@@ -99,22 +98,26 @@ const ChapterIdPage = async ({
                 <h1 className="text-sm font-semibold text-blue-800">
                   Notes and Assessments
                 </h1>
+                {isLocked && (
+                  <p className="text-red-500">
+                    Purchase the course to view the rest of the content
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-4">
                   {attachments.map((attachment) => (
                     <div
                       key={attachment.id}
-                      className={`bg-white w-full md:w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 ${isLocked ? 'blur-sm' : ''}`}
+                      className={`bg-white w-full md:w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 ${
+                        isLocked ? "blur-sm" : ""
+                      }`}
                     >
                       <p className="text-lg font-semibold text-gray-800 mb-2">
                         {attachment.name}
                       </p>
 
                       {/* Render PDF Preview instead of just a link */}
-                      {isLocked ? (
-                        <p className="text-red-500">Purchase the course to view the rest of the content</p>
-                      ) : (
-                        <DocumentPreview fileUrl={attachment.url} />
-                      )}
+
+                      <DocumentPreview fileUrl={attachment.url} />
                     </div>
                   ))}
                 </div>
