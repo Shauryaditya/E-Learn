@@ -38,7 +38,7 @@ const ChapterIdPage = async ({
     return redirect("/");
   }
 
-  console.log("Chapter ID>>", chapter);
+  console.log("Attachments>>", attachments);
 
   const isLocked = !chapter.isFree && !purchase;
   const completeOnEnd = !!purchase && !userProgress?.isCompleted;
@@ -111,9 +111,14 @@ const ChapterIdPage = async ({
                         isLocked ? "blur-sm" : ""
                       }`}
                     >
-                      <p className="text-lg font-semibold text-gray-800 mb-2">
-                        {attachment.name}
-                      </p>
+                      {!isLocked && (
+                        <a
+                          href={attachment.url}
+                          className="text-lg font-semibold text-gray-800 mb-2"
+                        >
+                          {attachment.name}
+                        </a>
+                      )}
 
                       {/* Render PDF Preview instead of just a link */}
 
