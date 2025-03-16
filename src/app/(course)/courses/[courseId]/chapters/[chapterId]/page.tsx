@@ -103,14 +103,18 @@ const ChapterIdPage = async ({
                   {attachments.map((attachment) => (
                     <div
                       key={attachment.id}
-                      className="bg-white w-full md:w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
+                      className={`bg-white w-full md:w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 ${isLocked ? 'blur-sm' : ''}`}
                     >
                       <p className="text-lg font-semibold text-gray-800 mb-2">
                         {attachment.name}
                       </p>
 
                       {/* Render PDF Preview instead of just a link */}
-                      <DocumentPreview fileUrl={attachment.url} />
+                      {isLocked ? (
+                        <p className="text-red-500">Purchase the course to view the rest of the content</p>
+                      ) : (
+                        <DocumentPreview fileUrl={attachment.url} />
+                      )}
                     </div>
                   ))}
                 </div>
