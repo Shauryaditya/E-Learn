@@ -12,10 +12,16 @@ const handleAuth = () => {
  
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
-    courseImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1}})
+    courseImage: f({ image: { maxFileSize: "16MB", maxFileCount: 1}})
     .middleware(() => handleAuth())
     .onUploadComplete(() => {}),
-    courseAttachment: f(["text","image","video","audio", "pdf"])
+    courseAttachment: f({
+        text: { maxFileSize: "16MB" },
+        image: { maxFileSize: "16MB" },
+        video: { maxFileSize: "16MB" },
+        audio: { maxFileSize: "16MB" },
+        pdf: { maxFileSize: "16MB" },
+      })
     .middleware(() =>handleAuth())
     .onUploadComplete(() => {}),
     chapterVideo: f({ video: { maxFileCount: 1, maxFileSize: "512GB"}})
