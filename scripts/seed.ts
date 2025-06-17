@@ -11,7 +11,7 @@ async function main(){
                 {name: "Chemistry"},
                 {name: "Mathematics"},
                 {name: "Biology"},
-                {name: "Engineering"} 
+                {name: "Worksheet"} 
             ]
         })
 
