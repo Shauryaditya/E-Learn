@@ -150,3 +150,185 @@ model RazorpayOrder {
   @@index([userId])
   @@index([courseId]) // Manually add an index for courseId
 }
+
+// ============================================
+// TEST SERIES MODELS
+// ============================================
+
+model Subject {
+  id          String  @id @default(uuid())
+  name        String  @unique // e.g., "Physics", "Chemistry", "Mathematics"
+  description String? @db.Text
+  imageUrl    String? @db.Text
+  
+  testSeries TestSeries[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TestSeries {
+  id          String  @id @default(uuid())
+  userId      String  // Teacher who created this
+  title       String  @db.Text
+  description String? @db.Text
+  imageUrl    String? @db.Text
+  price       Float?
+  isPublished Boolean @default(false)
+  
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  
+  testChapters       TestChapter[]
+  testSeriesPurchase TestSeriesPurchase[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([subjectId])
+  @@index([userId])
+}
+
+model TestChapter {
+  id          String  @id @default(uuid())
+  title       String  // e.g., "Thermodynamics", "Organic Chemistry"
+  description String? @db.Text
+  position    Int
+  isPublished Boolean @default(false)
+  
+  testSeriesId String
+  testSeries   TestSeries @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
+  
+  tests Test[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([testSeriesId])
+}
+
+model Test {
+  id          String  @id @default(uuid())
+  title       String
+  description String? @db.Text
+  duration    Int     // Duration in minutes
+  totalMarks  Int
+  passingMarks Int?
+  position    Int
+  isPublished Boolean @default(false)
+  isFree      Boolean @default(false)
+  
+  testChapterId String
+  testChapter   TestChapter @relation(fields: [testChapterId], references: [id], onDelete: Cascade)
+  
+  questions     Question[]
+  testAttempts  TestAttempt[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([testChapterId])
+}
+
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  NUMERICAL
+  TRUE_FALSE
+}
+
+model Question {
+  id            String       @id @default(uuid())
+  questionText  String       @db.Text
+  questionType  QuestionType @default(SINGLE_CHOICE)
+  marks         Float
+  negativeMarks Float        @default(0)
+  position      Int
+  explanation   String?      @db.Text
+  imageUrl      String?      @db.Text
+  
+  testId String
+  test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
+  
+  options QuestionOption[]
+  answers Answer[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([testId])
+}
+
+model QuestionOption {
+  id         String  @id @default(uuid())
+  optionText String  @db.Text
+  isCorrect  Boolean @default(false)
+  position   Int
+  
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([questionId])
+}
+
+model TestAttempt {
+  id          String   @id @default(uuid())
+  userId      String
+  score       Float?
+  totalMarks  Int
+  percentage  Float?
+  isPassed    Boolean?
+  isCompleted Boolean  @default(false)
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  
+  testId String
+  test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
+  
+  answers Answer[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, testId])
+  @@index([testId])
+  @@index([userId])
+}
+
+model Answer {
+  id             String   @id @default(uuid())
+  selectedAnswer String?  @db.Text // For single/multiple choice, store option IDs; for numerical, store the value
+  isCorrect      Boolean?
+  marksAwarded   Float?
+  
+  testAttemptId String
+  testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id], onDelete: Cascade)
+  
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([testAttemptId, questionId])
+  @@index([testAttemptId])
+  @@index([questionId])
+}
+
+model TestSeriesPurchase {
+  id     String @id @default(uuid())
+  userId String
+  
+  testSeriesId String
+  testSeries   TestSeries @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, testSeriesId])
+  @@index([testSeriesId])
+  @@index([userId])
+}
