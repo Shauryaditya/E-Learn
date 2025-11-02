@@ -41,6 +41,7 @@ model Category {
   id      String   @id @default(uuid())
   name    String   @unique
   courses Course[]
+  testSeries TestSeries[]
 }
 
 model Attachment {
@@ -155,18 +156,6 @@ model RazorpayOrder {
 // TEST SERIES MODELS
 // ============================================
 
-model Subject {
-  id          String  @id @default(uuid())
-  name        String  @unique // e.g., "Physics", "Chemistry", "Mathematics"
-  description String? @db.Text
-  imageUrl    String? @db.Text
-  
-  testSeries TestSeries[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model TestSeries {
   id          String  @id @default(uuid())
   userId      String  // Teacher who created this
@@ -176,8 +165,8 @@ model TestSeries {
   price       Float?
   isPublished Boolean @default(false)
   
-  subjectId String
-  subject   Subject @relation(fields: [subjectId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
   
   testChapters       TestChapter[]
   testSeriesPurchase TestSeriesPurchase[]
@@ -185,7 +174,7 @@ model TestSeries {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  @@index([subjectId])
+  @@index([categoryId])
   @@index([userId])
 }
 
