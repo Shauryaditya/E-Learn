@@ -53,7 +53,7 @@ export const DescriptionForm = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.patch(`/api/courses/${testSeriesId}`, values);
+      await axios.patch(`/api/testseries/${testSeriesId}`, values);
       toast.success("Course updated");
       toggleEdit();
       router.refresh();
@@ -65,7 +65,7 @@ export const DescriptionForm = ({
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
-        Course description
+        Test Series description
         <Button onClick={toggleEdit} variant="ghost">
           {isEditing ? (
             <>Cancel</>

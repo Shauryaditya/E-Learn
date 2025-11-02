@@ -20,13 +20,6 @@ export async function DELETE(
       where: {
         id: params.testSeriesId,
         userId: userId,
-      },
-      include: {
-        testChapters: {
-          include: {
-            questions: true,
-          }
-        }
       }
     });
 

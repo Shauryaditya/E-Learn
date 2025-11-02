@@ -57,7 +57,7 @@ export const ChaptersForm = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.post(`/api/courses/${testSeriesId}/chapters`, values);
+      await axios.post(`/api/testseries/${testSeriesId}/testchapters`, values);
       toast.success("Chapter Created");
       toggleCreating();
       router.refresh();
@@ -69,7 +69,7 @@ export const ChaptersForm = ({
   const onReorder = async (updateData: { id: string; position: number }[]) => {
     try {
       setIsUpdating(true);
-      await axios.put(`/api/courses/${testSeriesId}/chapters/reorder`, {
+      await axios.put(`/api/testseries/${testSeriesId}/chapters/reorder`, {
         list: updateData,
       });
       toast.success("Chapters reordered");
@@ -92,7 +92,7 @@ export const ChaptersForm = ({
         </div>
       )}
       <div className="font-medium flex items-center justify-between">
-        Course Chapters
+        Testseries Chapters
         <Button onClick={toggleCreating} variant="ghost">
           {isCreating ? (
             <>Cancel</>
