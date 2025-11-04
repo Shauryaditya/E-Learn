@@ -57,7 +57,7 @@ export const ChaptersForm = ({
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.post(`/api/testseries/${testSeriesId}/testchapters`, values);
+      await axios.post(`/api/testseries/${testSeriesId}/testChapter`, values);
       toast.success("Chapter Created");
       toggleCreating();
       router.refresh();
@@ -82,7 +82,7 @@ export const ChaptersForm = ({
   };
   
   const onEdit = (id: string) =>{
-    router.push(`/teacher/courses/${testSeriesId}/chapters/${id}`)
+    router.push(`/teacher/testseries/${testSeriesId}/testchapters/${id}`)
   }
   return (
     <div className="relative w-full mt-6 border bg-slate-100 rounded-md p-4">
