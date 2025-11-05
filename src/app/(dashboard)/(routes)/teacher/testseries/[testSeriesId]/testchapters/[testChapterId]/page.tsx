@@ -47,7 +47,7 @@ const TestChapterIdPage = async ({
     testChapter.title,
     testChapter.description,
   ];
-
+  console.log("Required Fields:", params.testChapterId, requiredFields);
   const totalFields = requiredFields.length;
   const completedFields = requiredFields.filter(Boolean).length;
 

@@ -30,10 +30,10 @@ export const TestChapterActions = ({
       setIsLoading(true);
 
       if (isPublished) {
-        await axios.patch(`/api/testseries/${testSeriesId}/chapters/${testChapterId}/unpublish`);
+        await axios.patch(`/api/testseries/${testSeriesId}/testChapter/${testChapterId}/unpublish`);
         toast.success("Chapter unpublished");
       } else {
-        await axios.patch(`/api/testseries/${testSeriesId}/chapters/${testChapterId}/publish`);
+        await axios.patch(`/api/testseries/${testSeriesId}/testChapter/${testChapterId}/publish`);
         toast.success("Chapter published");
       }
 

@@ -32,7 +32,7 @@ export async function POST(
       data: {
         url,
         name: url.split("/").pop() || "attachment",
-        chapterId: params.testChapterId,
+        testChapterId: params.testChapterId,  
       }
     });
 
