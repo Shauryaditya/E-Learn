@@ -26,7 +26,7 @@ const TestSeries = async () => {
     return redirect("/")
   }
 
-  const TestSeries = await db.course.findMany({
+  const TestSeries = await db.testSeries.findMany({
     where: {
       userId,
     },

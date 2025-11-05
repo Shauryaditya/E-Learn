@@ -57,6 +57,10 @@ model Attachment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  testChapterId String?
+  testChapter   TestChapter? @relation(fields: [testChapterId], references: [id], onDelete: Cascade)
+  
+  @@index([testChapterId])
 
   @@index([courseId])
   @@index([chapterId]) // Index for chapterId
@@ -192,6 +196,8 @@ model TestChapter {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  attachments  Attachment[]
+  
   
   @@index([testSeriesId])
 }

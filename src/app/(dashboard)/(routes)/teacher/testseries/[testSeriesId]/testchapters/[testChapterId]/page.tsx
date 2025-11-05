@@ -3,7 +3,7 @@
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Eye, LayoutDashboard, Video } from "lucide-react";
+import { ArrowLeft, Eye, LayoutDashboard, File } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { IconBadge } from "@/components/icon-badge";
@@ -12,6 +12,7 @@ import { Banner } from "@/components/banner";
 import { TestChapterTitleForm } from "./_components/test-chapter-title-form";
 import { TestChapterDescriptionForm } from "./_components/test-chapter-description-form";
 import { TestChapterActions } from "./_components/test-chapter-actions-form";
+import { TestChapterAttachmentForm } from "./_components/test-chapter-attachment-form";
 
 const TestChapterIdPage = async ({
   params
@@ -24,10 +25,17 @@ const TestChapterIdPage = async ({
     return redirect("/");
   }
 
-  const testChapter = await db.testChapter.findUnique({
+  const testChapter = await db?.testChapter?.findUnique({
     where: {
       id: params.testChapterId,
       testSeriesId: params.testSeriesId,
+    },
+    include: {
+      attachments: {
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
     },
   });
 
@@ -105,24 +113,29 @@ const TestChapterIdPage = async ({
             </div>
             <div>
               <div className="flex items-center gap-x-2">
-                <IconBadge icon={Eye} />
+                <IconBadge icon={File} />
                 <h2 className="text-xl">
-                  Access Settings
+                  Resources & Attachments
                 </h2>
               </div>
+              <TestChapterAttachmentForm
+                initialData={{ attachments: testChapter.attachments }}
+                testSeriesId={params.testSeriesId}
+                testChapterId={params.testChapterId}
+              />
             </div>
           </div>
           <div>
             <div className="flex items-center gap-x-2">
               <IconBadge icon={LayoutDashboard} />
               <h2 className="text-xl">
-                Add Questions
+                Add Tests
               </h2>
             </div>
             <div className="mt-4">
-              {/* Question management component will go here */}
+              {/* Test management component will go here */}
               <p className="text-sm text-slate-600">
-                Question management coming soon...
+                Test management coming soon...
               </p>
             </div>
           </div>
