@@ -9,6 +9,7 @@ import { Preview } from "@/components/preview";
 import DocumentPreview from "@/components/document-preview";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format";
+import { TestSeriesEnrollButton } from "../../_components/test-series-enroll"; // adjust path if different
 
 type PageProps = {
   params: { testSeriesId: string; testChapterId: string };
@@ -56,7 +57,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
 
   // Lock attachments for non-buyers (tests can still be free/locked per item)
   const isLocked = !purchased;
-  console.log("Chapter data:", chapter.attachments);
+
   return (
     <div className="max-w-4xl mx-auto pb-20">
       {/* Header / breadcrumbs */}
@@ -77,6 +78,10 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                 {formatPrice(chapter.testSeries.price)}
               </span>
             )}
+            <TestSeriesEnrollButton
+              testSeriesId={chapter.testSeries.id}
+              price={chapter.testSeries.price ?? 0}
+            />
           </div>
         ) : null}
       </div>
@@ -93,7 +98,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
 
       {/* Chapter description */}
       {chapter.description ? (
-        <div className="p-4">
+        <div className="">
           <Preview value={chapter.description} />
         </div>
       ) : null}
@@ -104,7 +109,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
           <Separator className="my-6" />
           <div className="p-4">
             <h2 className="text-sm font-semibold text-blue-800 mb-3">
-              Notes and Assessments
+              Question Paper
             </h2>
 
             {isLocked && (
