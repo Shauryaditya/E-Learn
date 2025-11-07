@@ -15,6 +15,11 @@ const guestRoutes = [
       label: "Browse",
       href: "/search",
     },
+    {
+      icon: Notebook,
+      label: "Test Series",
+      href: "/testseries",
+    }
   ];
 
   const teacherRoutes = [
