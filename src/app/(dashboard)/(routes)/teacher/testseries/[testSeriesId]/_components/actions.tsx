@@ -25,10 +25,10 @@ export const Actions = ({ disabled, testSeriesId, isPublished }: ActionsProps) =
 
       if (isPublished) {
         await axios.patch(`/api/testseries/${testSeriesId}/unpublish`);
-        toast.success("Course unpublished");
+        toast.success("Testseries unpublished");
       } else {
         await axios.patch(`/api/testseries/${testSeriesId}/publish`);
-        toast.success("Course published");
+        toast.success("Testseries published");
       }
       router.refresh();
     } catch {
