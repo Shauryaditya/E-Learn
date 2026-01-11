@@ -17,7 +17,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        signIn: {
+          afterSignOutUrl: "/"
+        },
+        signUp: {
+          afterSignOutUrl: "/"
+        }
+      }}
+    >
     <html lang="en">
       <body className={inter.className}>
         <ToastProvider />

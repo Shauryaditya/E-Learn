@@ -4,7 +4,6 @@ import { auth } from "@clerk/nextjs";
 import { Clock } from "lucide-react";
 import { redirect } from "next/navigation";
 import { InfoCard } from "./_components/info-card";
-import TimerComponent from "./_components/timercomponents/TimerComponent";
 
 export default async function Dashboard() {
   const { userId } = auth();
@@ -20,13 +19,13 @@ export default async function Dashboard() {
   return (
     <div className="p-6 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- 
-          <InfoCard 
+
+          <InfoCard
             icon={Clock}
             label="In Progress"
             numberOfItems={coursesInProgress.length}
           />
-          <InfoCard 
+          <InfoCard
             icon={Clock}
             label="Completed"
             numberOfItems={completedCourses.length}
@@ -34,7 +33,6 @@ export default async function Dashboard() {
           />
 
       </div>
-      <TimerComponent />
       <CoursesList items={[...coursesInProgress, ...completedCourses]} />
     </div>
   );
