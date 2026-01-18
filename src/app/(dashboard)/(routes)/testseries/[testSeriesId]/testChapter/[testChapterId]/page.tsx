@@ -2,6 +2,8 @@ import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { File, CheckCircle } from "lucide-react";
+import { TestMode } from "@prisma/client";
 
 import { Banner } from "@/components/banner";
 import { Separator } from "@/components/ui/separator";
@@ -9,7 +11,8 @@ import { Preview } from "@/components/preview";
 import DocumentPreview from "@/components/document-preview";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format";
-import { TestSeriesEnrollButton } from "../../_components/test-series-enroll"; // adjust path if different
+import { TestSeriesEnrollButton } from "../../_components/test-series-enroll";
+import { TestSubmissionForm } from "@/components/test-submission-form";
 
 type PageProps = {
   params: { testSeriesId: string; testChapterId: string };
@@ -19,10 +22,15 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
   const { userId } = auth();
   if (!userId) redirect("/");
 
-  // Load chapter + parent series + attachments + tests
+  // Load chapter + parent series + attachments + tests + submissions
   const chapter = await db.testChapter.findUnique({
     where: { id: params.testChapterId },
     include: {
+      submissions: {
+        where: {
+          userId,
+        }
+      },
       testSeries: {
         include: {
           testSeriesPurchase: { where: { userId } },
@@ -34,18 +42,10 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
       tests: {
         where: { isPublished: true },
         orderBy: { position: "asc" },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          duration: true,
-          totalMarks: true,
-          position: true,
-          isFree: true,
-        },
       },
     },
   });
+  console.log("chapte??", chapter);
 
   if (!chapter || chapter.testSeries.id !== params.testSeriesId) {
     redirect("/");
@@ -57,6 +57,8 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
 
   // Lock attachments for non-buyers (tests can still be free/locked per item)
   const isLocked = !purchased;
+
+  const existingSubmission = chapter.submissions[0];
 
   return (
     <div className="max-w-4xl mx-auto pb-20">
@@ -122,9 +124,8 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
               {chapter.attachments.map((a) => (
                 <div
                   key={a.id}
-                  className={`bg-white w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition ${
-                    isLocked ? "blur-sm select-none pointer-events-none" : ""
-                  }`}
+                  className={`bg-white w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition ${isLocked ? "blur-sm select-none pointer-events-none" : ""
+                    }`}
                 >
                   {/* Optional name/label above the preview */}
                   {a.name && (
@@ -145,45 +146,26 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
       {/* Tests list */}
       <Separator className="my-6" />
       <div className="p-4">
-        <h2 className="text-lg font-medium mb-4">Tests</h2>
-
-        {chapter.tests.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No tests available.</p>
+        <h2 className="text-lg font-medium mb-4">Submit Answer Sheet</h2>
+        {existingSubmission ? (
+          <div className="flex items-center gap-x-2 text-emerald-700 bg-emerald-50 p-3 rounded-md">
+            <CheckCircle className="h-5 w-5" />
+            <div>
+              <p className="font-medium">Submitted</p>
+              <a
+                href={existingSubmission.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs underline hover:text-emerald-800"
+              >
+                View your submission
+              </a>
+            </div>
+          </div>
         ) : (
-          <ul className="divide-y rounded-lg border">
-            {chapter.tests.map((t) => {
-              const unlocked = purchased || t.isFree;
-              return (
-                <li key={t.id} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">
-                        {t.position}. {t.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Duration: {t.duration}m · Total: {t.totalMarks} ·{" "}
-                        {t.isFree ? "Free" : purchased ? "Included" : "Locked"}
-                      </p>
-                    </div>
-
-                    {unlocked ? (
-                      <Button asChild size="sm" variant="outline">
-                        <Link href={`/tests/${t.id}/start`}>Start test</Link>
-                      </Button>
-                    ) : (
-                      <Button asChild size="sm">
-                        <Link href={`/testseries/${chapter.testSeries.id}`}>Buy to unlock</Link>
-                      </Button>
-                    )}
-                  </div>
-
-                  {t.description && (
-                    <p className="mt-2 text-sm text-muted-foreground">{t.description}</p>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <TestSubmissionForm
+            testSeriesId={chapter.testSeries.id}
+            testChapterId={chapter.id} />
         )}
       </div>
     </div>

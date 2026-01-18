@@ -199,7 +199,7 @@ model TestChapter {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   attachments  Attachment[]
-  
+  submissions   TestSubmission[]
   
   @@index([testSeriesId])
 }
@@ -215,14 +215,13 @@ model Test {
   isPublished Boolean @default(false)
   isFree      Boolean @default(false)
 
-  mode        TestMode @default(OBJECTIVE)
+  testMode        TestMode @default(OBJECTIVE)
 
   testChapterId String
   testChapter   TestChapter @relation(fields: [testChapterId], references: [id], onDelete: Cascade)
 
   questions     Question[]
   testAttempts  TestAttempt[]
-  submissions   TestSubmission[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -240,8 +239,8 @@ model TestSubmission {
   id            String @id @default(uuid())
   userId        String
 
-  testId        String
-  test          Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
+  testChapterId String
+  testChapter   TestChapter @relation(fields: [testChapterId], references: [id], onDelete: Cascade)
 
   pdfUrl        String @db.Text
 
@@ -254,12 +253,13 @@ model TestSubmission {
   reviewedAt    DateTime?
   reviewedBy    String?   // teacher userId (optional but smart)
 
+  annotatedPdfUrl String?   @db.Text
   status        SubmissionStatus @default(SUBMITTED)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([testId])
+  @@index([testChapterId])
   @@index([userId])
 }
 

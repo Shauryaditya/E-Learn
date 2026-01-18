@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Eye, LayoutDashboard, File } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { db } from "@/lib/db";
 import { IconBadge } from "@/components/icon-badge";
@@ -13,6 +14,7 @@ import { TestChapterTitleForm } from "./_components/test-chapter-title-form";
 import { TestChapterDescriptionForm } from "./_components/test-chapter-description-form";
 import { TestChapterActions } from "./_components/test-chapter-actions-form";
 import { TestChapterAttachmentForm } from "./_components/test-chapter-attachment-form";
+import { SubmissionList } from "@/components/submission-list";
 
 const TestChapterIdPage = async ({
   params
@@ -36,6 +38,16 @@ const TestChapterIdPage = async ({
           createdAt: "desc",
         },
       },
+      tests: {
+        orderBy: {
+          position: "asc",
+        }
+      },
+      submissions: {
+        orderBy: {
+          createdAt: "desc",
+        }
+      }
     },
   });
 
@@ -43,11 +55,12 @@ const TestChapterIdPage = async ({
     return redirect("/");
   }
 
+  console.log("Test Chapter>>>>", testChapter);
   const requiredFields = [
     testChapter.title,
     testChapter.description,
   ];
-  console.log("Required Fields:", params.testChapterId, requiredFields);
+  console.log("Required Fields:", requiredFields);
   const totalFields = requiredFields.length;
   const completedFields = requiredFields.filter(Boolean).length;
 
@@ -125,19 +138,31 @@ const TestChapterIdPage = async ({
               />
             </div>
           </div>
-          <div>
-            <div className="flex items-center gap-x-2">
-              <IconBadge icon={LayoutDashboard} />
-              <h2 className="text-xl">
-                Add Tests
-              </h2>
-            </div>
-            <div className="mt-4">
-              {/* Test management component will go here */}
-              <p className="text-sm text-slate-600">
-                Test management coming soon...
-              </p>
-            </div>
+        </div>
+        <div>
+          <div className="flex items-center gap-x-2">
+            <IconBadge icon={LayoutDashboard} />
+            <h2 className="text-xl">
+              Tests
+            </h2>
+          </div>
+          <div className="mt-4 space-y-4">
+            {(testChapter as any).tests && (testChapter as any).tests.length > 0 ? (
+              (testChapter as any).tests.map((test: any) => (
+                <div key={test.id} className="flex items-center justify-between border rounded-md p-3 bg-slate-50">
+                  <span className="font-medium truncate max-w-[200px]">{test.title}</span>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-slate-500 italic">No tests created yet.</p>
+            )}
+          </div>
+
+          <div className="mt-8">
+            <SubmissionList
+              items={(testChapter as any).submissions || []}
+              testSeriesId={params.testSeriesId}
+            />
           </div>
         </div>
       </div>

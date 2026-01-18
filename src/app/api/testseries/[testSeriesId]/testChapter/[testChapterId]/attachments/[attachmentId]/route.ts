@@ -27,10 +27,19 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const ownAttachment = await db.attachment.findUnique({
+      where: {
+        id: params.attachmentId,
+      }
+    });
+
+    if (!ownAttachment || ownAttachment.testChapterId !== params.testChapterId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
     const attachment = await db.attachment.delete({
       where: {
         id: params.attachmentId,
-        chapterId: params.testChapterId,
       }
     });
 
