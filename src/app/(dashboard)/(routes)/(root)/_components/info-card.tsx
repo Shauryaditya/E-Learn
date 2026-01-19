@@ -1,6 +1,5 @@
 import { IconBadge } from "@/components/icon-badge";
 import { LucideIcon } from "lucide-react";
-import { number } from "zod";
 
 interface InfoCardProps {
   numberOfItems: number;

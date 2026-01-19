@@ -1,8 +1,6 @@
-"use client"
 import { getDashboardCourses } from "@/actions/get-dashboard-courses";
 import { CoursesList } from "@/components/courses-list";
 import { auth } from "@clerk/nextjs";
-import { Clock } from "lucide-react";
 import { redirect } from "next/navigation";
 import { InfoCard } from "./_components/info-card";
 
@@ -22,12 +20,10 @@ export default async function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
           <InfoCard
-            icon={Clock}
             label="In Progress"
             numberOfItems={coursesInProgress.length}
           />
           <InfoCard
-            icon={Clock}
             label="Completed"
             numberOfItems={completedCourses.length}
             variant="success"
