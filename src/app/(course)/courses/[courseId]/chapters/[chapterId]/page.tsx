@@ -1,138 +1,186 @@
-import { getChapter } from "@/actions/get-chapter";
-import { Banner } from "@/components/banner";
+import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { VideoPlayer } from "./_components/video-player";
-import { CourseEnrollButton } from "./_components/course-enroll-button";
+import Link from "next/link";
+
+import { Banner } from "@/components/banner";
 import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
-import { File } from "lucide-react";
-import { CourseProgressButton } from "./_components/course-progress-button";
 import DocumentPreview from "@/components/document-preview";
+import { Button } from "@/components/ui/button";
+import { formatPrice } from "@/lib/format";
 
-const ChapterIdPage = async ({
-  params,
-}: {
-  params: { courseId: string; chapterId: string };
-}) => {
+type PageProps = {
+  params: { testSeriesId: string; testChapterId: string };
+};
+
+export default async function TestSeriesChapterPage({ params }: PageProps) {
   const { userId } = auth();
-  if (!userId) {
-    return redirect("/");
-  }
+  if (!userId) redirect("/");
 
-  const {
-    chapter,
-    course,
-    muxData,
-    attachments,
-    nextChapter,
-    userProgress,
-    purchase,
-  } = await getChapter({
-    userId,
-    chapterId: params.chapterId,
-    courseId: params.courseId,
+  // Load chapter + parent series + attachments + tests
+  const chapter = await db.testChapter.findUnique({
+    where: { id: params.testChapterId },
+    include: {
+      testSeries: {
+        include: {
+          testSeriesPurchase: { where: { userId } },
+        },
+      },
+      attachments: {
+        orderBy: { createdAt: "desc" },
+      },
+      tests: {
+        where: { isPublished: true },
+        orderBy: { position: "asc" },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          duration: true,
+          totalMarks: true,
+          position: true,
+          isFree: true,
+        },
+      },
+    },
   });
 
-  if (!chapter || !course) {
-    return redirect("/");
+  if (!chapter || chapter.testSeries.id !== params.testSeriesId) {
+    redirect("/");
   }
 
-  console.log("Attachments>>", attachments);
+  const purchased = !!chapter.testSeries.testSeriesPurchase.length;
+  const canView = chapter.testSeries.isPublished || purchased;
+  if (!canView) redirect("/");
 
-  const isLocked = !chapter.isFree && !purchase;
-  const completeOnEnd = !!purchase && !userProgress?.isCompleted;
-
+  // Lock attachments for non-buyers (tests can still be free/locked per item)
+  const isLocked = !purchased;
+  console.log("Chapter data:", chapter.attachments);
   return (
-    <div className="">
-      {userProgress?.isCompleted && (
-        <Banner variant="success" label="You already completed this chapter" />
-      )}
-      {isLocked && (
-        <Banner
-          variant="warning"
-          label="You need to purchase this course to watch this chapter"
-        />
-      )}
-      <div className="flex flex-col max-w-4xl mx-auto pb-20">
-        <div className="p-4">
-          {chapter.videoUrl ? ( // Use videoUrl instead of playbackId
-            <VideoPlayer
-              videoUrl={chapter.videoUrl}
-              chapterId={params.chapterId}
-              title={chapter.title}
-              courseId={params.courseId}
-              nextChapterId={nextChapter?.id!}
-              isLocked={isLocked}
-              completeOnEnd={completeOnEnd}
-            />
-          ) : (
-            <></>
-          )}
+    <div className="max-w-4xl mx-auto pb-20">
+      {/* Header / breadcrumbs */}
+      <div className="p-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-xs text-muted-foreground">
+            <Link href={`/testseries/${chapter.testSeries.id}`} className="underline">
+              {chapter.testSeries.title}
+            </Link>
+          </p>
+          <h1 className="text-2xl font-semibold">{chapter.title}</h1>
         </div>
-        <div className="">
-          <div className="p-4 flex flex-col md:flex-row items-center justify-between">
-            <h2 className="text-2xl font-semibold mb-2">{chapter.title}</h2>
-            {purchase ? (
-              <CourseProgressButton
-                chapterId={params.chapterId}
-                courseId={params.courseId}
-                nextChapterId={nextChapter?.id}
-                isCompleted={!!userProgress?.isCompleted}
-              />
-            ) : (
-              <CourseEnrollButton
-                courseId={params.courseId}
-                price={course.price!}
-              />
+
+        {!purchased ? (
+          <div className="flex items-center gap-3">
+            {chapter.testSeries.price != null && (
+              <span className="text-lg font-semibold">
+                {formatPrice(chapter.testSeries.price)}
+              </span>
             )}
           </div>
-          <Separator />
-          <div className="">
-            <Preview value={chapter.description!} />
-          </div>
-          {!!attachments.length && (
-            <>
-              <Separator />
-              <div className="p-4">
-                <h1 className="text-sm font-semibold text-blue-800">
-                  Notes and Assessments
-                </h1>
-                {isLocked && (
-                  <p className="text-red-500">
-                    Purchase the course to view the rest of the content
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-4">
-                  {attachments.map((attachment) => (
-                    <div
-                      key={attachment.id}
-                      className={`bg-white w-full md:w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 ${
-                        isLocked ? "blur-sm" : ""
-                      }`}
-                    >
-                      {!isLocked && (
-                        <a
-                          href={attachment.url}
-                          className="text-lg font-semibold text-gray-800 mb-2"
-                        >
-                          {attachment.name}
-                        </a>
-                      )}
+        ) : null}
+      </div>
 
-                      {/* Render PDF Preview instead of just a link */}
+      {/* Informational banners */}
+      {!purchased && (
+        <Banner
+          variant="warning"
+          label="Buy this test series to unlock all attachments and tests (non-free)."
+        />
+      )}
 
-                      <DocumentPreview fileUrl={attachment.url} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
+      <Separator className="my-6" />
+
+      {/* Chapter description */}
+      {chapter.description ? (
+        <div className="p-4">
+          <Preview value={chapter.description} />
         </div>
+      ) : null}
+
+      {/* Attachments */}
+      {chapter.attachments.length > 0 && (
+        <>
+          <Separator className="my-6" />
+          <div className="p-4">
+            <h2 className="text-sm font-semibold text-blue-800 mb-3">
+              Notes and Assessments
+            </h2>
+
+            {isLocked && (
+              <p className="text-red-500 mb-3">
+                Purchase the test series to view and download attachments.
+              </p>
+            )}
+
+            <div className="grid gap-4">
+              {chapter.attachments.map((a) => (
+                <div
+                  key={a.id}
+                  className={`bg-white w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition ${
+                    isLocked ? "blur-sm select-none pointer-events-none" : ""
+                  }`}
+                >
+                  {/* Optional name/label above the preview */}
+                  {a.name && (
+                    <div className="mb-2 text-sm font-medium text-gray-800">
+                      {a.name}
+                    </div>
+                  )}
+
+                  {/* Preview the document */}
+                  <DocumentPreview fileUrl={a.url} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Tests list */}
+      <Separator className="my-6" />
+      <div className="p-4">
+        <h2 className="text-lg font-medium mb-4">Tests</h2>
+
+        {chapter.tests.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No tests available.</p>
+        ) : (
+          <ul className="divide-y rounded-lg border">
+            {chapter.tests.map((t) => {
+              const unlocked = purchased || t.isFree;
+              return (
+                <li key={t.id} className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">
+                        {t.position}. {t.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Duration: {t.duration}m · Total: {t.totalMarks} ·{" "}
+                        {t.isFree ? "Free" : purchased ? "Included" : "Locked"}
+                      </p>
+                    </div>
+
+                    {unlocked ? (
+                      <Button asChild size="sm" variant="outline">
+                        <Link href={`/tests/${t.id}/start`}>Start test</Link>
+                      </Button>
+                    ) : (
+                      <Button asChild size="sm">
+                        <Link href={`/testseries/${chapter.testSeries.id}`}>Buy to unlock</Link>
+                      </Button>
+                    )}
+                  </div>
+
+                  {t.description && (
+                    <p className="mt-2 text-sm text-muted-foreground">{t.description}</p>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );
-};
-
-export default ChapterIdPage;
+}

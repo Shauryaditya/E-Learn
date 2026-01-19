@@ -37,10 +37,13 @@ model Course {
   @@index([categoryId])
 }
 
+
+
 model Category {
   id      String   @id @default(uuid())
   name    String   @unique
   courses Course[]
+  testSeries TestSeries[]
 }
 
 model Attachment {
@@ -56,6 +59,10 @@ model Attachment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  testChapterId String?
+  testChapter   TestChapter? @relation(fields: [testChapterId], references: [id], onDelete: Cascade)
+  
+  @@index([testChapterId])
 
   @@index([courseId])
   @@index([chapterId]) // Index for chapterId
@@ -149,4 +156,216 @@ model RazorpayOrder {
 
   @@index([userId])
   @@index([courseId]) // Manually add an index for courseId
+}
+
+// ============================================
+// TEST SERIES MODELS
+// ============================================
+
+model TestSeries {
+  id          String  @id @default(uuid())
+  userId      String  // Teacher who created this
+  title       String  @db.Text
+  description String? @db.Text
+  imageUrl    String? @db.Text
+  price       Float?
+  isPublished Boolean @default(false)
+  
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  
+  testChapters       TestChapter[]
+  testSeriesPurchase TestSeriesPurchase[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([categoryId])
+  @@index([userId])
+}
+
+model TestChapter {
+  id          String  @id @default(uuid())
+  title       String  // e.g., "Thermodynamics", "Organic Chemistry"
+  description String? @db.Text
+  position    Int
+  isPublished Boolean @default(false)
+  
+  testSeriesId String
+  testSeries   TestSeries @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
+  
+  tests Test[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  attachments  Attachment[]
+  submissions   TestSubmission[]
+  
+  @@index([testSeriesId])
+}
+
+model Test {
+  id          String  @id @default(uuid())
+  title       String
+  description String? @db.Text
+  duration    Int
+  totalMarks  Int
+  passingMarks Int?
+  position    Int
+  isPublished Boolean @default(false)
+  isFree      Boolean @default(false)
+
+  testMode        TestMode @default(OBJECTIVE)
+
+  testChapterId String
+  testChapter   TestChapter @relation(fields: [testChapterId], references: [id], onDelete: Cascade)
+
+  questions     Question[]
+  testAttempts  TestAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+enum QuestionType {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  NUMERICAL
+  TRUE_FALSE
+}
+
+model TestSubmission {
+  id            String @id @default(uuid())
+  userId        String
+
+  testChapterId String
+  testChapter   TestChapter @relation(fields: [testChapterId], references: [id], onDelete: Cascade)
+
+  pdfUrl        String @db.Text
+
+  fileName      String?
+  fileSize      Int?      // in bytes
+  attemptNo     Int       @default(1)
+
+  marksAwarded  Float?
+  feedback      String?   @db.Text
+  reviewedAt    DateTime?
+  reviewedBy    String?   // teacher userId (optional but smart)
+
+  annotatedPdfUrl String?   @db.Text
+  status        SubmissionStatus @default(SUBMITTED)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([testChapterId])
+  @@index([userId])
+}
+
+enum SubmissionStatus {
+  SUBMITTED
+  REVIEWED
+  NEEDS_REVISION
+}
+model Question {
+  id            String       @id @default(uuid())
+  questionText  String       @db.Text
+  questionType  QuestionType @default(SINGLE_CHOICE)
+  marks         Float
+  negativeMarks Float        @default(0)
+  position      Int
+  explanation   String?      @db.Text
+  imageUrl      String?      @db.Text
+  
+  testId String
+  test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
+  
+  options QuestionOption[]
+  answers Answer[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([testId])
+}
+
+model QuestionOption {
+  id         String  @id @default(uuid())
+  optionText String  @db.Text
+  isCorrect  Boolean @default(false)
+  position   Int
+  
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([questionId])
+}
+
+model TestAttempt {
+  id          String   @id @default(uuid())
+  userId      String
+  score       Float?
+  totalMarks  Int
+  percentage  Float?
+  isPassed    Boolean?
+  isCompleted Boolean  @default(false)
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  
+  testId String
+  test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
+  
+  answers Answer[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, testId])
+  @@index([testId])
+  @@index([userId])
+}
+
+model Answer {
+  id             String   @id @default(uuid())
+  selectedAnswer String?  @db.Text // For single/multiple choice, store option IDs; for numerical, store the value
+  isCorrect      Boolean?
+  marksAwarded   Float?
+  
+  testAttemptId String
+  testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id], onDelete: Cascade)
+  
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([testAttemptId, questionId])
+  @@index([testAttemptId])
+  @@index([questionId])
+}
+
+model TestSeriesPurchase {
+  id     String @id @default(uuid())
+  userId String
+  
+  testSeriesId String
+  testSeries   TestSeries @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, testSeriesId])
+  @@index([testSeriesId])
+  @@index([userId])
+}
+
+
+enum TestMode {
+  OBJECTIVE
+  DESCRIPTIVE
 }

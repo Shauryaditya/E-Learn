@@ -143,6 +143,10 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 4. Push to the Branch (`git push origin feature/NewFeature`)
 5. Open a Pull Request
 
+Please note that we have a [Code of Conduct](CODE_OF_CONDUCT.md). Please follow it in all your interactions with the project.
+
+For security concerns, please review our [Security Policy](SECURITY.md).
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
