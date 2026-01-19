@@ -13,26 +13,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ClerkProvider
-      appearance={{
-        signIn: {
-          afterSignOutUrl: "/"
-        },
-        signUp: {
-          afterSignOutUrl: "/"
-        }
-      }}
+      afterSignUpUrl="/"
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
     >
-    <html lang="en">
-      <body className={inter.className}>
-        <ToastProvider />
-        {children}
+      <html lang="en">
+        <body className={inter.className}>
+          <ToastProvider />
+          {children}
         </body>
-    </html>
+      </html>
     </ClerkProvider>
   );
 }

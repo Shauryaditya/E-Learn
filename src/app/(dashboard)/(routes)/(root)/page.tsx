@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs";
 import { Clock } from "lucide-react";
 import { redirect } from "next/navigation";
 import { InfoCard } from "./_components/info-card";
-import TimerComponent from "./_components/timercomponents/TimerComponent";
+
 
 export default async function Dashboard() {
   const { userId } = auth();
@@ -34,7 +34,6 @@ export default async function Dashboard() {
           />
 
       </div>
-      <TimerComponent />
       <CoursesList items={[...coursesInProgress, ...completedCourses]} />
     </div>
   );

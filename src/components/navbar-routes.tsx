@@ -24,9 +24,9 @@ export const NavbarRoutes = () => {
 
   const isSearchPage = pathname === "/search";
 
-  const handleSignOut = async () => {
-    await signOut({ redirectUrl: "/" });
-  };
+const handleSignOut = async () => {
+  await signOut();
+};
 
   return (
     <>
