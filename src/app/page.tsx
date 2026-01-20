@@ -8,7 +8,7 @@ import StudyRoom from "@/components/landingpage/StudyRoom";
 import MakeFriends from "@/components/landingpage/MakeFriends";
 import CTASection from "@/components/landingpage/CTASection";
 
-import { Sidebar } from "@/app/(dashboard)/_components/Sidebar";
+import { Sidebar } from "@/app/(dashboard)/_components/sidebar";
 import { Navbar } from "@/app/(dashboard)/_components/navbar";
 import { InfoCard } from "./(dashboard)/(routes)/(root)/_components/info-card";
 
