@@ -10,7 +10,7 @@ import CTASection from "@/components/landingpage/CTASection";
 
 import { Sidebar } from "@/app/(dashboard)/_components/sidebar";
 import { Navbar } from "@/app/(dashboard)/_components/navbar";
-import { InfoCard } from "./(dashboard)/(routes)/(root)/_components/info-card";
+import { InfoCard } from "@/app/(dashboard)/(routes)/(root)/_components/info-card";
 
 export default async function Home() {
     const { userId } = auth();
