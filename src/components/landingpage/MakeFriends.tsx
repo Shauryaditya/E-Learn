@@ -3,17 +3,17 @@ function MakeFriends() {
     <div className="max-w-3xl xl:max-w-7xl  mx-auto mb-28 lg:flex flex-row-reverse gap-4 xl:gap-24 items-center justify-center flex-wrap-reverse">
       <div className="flex-1 max-w-[700px] relative rounded-3xl bg-re d-100 z-50 aspect-video lg:ms-0 ms-2">
         <img
-          src="/leaderboard.webp"
+          src="/assets/Groupchat.png"
           alt="Friends Chat"
           className="absolute bottom-[40%] right-[10%] w-[30%] rounded-2xl shadow-2xl object-cover"
         />
         <img
-          src="/userProfile.webp"
+          src="/assets/PersonalisedDashboard.png"
           alt="Study Room"
           className="absolute top-0 left-0 h-[90%] rounded-2xl shadow-2xl object-cover"
         />
         <img
-          src="/studyStats.webp"
+          src="/assets/Groupchat.png"
           alt="Group Study"
           className="absolute bottom-0 right-0 w-[80%] rounded-2xl shadow-2xl object-cover"
         />

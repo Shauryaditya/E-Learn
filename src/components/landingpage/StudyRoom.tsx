@@ -7,7 +7,7 @@ function StudyRoom() {
         <div
           className="aspect-video relative bg-cover bg-center"
           style={{
-            backgroundImage: `url('/studyRoom.png')`,
+            backgroundImage: `url('/Groupchat.png')`,
           }}
         >
           {/* Mock macOS window controls */}

@@ -3,7 +3,7 @@ function GoalsAndEvents() {
     <div className="max-w-3xl xl:max-w-7xl mx-auto mb-16 sm:mb-20 xl:mb-28 px-4 sm:px-0 flex flex-col lg:flex-row gap-6 sm:gap-8 xl:gap-24 items-center justify-center">
       <div className="flex-1 max-w-[600px] relative w-full">
         <img
-          src="/Page1LightScreenshot.png"
+          src="/assets/TestSeries.png"
           alt="Goals"
           className="w-full h-auto"
           style={{

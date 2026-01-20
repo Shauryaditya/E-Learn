@@ -24,15 +24,15 @@ function CTASection() {
               onClick={() => router.push("/sign-in")}
               variant="default"
               size="default"
-              className="w-full sm:w-auto flex items-center justify-center sm:justify-start space-x-3 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-white font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-              style={{ backgroundColor: "var(--btn)" }}
+              className="w-full sm:w-auto flex items-center justify-center sm:justify-start space-x-3 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              
             >
               <Play size={20} />
               <span>Get Started for Free</span>
             </Button>
 
             <a
-              href="https://github.com/Eduhaven/eduhaven"
+              href="https://github.com/Shauryaditya/E-Learn"
               className="w-full sm:w-auto flex items-center justify-center sm:justify-start space-x-3 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg border-2 hover:shadow-lg transform hover:scale-105 transition-all duration-300"
               style={{ borderColor: "var(--btn)", color: "var(--btn)" }}
             >

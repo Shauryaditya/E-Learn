@@ -242,7 +242,7 @@ function HeroSection() {
       >
         <div
           className="h-[33vh] sm:h-[40vh] lg:h-[50vh] aspect-[2/1] bg-cover bg-center rounded-lg sm:rounded-none lg:mt-0 mt-5"
-          style={{ backgroundImage: "url('/Page1LightScreenshot.png')" }}
+          style={{ backgroundImage: "url('/assets/landingstyle.png')" }}
         >
           <div className="absolute bottom-0 left-0 w-full h-[25vh] sm:h-[35vh] lg:h-[45vh] bg-gradient-to-t from-[var(--bg-primary)] to-transparent"></div>
         </div>
