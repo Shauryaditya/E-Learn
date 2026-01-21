@@ -16,7 +16,7 @@ function CTASection() {
 
           <p className="text-base sm:text-xl mb-8 sm:mb-12 txt-dim">
             Join thousands of students who are staying organized, motivated, and
-            achieving their academic goals with EduHaven.
+            achieving their academic goals with Aaccent.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
@@ -25,7 +25,7 @@ function CTASection() {
               variant="default"
               size="default"
               className="w-full sm:w-auto flex items-center justify-center sm:justify-start space-x-3 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-              
+
             >
               <Play size={20} />
               <span>Get Started for Free</span>
