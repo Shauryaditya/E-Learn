@@ -29,6 +29,7 @@ model Course {
   chapters    Chapter[]
   attachments Attachment[]
   purchases   Purchase[]
+  goals       Goal[]
 
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -176,6 +177,7 @@ model TestSeries {
   
   testChapters       TestChapter[]
   testSeriesPurchase TestSeriesPurchase[]
+  goals              Goal[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -368,4 +370,34 @@ model TestSeriesPurchase {
 enum TestMode {
   OBJECTIVE
   DESCRIPTIVE
+}
+
+model Goal {
+  id          String   @id @default(uuid())
+  title       String   @db.Text
+  description String?  @db.Text
+  dueDate     DateTime
+  isCompleted Boolean  @default(false)
+  
+  // Student this goal is assigned to
+  studentId   String
+  
+  // Teacher who created this goal
+  teacherId   String
+  
+  // Either courseId OR testSeriesId will be set (not both)
+  courseId      String?
+  course        Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  testSeriesId  String?
+  testSeries    TestSeries?  @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([courseId])
+  @@index([testSeriesId])
+  @@index([dueDate])
 }

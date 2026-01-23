@@ -7,96 +7,91 @@ import { Banner } from "@/components/banner";
 import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import DocumentPreview from "@/components/document-preview";
-import { Button } from "@/components/ui/button";
-import { formatPrice } from "@/lib/format";
+import { VideoPlayer } from "./_components/video-player";
 
 type PageProps = {
-  params: { testSeriesId: string; testChapterId: string };
+  params: { courseId: string; chapterId: string };
 };
 
-export default async function TestSeriesChapterPage({ params }: PageProps) {
+export default async function CourseChapterPage({ params }: PageProps) {
   const { userId } = auth();
   if (!userId) redirect("/");
 
-  // Load chapter + parent series + attachments + tests
-  const chapter = await db.testChapter.findUnique({
-    where: { id: params.testChapterId },
+  // Load chapter + parent course + attachments
+  const chapter = await db.chapter.findUnique({
+    where: { id: params.chapterId },
     include: {
-      testSeries: {
+      course: {
         include: {
-          testSeriesPurchase: { where: { userId } },
+          purchases: { where: { userId } },
         },
       },
       attachments: {
         orderBy: { createdAt: "desc" },
       },
-      tests: {
-        where: { isPublished: true },
-        orderBy: { position: "asc" },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          duration: true,
-          totalMarks: true,
-          position: true,
-          isFree: true,
-        },
-      },
+      muxData: true,
     },
   });
 
-  if (!chapter || chapter.testSeries.id !== params.testSeriesId) {
+  console.log("Chapter data:", chapter);
+
+  if (!chapter || chapter.course.id !== params.courseId) {
     redirect("/");
   }
 
-  const purchased = !!chapter.testSeries.testSeriesPurchase.length;
-  const canView = chapter.testSeries.isPublished || purchased;
-  if (!canView) redirect("/");
+  const purchased = !!chapter.course.purchases.length;
+  const canView = chapter.isPublished && (chapter.isFree || purchased);
 
-  // Lock attachments for non-buyers (tests can still be free/locked per item)
-  const isLocked = !purchased;
-  console.log("Chapter data:", chapter.attachments);
+  if (!canView) {
+    redirect(`/courses/${params.courseId}`);
+  }
+
+  // Lock content for non-buyers (unless chapter is free)
+  const isLocked = !chapter.isFree && !purchased;
+
   return (
     <div className="max-w-4xl mx-auto pb-20">
       {/* Header / breadcrumbs */}
       <div className="p-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs text-muted-foreground">
-            <Link href={`/testseries/${chapter.testSeries.id}`} className="underline">
-              {chapter.testSeries.title}
+            <Link href={`/courses/${chapter.course.id}`} className="underline">
+              {chapter.course.title}
             </Link>
           </p>
           <h1 className="text-2xl font-semibold">{chapter.title}</h1>
         </div>
-
-        {!purchased ? (
-          <div className="flex items-center gap-3">
-            {chapter.testSeries.price != null && (
-              <span className="text-lg font-semibold">
-                {formatPrice(chapter.testSeries.price)}
-              </span>
-            )}
-          </div>
-        ) : null}
       </div>
 
       {/* Informational banners */}
-      {!purchased && (
+      {isLocked && (
         <Banner
           variant="warning"
-          label="Buy this test series to unlock all attachments and tests (non-free)."
+          label="Purchase this course to unlock all content."
         />
       )}
 
       <Separator className="my-6" />
 
+      {/* Video Player */}
+      {chapter.videoUrl && (
+        <div className="p-4">
+          <VideoPlayer
+            chapterId={chapter.id}
+            title={chapter.title}
+            courseId={params.courseId}
+            videoUrl={chapter.videoUrl}
+            isLocked={isLocked}
+          />
+        </div>
+      )}
+
       {/* Chapter description */}
-      {chapter.description ? (
+      {chapter.description && (
         <div className="p-4">
           <Preview value={chapter.description} />
         </div>
-      ) : null}
+      )}
 
       {/* Attachments */}
       {chapter.attachments.length > 0 && (
@@ -104,83 +99,37 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
           <Separator className="my-6" />
           <div className="p-4">
             <h2 className="text-sm font-semibold text-blue-800 mb-3">
-              Notes and Assessments
+              Course Materials
             </h2>
 
             {isLocked && (
               <p className="text-red-500 mb-3">
-                Purchase the test series to view and download attachments.
+                Purchase the course to view and download materials.
               </p>
             )}
 
             <div className="grid gap-4">
-              {chapter.attachments.map((a) => (
+              {chapter.attachments.map((attachment) => (
                 <div
-                  key={a.id}
-                  className={`bg-white w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition ${
-                    isLocked ? "blur-sm select-none pointer-events-none" : ""
-                  }`}
+                  key={attachment.id}
+                  className={`bg-white w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition ${isLocked ? "blur-sm select-none pointer-events-none" : ""
+                    }`}
                 >
                   {/* Optional name/label above the preview */}
-                  {a.name && (
+                  {attachment.name && (
                     <div className="mb-2 text-sm font-medium text-gray-800">
-                      {a.name}
+                      {attachment.name}
                     </div>
                   )}
 
                   {/* Preview the document */}
-                  <DocumentPreview fileUrl={a.url} />
+                  <DocumentPreview fileUrl={attachment.url} />
                 </div>
               ))}
             </div>
           </div>
         </>
       )}
-
-      {/* Tests list */}
-      <Separator className="my-6" />
-      <div className="p-4">
-        <h2 className="text-lg font-medium mb-4">Tests</h2>
-
-        {chapter.tests.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No tests available.</p>
-        ) : (
-          <ul className="divide-y rounded-lg border">
-            {chapter.tests.map((t) => {
-              const unlocked = purchased || t.isFree;
-              return (
-                <li key={t.id} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">
-                        {t.position}. {t.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Duration: {t.duration}m · Total: {t.totalMarks} ·{" "}
-                        {t.isFree ? "Free" : purchased ? "Included" : "Locked"}
-                      </p>
-                    </div>
-
-                    {unlocked ? (
-                      <Button asChild size="sm" variant="outline">
-                        <Link href={`/tests/${t.id}/start`}>Start test</Link>
-                      </Button>
-                    ) : (
-                      <Button asChild size="sm">
-                        <Link href={`/testseries/${chapter.testSeries.id}`}>Buy to unlock</Link>
-                      </Button>
-                    )}
-                  </div>
-
-                  {t.description && (
-                    <p className="mt-2 text-sm text-muted-foreground">{t.description}</p>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
     </div>
   );
 }

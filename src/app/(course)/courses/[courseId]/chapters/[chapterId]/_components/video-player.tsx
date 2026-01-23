@@ -9,9 +9,9 @@ interface VideoPlayerProps {
   videoUrl: string; // Update to use videoUrl
   courseId: string;
   chapterId: string;
-  nextChapterId: string;
+  nextChapterId?: string;
   isLocked: boolean;
-  completeOnEnd: boolean;
+  completeOnEnd?: boolean;
   title: string;
 }
 
