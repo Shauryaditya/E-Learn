@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format";
 import axios from "axios";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 import Script from "next/script";
 import { auth } from "@clerk/nextjs";
@@ -22,7 +22,7 @@ export const CourseEnrollButton = ({
   const orderIdRef = useRef<string | null>(null);
 
   // Create the Razorpay order
-  const createOrder = async () => {
+  const createOrder = useCallback(async () => {
     try {
       setIsOrderLoading(true);
       const response = await axios.post(`/api/courses/${courseId}/checkout`, {
@@ -43,7 +43,7 @@ export const CourseEnrollButton = ({
     } finally {
       setIsOrderLoading(false);
     }
-  };
+  }, [courseId, price]);
 
   // Trigger payment processing
   const processPayment = async () => {
@@ -107,7 +107,7 @@ export const CourseEnrollButton = ({
   // Fetch order ID on mount
   useEffect(() => {
     createOrder();
-  }, []);
+  }, [createOrder]);
 
   // Show a loading state until the order is created
   if (isOrderLoading)

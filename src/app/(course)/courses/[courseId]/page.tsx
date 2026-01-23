@@ -78,7 +78,7 @@ const CourseIdPage = async ({
         {/* Additional Info */}
         {!purchase && (
           <div className="text-sm text-muted-foreground">
-            <p>💡 Some chapters may be available as free previews. Check the sidebar to see what's unlocked.</p>
+            <p>💡 Some chapters may be available as free previews. Check the sidebar to see what&apos;s unlocked.</p>
           </div>
         )}
       </div>

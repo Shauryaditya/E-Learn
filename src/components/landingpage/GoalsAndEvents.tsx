@@ -1,13 +1,20 @@
+import Image from "next/image";
+
 function GoalsAndEvents() {
   return (
     <div className="max-w-3xl xl:max-w-7xl mx-auto mb-16 sm:mb-20 xl:mb-28 px-4 sm:px-0 flex flex-col lg:flex-row gap-6 sm:gap-8 xl:gap-24 items-center justify-center">
       <div className="flex-1 max-w-[600px] relative w-full">
-        <img
+        <Image
           src="/assets/TestSeries.png"
           alt="Goals"
+          width={0}
+          height={0}
+          sizes="100vw"
           className="w-full h-auto"
           style={{
             filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.2))",
+            width: '100%',
+            height: 'auto',
           }}
         />
       </div>
