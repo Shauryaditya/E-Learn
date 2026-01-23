@@ -1,6 +1,11 @@
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import { getDashboardCourses } from "@/actions/get-dashboard-courses";
+import { UserButton } from "@clerk/nextjs";
+import { CheckCircle, Clock } from "lucide-react";
+import { InfoCard } from "../(root)/_components/info-card";
+import { CoursesList } from "@/components/courses-list";
 import { GoalsCalendar } from "./_components/goals-calendar";
 import { GoalsList } from "./_components/goals-list";
 
@@ -35,7 +40,9 @@ const StudentDashboard = async () => {
         orderBy: {
             dueDate: "asc",
         },
-    });
+    }); 
+
+    const { completedCourses, coursesInProgress } = await getDashboardCourses(userId);
 
     console.log("Student Dashboard - userId:", userId);
     console.log("Student Dashboard - goals count:", goals.length);
@@ -74,6 +81,23 @@ const StudentDashboard = async () => {
                         <GoalsList initialGoals={goals} />
                     </div>
                 </div>
+            </div>
+
+            <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                   <InfoCard
+                      icon={Clock}
+                      label="In Progress"
+                      numberOfItems={coursesInProgress.length}
+                   />
+                   <InfoCard
+                      icon={CheckCircle}
+                      label="Completed"
+                      numberOfItems={completedCourses.length}
+                      variant="success"
+                   />
+                </div>
+                <CoursesList items={[...coursesInProgress, ...completedCourses]} />
             </div>
         </div>
     );
