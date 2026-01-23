@@ -22,6 +22,7 @@ interface Goal {
     dueDate: Date;
     isCompleted: boolean;
     studentId: string;
+    teacherId: string;
 }
 
 interface GoalFormProps {
