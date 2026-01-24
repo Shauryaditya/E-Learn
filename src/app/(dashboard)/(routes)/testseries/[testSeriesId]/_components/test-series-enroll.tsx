@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format";
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
@@ -31,7 +31,7 @@ export const TestSeriesEnrollButton = ({ price, testSeriesId }: TestSeriesEnroll
   const mountedRef = useRef(false);
   const creatingRef = useRef(false);
 
-  const createOrder = async () => {
+  const createOrder = useCallback(async () => {
     if (creatingRef.current) return;          // prevent concurrent calls
     creatingRef.current = true;
     try {
@@ -54,13 +54,13 @@ export const TestSeriesEnrollButton = ({ price, testSeriesId }: TestSeriesEnroll
       setIsOrderLoading(false);
       creatingRef.current = false;
     }
-  };
+  }, [testSeriesId]);
 
   useEffect(() => {
     if (mountedRef.current) return;           // Strict Mode remount guard
     mountedRef.current = true;
     createOrder();
-  }, []);
+  }, [createOrder]);
 
   const processPayment = async () => {
     // fallback: if no order yet (e.g., user clicked fast), create it now

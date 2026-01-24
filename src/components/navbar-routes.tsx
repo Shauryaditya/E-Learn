@@ -7,6 +7,7 @@ import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { SearchInput } from "./search-input";
 import { isTeacher } from "@/lib/teacher";
+import { ModeToggle } from "@/components/mode-toggle";
 
 // import { isTeacher } from "@/lib/teacher";
 
@@ -24,9 +25,9 @@ export const NavbarRoutes = () => {
 
   const isSearchPage = pathname === "/search";
 
-const handleSignOut = async () => {
-  await signOut();
-};
+  const handleSignOut = async () => {
+    await signOut(() => router.push("/"));
+  };
 
   return (
     <>
@@ -35,7 +36,8 @@ const handleSignOut = async () => {
           <SearchInput />
         </div>
       )}
-      <div className="flex gap-x-2 ml-auto">
+      <div className="flex gap-x-2 ml-auto items-center">
+        <ModeToggle />
         {isTeacherPage || isCoursePage ? (
           <Link href="/">
             <Button>

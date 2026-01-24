@@ -2,7 +2,7 @@ import { MessageCircle, Video } from "lucide-react";
 
 function StudyRoom() {
   return (
-    <div className="max-w-3xl xl:max-w-7xl mx-auto mb-28 md:flex gap-4 xl:gap-24 items-center justify-center">
+    <div className="max-w-3xl xl:max-w-7xl mx-auto mb-16 md:mb-28 md:flex gap-4 xl:gap-24 items-center justify-center">
       <div className="flex-1 md:max-w-[600px] w-[85%] relative rounded-3xl overflow-hidden shadow-2xl group md:ms-0 ms-[32px] md:mb-0 mb-[50px]">
         <div
           className="aspect-video relative bg-cover bg-center"
