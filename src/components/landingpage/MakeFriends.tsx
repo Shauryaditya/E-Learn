@@ -2,7 +2,7 @@ import Image from "next/image";
 
 function MakeFriends() {
   return (
-    <div className="max-w-3xl xl:max-w-7xl  mx-auto mb-28 lg:flex flex-row-reverse gap-4 xl:gap-24 items-center justify-center flex-wrap-reverse">
+    <div className="max-w-3xl xl:max-w-7xl  mx-auto mb-16 lg:mb-28 lg:flex flex-row-reverse gap-4 xl:gap-24 items-center justify-center flex-wrap-reverse">
       <div className="flex-1 max-w-[700px] relative rounded-3xl bg-re d-100 z-50 aspect-video lg:ms-0 ms-2">
         <Image
           src="/assets/Groupchat.png"

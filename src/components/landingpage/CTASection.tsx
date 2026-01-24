@@ -9,7 +9,7 @@ function CTASection() {
   return (
     <section className="py-8 sm:py-16 px-4 sm:px-6">
       <div className="container mx-auto text-center">
-        <div className="max-w-4xl mx-auto p-6 sm:p-12 mb-[150px] lg:mb-0">
+        <div className="max-w-4xl mx-auto p-6 sm:p-12 mb-16 lg:mb-0">
           <h2 className="text-2xl sm:text-4xl font-semibold font-poppins mb-4 sm:mb-2">
             Ready to transform your learning journey?
           </h2>

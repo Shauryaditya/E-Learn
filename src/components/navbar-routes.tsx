@@ -26,7 +26,7 @@ export const NavbarRoutes = () => {
   const isSearchPage = pathname === "/search";
 
   const handleSignOut = async () => {
-    await signOut();
+    await signOut(() => router.push("/"));
   };
 
   return (
