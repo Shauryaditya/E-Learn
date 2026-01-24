@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs";
+import { auth, clerkClient } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { GoalsManagement } from "./_components/goals-management";
@@ -36,6 +36,32 @@ const CourseGoalsPage = async ({
         },
     });
 
+    const studentIds = enrolledStudents.map((s) => s.userId);
+    let studentsWithDetails: any[] = [];
+
+    if (studentIds.length > 0) {
+        try {
+            const users = await clerkClient.users.getUserList({
+                userId: studentIds,
+                limit: 100,
+            });
+
+            studentsWithDetails = users.map((user) => ({
+                id: user.id,
+                name: user.firstName ? `${user.firstName} ${user.lastName || ""}` : user.username || "Unknown",
+                email: user.emailAddresses?.[0]?.emailAddress || "No email",
+            }));
+        } catch (error) {
+            console.error("Failed to fetch students from Clerk:", error);
+            // Fallback to IDs if Clerk fetch fails
+            studentsWithDetails = studentIds.map(id => ({
+                id,
+                name: `Student`,
+                email: id
+            }));
+        }
+    }
+
     // Fetch existing goals
     const goals = await db.goal.findMany({
         where: {
@@ -61,7 +87,7 @@ const CourseGoalsPage = async ({
 
             <GoalsManagement
                 courseId={params.courseId}
-                enrolledStudents={enrolledStudents.map((s) => s.userId)}
+                enrolledStudents={studentsWithDetails}
                 initialGoals={goals}
             />
         </div>

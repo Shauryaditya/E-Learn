@@ -25,9 +25,15 @@ interface Goal {
     teacherId: string;
 }
 
+interface Student {
+    id: string;
+    name: string;
+    email: string;
+}
+
 interface GoalFormProps {
     courseId: string;
-    enrolledStudents: string[];
+    enrolledStudents: Student[];
     existingGoal?: Goal;
     onSuccess: (goal: Goal) => void;
     onCancel: () => void;
@@ -101,9 +107,9 @@ export const GoalForm = ({
                             <SelectValue placeholder="Select a student" />
                         </SelectTrigger>
                         <SelectContent>
-                            {enrolledStudents.map((studentId) => (
-                                <SelectItem key={studentId} value={studentId}>
-                                    {studentId.slice(0, 16)}...
+                            {enrolledStudents.map((student) => (
+                                <SelectItem key={student.id} value={student.id}>
+                                    {student.name} ({student.email})
                                 </SelectItem>
                             ))}
                         </SelectContent>

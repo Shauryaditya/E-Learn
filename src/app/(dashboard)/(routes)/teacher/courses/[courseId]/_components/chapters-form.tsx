@@ -85,7 +85,7 @@ export const ChaptersForm = ({
     router.push(`/teacher/courses/${courseId}/chapters/${id}`)
   }
   return (
-    <div className="relative w-full mt-6 border bg-slate-100 rounded-md p-4">
+    <div className="relative w-full mt-6 border bg-slate-100 dark:bg-slate-800 rounded-md p-4">
       {isUpdating && (
         <div className="absolute h-full w-full bg-slate-500/20 top-0 right-0 rounded-m flex items-center justify-center">
           <Loader2 className="animate-spin w-6 h-6 text-sky-700"/>

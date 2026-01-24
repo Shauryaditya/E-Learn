@@ -57,7 +57,7 @@ export const AttachmentForm = ({
   }
 
   return (
-    <div className="mt-6 border bg-slate-100 rounded-md p-4">
+    <div className="mt-6 border bg-slate-100 dark:bg-slate-800 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
         Course Attachments
         <Button onClick={toggleEdit} variant="ghost">

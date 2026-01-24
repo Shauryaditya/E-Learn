@@ -76,7 +76,7 @@ export const CategoryForm = ({
   const safeOptions = options ?? [];
 
   return (
-    <div className="mt-6 border bg-slate-100 rounded-md p-4">
+    <div className="mt-6 border bg-slate-100 dark:bg-slate-800 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
         Course category
         <Button onClick={toggleEdit} variant="ghost">

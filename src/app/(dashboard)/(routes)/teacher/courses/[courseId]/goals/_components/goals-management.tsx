@@ -23,9 +23,15 @@ interface Goal {
     teacherId: string;
 }
 
+interface Student {
+    id: string;
+    name: string;
+    email: string;
+}
+
 interface GoalsManagementProps {
     courseId: string;
-    enrolledStudents: string[];
+    enrolledStudents: Student[];
     initialGoals: Goal[];
 }
 
@@ -72,6 +78,11 @@ export const GoalsManagement = ({
         });
     };
 
+    const getStudentName = (studentId: string) => {
+        const student = enrolledStudents.find(s => s.id === studentId);
+        return student ? student.name : `Student ${studentId.slice(0, 8)}...`;
+    };
+
     return (
         <div className="space-y-6">
             {/* Header with Create Button */}
@@ -108,7 +119,7 @@ export const GoalsManagement = ({
                                     )}
                                     <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
                                         <span>Due: {formatDate(goal.dueDate)}</span>
-                                        <span>Student ID: {goal.studentId.slice(0, 8)}...</span>
+                                        <span>Student: {getStudentName(goal.studentId)}</span>
                                         <span
                                             className={`px-2 py-1 rounded ${goal.isCompleted
                                                     ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"

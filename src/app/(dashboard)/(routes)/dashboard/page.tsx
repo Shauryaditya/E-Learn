@@ -16,31 +16,36 @@ const StudentDashboard = async () => {
         return redirect("/");
     }
 
-    // Fetch all goals for the logged-in student
-    const goals = await db.goal.findMany({
-        where: {
-            studentId: userId,
-        },
-        include: {
-            course: {
-                select: {
-                    id: true,
-                    title: true,
-                    imageUrl: true,
+    let goals: any = [];
+    try {
+        // Fetch all goals for the logged-in student
+        goals = await db.goal.findMany({
+            where: {
+                studentId: userId,
+            },
+            include: {
+                course: {
+                    select: {
+                        id: true,
+                        title: true,
+                        imageUrl: true,
+                    },
+                },
+                testSeries: {
+                    select: {
+                        id: true,
+                        title: true,
+                        imageUrl: true,
+                    },
                 },
             },
-            testSeries: {
-                select: {
-                    id: true,
-                    title: true,
-                    imageUrl: true,
-                },
+            orderBy: {
+                dueDate: "asc",
             },
-        },
-        orderBy: {
-            dueDate: "asc",
-        },
-    }); 
+        });
+    } catch (error) {
+        console.log("Failed to fetch goals:", error);
+    }
 
     const { completedCourses, coursesInProgress } = await getDashboardCourses(userId);
 
