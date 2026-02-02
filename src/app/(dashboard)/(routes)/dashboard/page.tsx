@@ -1,3 +1,4 @@
+import { PushNotificationManager } from "@/components/pwa/push-notification-manager";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
@@ -62,6 +63,9 @@ const StudentDashboard = async () => {
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
                     Track your learning goals and progress
                 </p>
+                <div className="mt-4">
+                  <PushNotificationManager />
+                </div>
             </div>
 
             {/* Goals Section */}

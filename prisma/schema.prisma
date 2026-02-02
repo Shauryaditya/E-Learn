@@ -401,3 +401,14 @@ model Goal {
   @@index([testSeriesId])
   @@index([dueDate])
 }
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  endpoint  String   @db.Text
+  keys      Json     // Store p256dh and auth keys
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}

@@ -11,6 +11,7 @@ import CTASection from "@/components/landingpage/CTASection";
 import { Sidebar } from "@/app/(dashboard)/_components/sidebar";
 import { Navbar } from "@/app/(dashboard)/_components/navbar";
 import { InfoCard } from "@/app/(dashboard)/(routes)/(root)/_components/info-card";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 
 export default async function Home() {
     const { userId } = auth();
@@ -24,6 +25,7 @@ export default async function Home() {
     // If user is not authenticated, show landing page
     return (
         <div className="min-h-screen">
+            <InstallPrompt />
             <HeroSection />
             <GoalsAndEvents />
             <StudyRoom />

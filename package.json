@@ -30,6 +30,7 @@
     "@react-pdf-viewer/core": "^3.12.0",
     "@react-pdf-viewer/default-layout": "^3.12.0",
     "@tanstack/react-table": "^8.20.5",
+    "@types/web-push": "^3.6.4",
     "@uploadthing/react": "^6.4.1",
     "axios": "^1.6.7",
     "class-variance-authority": "^0.7.0",
@@ -55,6 +56,7 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "uploadthing": "^6.7.0",
+    "web-push": "^3.6.7",
     "zod": "^3.22.4"
   },
   "devDependencies": {
