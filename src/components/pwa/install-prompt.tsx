@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
  
 export function InstallPrompt() {
+  const [isIOS, setIsIOS] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
  
   useEffect(() => {
