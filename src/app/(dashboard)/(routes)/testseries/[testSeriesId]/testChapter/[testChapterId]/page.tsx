@@ -29,6 +29,9 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
       submissions: {
         where: {
           userId,
+        },
+        orderBy: {
+          createdAt: "desc",
         }
       },
       testSeries: {
@@ -148,18 +151,52 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
       <div className="p-4">
         <h2 className="text-lg font-medium mb-4">Submit Answer Sheet</h2>
         {existingSubmission ? (
-          <div className="flex items-center gap-x-2 text-emerald-700 bg-emerald-50 p-3 rounded-md">
-            <CheckCircle className="h-5 w-5" />
-            <div>
+          <div className="flex flex-col gap-y-2 bg-emerald-50 p-3 rounded-md border border-emerald-100">
+            <div className="flex items-center gap-x-2 text-emerald-700">
+              <CheckCircle className="h-5 w-5" />
               <p className="font-medium">Submitted</p>
-              <a
+            </div>
+            
+            <div className="ml-7 flex flex-col gap-1">
+               <a
                 href={existingSubmission.pdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs underline hover:text-emerald-800"
+                className="text-sm underline hover:text-emerald-800 w-fit"
               >
-                View your submission
+                View original submission
               </a>
+
+              {existingSubmission.status === "REVIEWED" && (
+                <div className="mt-2 space-y-2">
+                   {existingSubmission.annotatedPdfUrl && (
+                      <div>
+                        <a
+                          href={existingSubmission.annotatedPdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-semibold text-blue-700 hover:underline flex items-center gap-2"
+                        >
+                          <File className="h-4 w-4" />
+                          View Checked Copy (Annotated)
+                        </a>
+                      </div>
+                   )}
+                   
+                   {existingSubmission.marksAwarded !== null && (
+                      <p className="text-sm text-slate-700">
+                        <strong>Marks Awarded:</strong> {existingSubmission.marksAwarded}
+                      </p>
+                   )}
+
+                   {existingSubmission.feedback && (
+                      <div className="text-sm text-slate-700 bg-white/50 p-2 rounded">
+                        <strong>Feedback:</strong>
+                        <p className="whitespace-pre-wrap mt-1">{existingSubmission.feedback}</p>
+                      </div>
+                   )}
+                </div>
+              )}
             </div>
           </div>
         ) : (

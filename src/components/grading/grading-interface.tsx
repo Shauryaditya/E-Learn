@@ -6,7 +6,8 @@ import { Loader2, Save, Undo, Eraser, Pen, MousePointer2 } from "lucide-react"; 
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import PdfViewer from "./PdfPageRenderer";
+import dynamic from "next/dynamic";
+const PdfViewer = dynamic(() => import("./PdfPageRenderer"), { ssr: false });
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -74,13 +75,53 @@ export const GradingInterface = ({
     // Dynamic Canvas Resizing
     const resizeCanvas = useCallback(() => {
         const container = containerRef.current;
-        const canvas = canvasRef.current;
-        if (!container || !canvas) return;
+        const overlayCanvas = canvasRef.current;
+        if (!container || !overlayCanvas) return;
 
-        const rect = container.getBoundingClientRect();
-        // Match canvas resolution to display size for sharp rendering
-        canvas.width = rect.width;
-        canvas.height = rect.height;
+        // Try to find the specific page element rendered by @react-pdf-viewer
+        // It often uses a class like 'rpv-core__page-layer' or just the canvas/svg inside
+        // Since we want the *current* page, we might need to be specific if multiple are in DOM (though usually virtualized)
+        
+        // Strategy: specific selector for the library's page container
+        // Note: The library renders pages with data-testid="core__page-layer" or class "rpv-core__page-layer"
+        // We need the one corresponding to the current page if possible, or just the visible one.
+        // Given we are mostly single-page view or scrolling, the "visible" one is significant.
+        
+        let targetElement = container.querySelector('.rpv-core__page-layer') as HTMLElement;
+        
+        // Fallback: search for canvas that is not our overlay
+        if (!targetElement) {
+             const canvases = container.querySelectorAll('canvas');
+             for (let i = 0; i < canvases.length; i++) {
+                 if (canvases[i] !== overlayCanvas) {
+                     targetElement = canvases[i] as HTMLElement;
+                     break;
+                 }
+             }
+        }
+
+        if (targetElement) {
+            const rect = targetElement.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+
+            // Calculate position relative to container
+            const top = rect.top - containerRect.top;
+            const left = rect.left - containerRect.left;
+
+            overlayCanvas.style.top = `${top}px`;
+            overlayCanvas.style.left = `${left}px`;
+            overlayCanvas.width = rect.width;
+            overlayCanvas.height = rect.height;
+            overlayCanvas.style.width = `${rect.width}px`;
+            overlayCanvas.style.height = `${rect.height}px`;
+        } else {
+             // Fallback to container fit if not ready (keeps it usable at least)
+            const rect = container.getBoundingClientRect();
+            overlayCanvas.style.top = '0px';
+            overlayCanvas.style.left = '0px';
+            overlayCanvas.width = rect.width;
+            overlayCanvas.height = rect.height;
+        }
         
         // Trigger re-render of paths
         renderPaths();
@@ -236,23 +277,32 @@ export const GradingInterface = ({
             let finalPdfUrl = submission.annotatedPdfUrl;
 
             // Only process if we have new paths
+            console.log("handleSave called. Paths:", paths.length, paths);
             if (paths.length > 0) {
                 toast.loading("Processing PDF annotations...");
 
-                // 1. Fetch original PDF
-                const existingPdfBytes = await fetch(submission.pdfUrl).then(res => res.arrayBuffer());
+                // 1. Fetch original PDF (or the latest annotated version if it exists)
+                const pdfSource = submission.annotatedPdfUrl || submission.pdfUrl;
+                console.log("Fetching PDF from:", pdfSource);
+                const existingPdfBytes = await fetch(pdfSource).then(res => res.arrayBuffer());
+                console.log("PDF fetched, bytes:", existingPdfBytes.byteLength);
 
                 // 2. Load into pdf-lib
                 const pdfDoc = await PDFDocument.load(existingPdfBytes);
                 const pages = pdfDoc.getPages();
+                console.log("PDF loaded, pages:", pages.length);
 
                 // 3. Draw paths
-                paths.forEach(pathOp => {
+                paths.forEach((pathOp, idx) => {
                     const pageIndex = pathOp.page - 1;
-                    if (pageIndex < 0 || pageIndex >= pages.length) return;
+                    if (pageIndex < 0 || pageIndex >= pages.length) {
+                        console.warn("Skipping path on invalid page index:", pageIndex);
+                        return;
+                    }
 
                     const page = pages[pageIndex];
                     const { width, height } = page.getSize();
+                    console.log(`Drawing path ${idx} on page ${pageIndex + 1}. Page size: ${width}x${height}`);
 
                     // Map 0..1 coordinates to PDF Page dimensions
                     const points = pathOp.points.map(p => ({
@@ -266,48 +316,38 @@ export const GradingInterface = ({
                          const g = parseInt(pathOp.color.slice(3, 5), 16) / 255;
                          const b = parseInt(pathOp.color.slice(5, 7), 16) / 255;
 
-                         // Draw path as a sequence of lines (pdf-lib doesn't have a single 'path' stroke easy api for raw points without SVG path)
-                         // But we can construct a SVG path or just draw lines. 
-                         // Drawing individual lines is safer for arbitrary points.
-                         // Optimization: Create a SVG path string? 
-                         // pdf-lib `drawSvgPath` is strict. `drawLine` is robust.
-                         
-                         // We can iterate.
-                        //  page.drawLine({
-                        //      start: points[0],
-                        //      end: points[1],
-                        //      ...
-                        //  })
-                        
-                        // NOTE: Drawing thousands of tiny lines is slow.
-                        // Ideally we construct a SVG path. 
-                        // M x y L x y ...
-                        
-                        let svgPath = `M ${points[0].x} ${points[0].y}`;
-                        for (let i = 1; i < points.length; i++) {
-                             svgPath += ` L ${points[i].x} ${points[i].y}`;
-                        }
-                        
-                        page.drawSvgPath(svgPath, {
-                            borderColor: rgb(r, g, b),
-                            borderWidth: pathOp.width,
-                            borderOpacity: 1,
-                        });
+                          // Draw lines explicitly
+                         for (let i = 0; i < points.length - 1; i++) {
+                             page.drawLine({
+                                 start: points[i],
+                                 end: points[i + 1],
+                                 color: rgb(r, g, b),
+                                 thickness: pathOp.width,
+                                 opacity: 1,
+                             });
+                         }
                     }
                 });
 
                 // 4. Save and Upload
                 const pdfBytes = await pdfDoc.save();
+                console.log("Modified PDF saved, bytes:", pdfBytes.byteLength);
+                
                 const blob = new Blob([pdfBytes as any], { type: "application/pdf" });
                 const file = new File([blob], `graded-${submission.id}.pdf`, { type: "application/pdf" });
 
                 const uploadRes = await startUpload([file]);
+                console.log("Upload response:", uploadRes);
+
                 if (!uploadRes || !uploadRes[0]) {
                     throw new Error("Upload failed");
                 }
 
                 finalPdfUrl = uploadRes[0].url;
+                console.log("Final PDF URL:", finalPdfUrl);
                 toast.success("Annotations burned to PDF!");
+            } else {
+                console.log("No new paths to save.");
             }
 
             // Update Database
@@ -419,10 +459,10 @@ export const GradingInterface = ({
                         
                         <div className="relative">
                             <PdfViewer
-                                key={pageNumber} // Re-mount on page change to ensure clean render
-                                fileUrl={submission.pdfUrl}
+                                fileUrl={submission.annotatedPdfUrl || submission.pdfUrl}
                                 pageNumber={pageNumber}
                                 onLoad={({ numPages }: any) => { setNumPages(numPages); resizeCanvas(); }}
+                                onPageChange={setPageNumber}
                             />
                             
                             {/* Overlay Canvas */}
