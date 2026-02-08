@@ -23,7 +23,7 @@ async function main() {
   } catch (e) {
       console.error(e);
       const outputPath = path.resolve(__dirname, "..", "debug_output.json");
-      fs.writeFileSync(outputPath, JSON.stringify({ error: e.toString() }));
+      fs.writeFileSync(outputPath, JSON.stringify({ error: (e as any).toString() }));
   }
 }
 

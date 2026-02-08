@@ -1,0 +1,1 @@
+scripts/debug_submission.ts(26,60): error TS18046: 'e' is of type 'unknown'.

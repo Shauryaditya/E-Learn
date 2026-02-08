@@ -10,7 +10,7 @@ const withPWA = withPWAInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: 'standalone',
-    swcMinify: false,
+
     images: {
         domains: ["utfs.io"]
     },
