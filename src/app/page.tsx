@@ -6,6 +6,7 @@ import HeroSection from "@/components/landingpage/HeroSection";
 import GoalsAndEvents from "@/components/landingpage/GoalsAndEvents";
 import StudyRoom from "@/components/landingpage/StudyRoom";
 import MakeFriends from "@/components/landingpage/MakeFriends";
+import AnswerAnalysis from "@/components/landingpage/AnswerAnalysis";
 import CTASection from "@/components/landingpage/CTASection";
 
 import { Sidebar } from "@/app/(dashboard)/_components/sidebar";
@@ -30,6 +31,7 @@ export default async function Home() {
             <GoalsAndEvents />
             <StudyRoom />
             <MakeFriends />
+            <AnswerAnalysis />
             <CTASection />
         </div>
     );

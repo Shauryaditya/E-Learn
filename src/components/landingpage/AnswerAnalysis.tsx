@@ -1,12 +1,12 @@
 import Image from "next/image";
 
-function GoalsAndEvents() {
+function AnswerAnalysis() {
   return (
     <div className="max-w-3xl xl:max-w-7xl mx-auto mb-8 sm:mb-12 lg:mb-16 px-4 sm:px-0 flex flex-col lg:flex-row gap-6 sm:gap-8 xl:gap-24 items-center justify-center">
       <div className="flex-1 max-w-[600px] relative w-full">
         <Image
           src="/assets/TestSeries.png"
-          alt="Goals"
+          alt="Answer Analysis"
           width={0}
           height={0}
           sizes="100vw"
@@ -19,10 +19,10 @@ function GoalsAndEvents() {
         />
       </div>
       <h1 className="flex-1 max-w-[400px] text-balance text-xl sm:text-2xl xl:text-3xl font-poppins font-thin leading-[1.5] min-h-[calc(1.5em*4)] text-center xl:text-left">
-        Set achievable goals and track important academic events seamlessly.
+        Get your boards answer scripts digitally evaluated
       </h1>
     </div>
   );
 }
 
-export default GoalsAndEvents;
+export default AnswerAnalysis;
