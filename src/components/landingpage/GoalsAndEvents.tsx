@@ -3,7 +3,7 @@ import Image from "next/image";
 function GoalsAndEvents() {
   return (
     <div className="max-w-3xl xl:max-w-7xl mx-auto mb-8 sm:mb-12 lg:mb-16 px-4 sm:px-0 flex flex-col lg:flex-row gap-6 sm:gap-8 xl:gap-24 items-center justify-center">
-      <div className="flex-1 max-w-[600px] relative w-full">
+      <div className="flex-1 max-w-[600px] relative w-full -mt-10">
         <Image
           src="/assets/TestSeries.png"
           alt="Goals"
