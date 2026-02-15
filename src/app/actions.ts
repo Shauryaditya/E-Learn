@@ -4,11 +4,20 @@ import webpush from 'web-push'
 import { auth } from '@clerk/nextjs'
 import { db } from '@/lib/db' 
  
-webpush.setVapidDetails(
-  'mailto:example@yourdomain.org',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-)
+const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+
+if (vapidPublicKey && vapidPrivateKey) {
+  try {
+    webpush.setVapidDetails(
+      'mailto:example@yourdomain.org',
+      vapidPublicKey,
+      vapidPrivateKey
+    );
+  } catch (error) {
+    console.error("Failed to set VAPID details:", error);
+  }
+}
  
 export async function subscribeUser(sub: any) {
   const { userId } = auth()

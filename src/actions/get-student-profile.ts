@@ -9,11 +9,16 @@ export const getStudentProfile = async () => {
     return null;
   }
 
-  const profile = await db.studentProfile.findUnique({
-    where: {
-      userId,
-    },
-  });
+  try {
+    const profile = await db.studentProfile.findUnique({
+      where: {
+        userId,
+      },
+    });
 
-  return profile;
+    return profile;
+  } catch (error) {
+    console.log("[GET_STUDENT_PROFILE]", error);
+    return null;
+  }
 };
