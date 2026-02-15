@@ -1,7 +1,8 @@
-
 import { NextResponse } from "next/server";
 import { model } from "@/lib/gemini";
 import { db } from "@/lib/db";
+
+export const maxDuration = 60; // 5 minutes (max for pro) or 60s for hobby. setting to 60s to be safe.
 
 export async function POST(req: Request) {
   try {

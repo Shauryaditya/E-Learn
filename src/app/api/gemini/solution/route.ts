@@ -1,6 +1,7 @@
-
 import { NextResponse } from "next/server";
 import { model } from "@/lib/gemini";
+
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
