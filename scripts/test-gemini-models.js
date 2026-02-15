@@ -1,24 +1,22 @@
-
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-// require('dotenv').config({ path: '.env' });
 
-const API_KEY = "AIzaSyC_X6OjCShKfT6g_E9EsQ_sNfy1lLSuLQM"; // Hardcoded for testing
+// This script requires the `GOOGLE_API_KEY` environment variable to be set.
+// Usage: node --env-file=.env scripts/test-gemini-models.js
+// OR: Set it in your terminal: $env:GOOGLE_API_KEY="your-api-key"; node scripts/test-gemini-models.js
+
+const API_KEY = process.env.GOOGLE_API_KEY;
+
+if (!API_KEY) {
+  console.error("Error: GOOGLE_API_KEY environment variable is not set.");
+  console.error("Please create a .env file with GOOGLE_API_KEY=... or set usage environment variable.");
+  process.exit(1);
+}
 
 async function listModels() {
-  const genAI = new GoogleGenerativeAI(API_KEY);
   try {
       console.log("Listing models...");
-      const modelList = await genAI.getGenerativeModel({ model: "gemini-pro" }).apiKey; 
-      // Actually accessing the model list requires a different call usually, 
-      // but let's try to just generate content with a known model to see if key works, 
-      // OR use the correct listModels endpoint if exposed by SDK.
       
-      // better way with current SDK:
-      // The SDK doesn't always expose listModels directly in the main class in all versions.
-      // Let's try to just hit the API with a simple fetch.
-      
-      const key = API_KEY;
-      const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
       
       const response = await fetch(url);
       const data = await response.json();
