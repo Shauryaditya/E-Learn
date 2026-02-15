@@ -47,7 +47,7 @@ const formSchema = z.object({
 });
 
 const GRADES = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12"];
-const BOARDS = ["CBSE", "ICSE", "State Board", "IB", "IGCSE"];
+const BOARDS = ["CBSE", "ICSE", "ISC", "State Board", "IB", "IGCSE"];
 const SUBJECTS = [
   "Mathematics",
   "Physics",
@@ -105,7 +105,7 @@ export const StudentOnboardingModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-[500px]" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Welcome! Let&apos;s setup your profile.</DialogTitle>
           <DialogDescription>
