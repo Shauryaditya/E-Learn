@@ -35,3 +35,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# backups
+.env.backup
+.env.production.local
+.env.development.local
+.env.test.local
+
+# maps
+*.map
