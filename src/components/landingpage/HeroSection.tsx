@@ -65,22 +65,33 @@ const profiles: Profile[] = [
 ];
 
 function FloatingProfile({ profile, delay = 0, area = "bottom" }: { profile: Profile; delay?: number; area?: "left" | "right" | "bottom" }) {
-  // Generate position based on fixed area
+  // deterministic random generator
+  const seededRandom = (seed: number) => {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+  };
+
+  // Generate position based on fixed area using deterministic random
   const generatePositionByArea = () => {
+    const s1 = seededRandom(profile.id * 100);
+    const s2 = seededRandom(profile.id * 200);
+    
     switch (area) {
       case "left":
-        return { x: Math.random() * 15 + 5, y: Math.random() * 60 + 20 }; // Left edge
+        return { x: s1 * 15 + 5, y: s2 * 60 + 20 }; // Left edge
       case "right":
-        return { x: Math.random() * 15 + 80, y: Math.random() * 60 + 20 }; // Right edge
+        return { x: s1 * 15 + 80, y: s2 * 60 + 20 }; // Right edge
       case "bottom":
       default:
-        return { x: Math.random() * 70 + 15, y: Math.random() * 15 + 80 }; // Bottom edge
+        return { x: s1 * 70 + 15, y: s2 * 15 + 80 }; // Bottom edge
     }
   };
 
   const [basePosition] = useState(generatePositionByArea());
-  const waveSpeed = 5000 + Math.random() * 3000; // 5-8 seconds per wave
-  const waveAmplitude = 4 + Math.random() * 3; // 4-7% amplitude
+  
+  // Use seeded random for animation values too
+  const waveSpeed = 5000 + seededRandom(profile.id * 300) * 3000; // 5-8 seconds per wave
+  const waveAmplitude = 4 + seededRandom(profile.id * 400) * 3; // 4-7% amplitude
 
   return (
     <motion.div

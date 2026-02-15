@@ -14,11 +14,8 @@ const nextConfig = {
     images: {
         domains: ["utfs.io"]
     },
-    webpack: (config, { isServer }) => {
-        if (isServer) {
-            config.externals = [...(config.externals || []), "canvas"];
-        }
-        config.resolve.fallback = { canvas: false };
+    webpack: (config) => {
+        config.resolve.alias.canvas = false;
         return config;
     }
 };

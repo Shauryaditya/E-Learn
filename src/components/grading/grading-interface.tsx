@@ -73,6 +73,36 @@ export const GradingInterface = ({
     const { startUpload } = useUploadThing("testSubmission");
 
     // Dynamic Canvas Resizing
+    const renderPaths = useCallback(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const pagePaths = paths.filter(p => p.page === pageNumber);
+
+        pagePaths.forEach(pathData => {
+            if (pathData.points.length < 2) return;
+
+            ctx.beginPath();
+            const start = denormalize(pathData.points[0], canvas.width, canvas.height);
+            ctx.moveTo(start.x, start.y);
+
+            for (let i = 1; i < pathData.points.length; i++) {
+                const p = denormalize(pathData.points[i], canvas.width, canvas.height);
+                ctx.lineTo(p.x, p.y);
+            }
+            
+            ctx.strokeStyle = pathData.color;
+            ctx.lineWidth = pathData.width;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.stroke();
+        });
+    }, [paths, pageNumber]);
+
     const resizeCanvas = useCallback(() => {
         const container = containerRef.current;
         const overlayCanvas = canvasRef.current;
@@ -125,7 +155,7 @@ export const GradingInterface = ({
         
         // Trigger re-render of paths
         renderPaths();
-    }, [pageNumber, paths]); // Re-bind if dependencies change, though renderPaths handles most
+    }, [renderPaths]); // Re-bind if dependencies change, though renderPaths handles most
 
     useEffect(() => {
         window.addEventListener("resize", resizeCanvas);
@@ -137,10 +167,9 @@ export const GradingInterface = ({
         };
     }, [resizeCanvas]);
 
-    // Force resize when page changes
     useEffect(() => {
         resizeCanvas();
-    }, [pageNumber]);
+    }, [pageNumber, resizeCanvas]);
 
     // Helper: Normalize coordinates (Screen -> 0..1)
     const getNormalizedPoint = (e: React.MouseEvent<HTMLCanvasElement>): Point => {
@@ -211,40 +240,11 @@ export const GradingInterface = ({
         setCurrentPoints([]);
     };
 
-    const renderPaths = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return;
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const pagePaths = paths.filter(p => p.page === pageNumber);
-
-        pagePaths.forEach(pathData => {
-            if (pathData.points.length < 2) return;
-
-            ctx.beginPath();
-            const start = denormalize(pathData.points[0], canvas.width, canvas.height);
-            ctx.moveTo(start.x, start.y);
-
-            for (let i = 1; i < pathData.points.length; i++) {
-                const p = denormalize(pathData.points[i], canvas.width, canvas.height);
-                ctx.lineTo(p.x, p.y);
-            }
-            
-            ctx.strokeStyle = pathData.color;
-            ctx.lineWidth = pathData.width;
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            ctx.stroke();
-        });
-    };
 
     // Re-render when paths or page changes
     useEffect(() => {
         renderPaths();
-    }, [paths, pageNumber]);
+    }, [paths, pageNumber, renderPaths]);
 
 
     // Undo last stroke on current page

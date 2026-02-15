@@ -2,12 +2,13 @@ import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-
 import { Banner } from "@/components/banner";
 import { Separator } from "@/components/ui/separator";
 import { Preview } from "@/components/preview";
 import DocumentPreview from "@/components/document-preview";
 import { VideoPlayer } from "./_components/video-player";
+import { QuizGeneratorModal } from "@/components/modals/quiz-generator-modal";
+import { SolutionModal } from "@/components/modals/solution-modal";
 
 type PageProps = {
   params: { courseId: string; chapterId: string };
@@ -32,8 +33,6 @@ export default async function CourseChapterPage({ params }: PageProps) {
       muxData: true,
     },
   });
-
-  console.log("Chapter data:", chapter);
 
   if (!chapter || chapter.course.id !== params.courseId) {
     redirect("/");
@@ -61,6 +60,10 @@ export default async function CourseChapterPage({ params }: PageProps) {
           </p>
           <h1 className="text-2xl font-semibold">{chapter.title}</h1>
         </div>
+        {/* AI Quiz Generator for Students */}
+        {!isLocked && (
+             <QuizGeneratorModal chapterId={chapter.id} courseId={chapter.course.id} />
+        )}
       </div>
 
       {/* Informational banners */}
@@ -115,12 +118,17 @@ export default async function CourseChapterPage({ params }: PageProps) {
                   className={`bg-white w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition ${isLocked ? "blur-sm select-none pointer-events-none" : ""
                     }`}
                 >
-                  {/* Optional name/label above the preview */}
-                  {attachment.name && (
-                    <div className="mb-2 text-sm font-medium text-gray-800">
-                      {attachment.name}
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between mb-2">
+                    {/* Optional name/label above the preview */}
+                     <div className="text-sm font-medium text-gray-800">
+                        {attachment.name || "Attachment"}
+                     </div>
+                     
+                     {/* AI Solution Generator */}
+                     {!isLocked && attachment.url.endsWith(".pdf") && (
+                         <SolutionModal fileUrl={attachment.url} />
+                     )}
+                  </div>
 
                   {/* Preview the document */}
                   <DocumentPreview fileUrl={attachment.url} />

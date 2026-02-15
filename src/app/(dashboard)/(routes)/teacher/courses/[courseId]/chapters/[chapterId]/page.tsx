@@ -15,6 +15,7 @@ import { Banner } from "@/components/banner";
 import { ChapterActions } from "./_components/chapter-actions";
 import { ChapterAttachmentForm } from "./_components/chapter-attachment-form";
 import { ChapterVideoLink } from "./_components/chapter-video-link-form";
+import { QuizGeneratorModal } from "@/components/modals/quiz-generator-modal";
 
 const ChapterIdPage = async ({
   params,
@@ -80,6 +81,7 @@ const ChapterIdPage = async ({
                 chapterId={params.chapterId}
                 isPublished={chapter.isPublished}
             />
+            <QuizGeneratorModal chapterId={params.chapterId} courseId={params.courseId} />
           </div>
         </div>
       </div>

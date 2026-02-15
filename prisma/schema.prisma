@@ -402,6 +402,7 @@ model Goal {
   @@index([dueDate])
 }
 
+
 model PushSubscription {
   id        String   @id @default(uuid())
   userId    String
@@ -411,4 +412,54 @@ model PushSubscription {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model StudentProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  name      String?
+  grade     String?
+  board     String?
+  subjects  String[]
+  targetExam String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Resource {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  url         String   @db.Text
+  
+  category    ResourceCategory @default(BOARD)
+  type        ResourceType     @default(PAST_PAPER)
+  
+  subject     String
+  grade       String?  // e.g., "Class 10", "Class 12"
+  year        Int?
+  
+  isPaid      Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([subject])
+  @@index([grade])
+}
+
+enum ResourceCategory {
+  BOARD
+  JEE_MAINS
+  JEE_ADVANCED
+  NEET
+  OTHER
+}
+
+enum ResourceType {
+  PAST_PAPER
+  SAMPLE_PAPER
+  NOTES
 }

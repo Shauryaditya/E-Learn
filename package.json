@@ -12,6 +12,7 @@
   "dependencies": {
     "@clerk/nextjs": "^4.29.7",
     "@ducanh2912/next-pwa": "^10.2.9",
+    "@google/generative-ai": "^0.24.1",
     "@hello-pangea/dnd": "^16.6.0",
     "@hookform/resolvers": "^3.3.4",
     "@mux/mux-node": "^8.8.0",
@@ -27,6 +28,7 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@react-pdf-viewer/core": "^3.12.0",
     "@react-pdf-viewer/default-layout": "^3.12.0",
     "@tanstack/react-table": "^8.20.5",

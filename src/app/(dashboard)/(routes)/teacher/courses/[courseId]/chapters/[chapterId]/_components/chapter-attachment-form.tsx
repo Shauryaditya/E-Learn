@@ -11,6 +11,7 @@ import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { FileUpload } from "@/components/file-upload";
+import { SolutionModal } from "@/components/modals/solution-modal";
 
 interface ChapterAttachmentFormProps {
   initialData: Chapter & { attachments: Attachment[] };
@@ -90,6 +91,8 @@ export const ChapterAttachmentForm = ({
                 >
                   <File className="h-4 w-4 mr-2 flex-shrink-0" />
                   <p className="text-xs line-clamp-1">{attachment.name}</p>
+                  <div className="ml-auto flex items-center gap-x-2">
+                    <SolutionModal fileUrl={attachment.url} />
                   {
                     deletingId === attachment.id && (
                       <div className="">
@@ -100,10 +103,11 @@ export const ChapterAttachmentForm = ({
                   {deletingId !== attachment.id && (
                     <button
                     onClick={() => onDelete(attachment.id)}
-                    className="ml-auto hover:opacity-75 transition">
+                    className="hover:opacity-75 transition">
                       <X className="h-4 w-4" />
                     </button>
                   )}
+                  </div>
                 </div>
               ))}
             </div>
