@@ -39,8 +39,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(profile);
-  } catch (error) {
+  } catch (error: any) {
     console.error("[STUDENT_PROFILE_ERROR]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse(error.message || "Internal Error", { status: 500 });
   }
 }
