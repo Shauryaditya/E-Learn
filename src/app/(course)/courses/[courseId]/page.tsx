@@ -20,6 +20,16 @@ const CourseIdPage = async ({
     where: {
       id: params.courseId,
     },
+    include: {
+      chapters: {
+        where: {
+          isPublished: true,
+        },
+        orderBy: {
+          position: "asc",
+        },
+      },
+    },
   });
 
   if (!course) {
@@ -59,7 +69,17 @@ const CourseIdPage = async ({
                   One-time payment • Lifetime access
                 </p>
               </div>
-              <CourseEnrollButton courseId={course.id} price={course.price} />
+              <div className="flex flex-col gap-y-2 md:flex-row md:gap-x-2">
+                 {course.chapters[0] && (
+                    <a 
+                      href={`/courses/${course.id}/chapters/${course.chapters[0].id}`}
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8 py-2 w-full md:w-auto"
+                    >
+                      Start Learning
+                    </a>
+                 )}
+                <CourseEnrollButton courseId={course.id} price={course.price} />
+              </div>
             </div>
           </div>
         )}
@@ -69,9 +89,18 @@ const CourseIdPage = async ({
             <p className="text-emerald-700 dark:text-emerald-300 font-semibold text-lg">
               ✓ You are enrolled in this course
             </p>
-            <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
+            <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1 mb-4">
               Select a chapter from the sidebar to continue learning
             </p>
+            
+             {course.chapters[0] && (
+                <a 
+                  href={`/courses/${course.id}/chapters/${course.chapters[0].id}`}
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full md:w-auto"
+                >
+                  Start Learning
+                </a>
+             )}
           </div>
         )}
 
