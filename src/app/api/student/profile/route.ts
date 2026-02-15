@@ -8,26 +8,39 @@ export async function POST(req: Request) {
     const { userId } = auth();
     const values = await req.json();
 
+    console.log("[STUDENT_PROFILE_POST] Request values:", values);
+
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+
+    // Filter values to only allowed fields to prevent Prisma "Unknown argument" errors
+    const { name, grade, board, subjects, targetExam } = values;
 
     const profile = await db.studentProfile.upsert({
       where: {
         userId,
       },
       update: {
-        ...values,
+        name,
+        grade,
+        board,
+        subjects,
+        targetExam
       },
       create: {
         userId,
-        ...values,
+        name,
+        grade,
+        board,
+        subjects,
+        targetExam
       },
     });
 
     return NextResponse.json(profile);
   } catch (error) {
-    console.log("[STUDENT_PROFILE]", error);
+    console.error("[STUDENT_PROFILE_ERROR]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
