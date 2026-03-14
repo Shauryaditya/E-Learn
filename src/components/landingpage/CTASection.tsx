@@ -31,14 +31,6 @@ function CTASection() {
               <span>Get Started for Free</span>
             </Button>
 
-            <a
-              href="https://github.com/Shauryaditya/E-Learn"
-              className="w-full sm:w-auto flex items-center justify-center sm:justify-start space-x-3 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg border-2 hover:shadow-lg transform hover:scale-105 transition-all duration-300"
-              style={{ borderColor: "var(--btn)", color: "var(--btn)" }}
-            >
-              <Github size={20} />
-              <span>View on GitHub</span>
-            </a>
           </div>
 
           <div className="mt-6 sm:mt-8 flex justify-center">
@@ -48,15 +40,15 @@ function CTASection() {
             >
               <div className="flex items-center space-x-2">
                 <Check size={16} className="text-green-500" />
-                <span>Free forever</span>
+                <span>Managed by real professionals</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Check size={16} className="text-green-500" />
-                <span>Open source</span>
+                <span>AI Powered</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Check size={16} className="text-green-500" />
-                <span>No credit card required</span>
+                <span>No hidden charges</span>
               </div>
             </div>
           </div>
