@@ -11,6 +11,9 @@ async function main() {
                 { name: "Chemistry" },
                 { name: "Mathematics" },
                 { name: "Biology" },
+                { name: "English" },
+                { name: "History" },
+                { name: "Geography" },
             ]
         })
 
