@@ -84,11 +84,32 @@ model Chapter {
 
   userProgress UserProgress[]
   attachments  Attachment[] // New relation to manage attachments for chapters
+  submissions  ChapterSubmission[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([courseId])
+}
+
+model ChapterSubmission {
+  id            String @id @default(uuid())
+  userId        String
+
+  chapterId     String
+  chapter       Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  images        String[]
+  annotatedImages String[]
+
+  status        SubmissionStatus @default(SUBMITTED)
+  feedback      String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chapterId])
+  @@index([userId])
 }
 
 model MuxData {

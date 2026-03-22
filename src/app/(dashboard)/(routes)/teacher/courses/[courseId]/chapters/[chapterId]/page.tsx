@@ -5,7 +5,8 @@ import React from "react";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Eye, LayoutDashboard, Video } from "lucide-react";
+import { ArrowLeft, Eye, LayoutDashboard, Video, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { IconBadge } from "@/components/icon-badge";
 import { ChapterTitleForm } from "./_components/chapter-title-form";
 import { ChapterDescriptionForm } from "./_components/chapter-description-form";
@@ -137,6 +138,18 @@ const ChapterIdPage = async ({
                 courseId={params.courseId}
                 chapterId={params.chapterId}
               />
+            </div>
+            <div className="">
+              <div className="flex items-center gap-x-2">
+                <IconBadge icon={FileText} />
+                <h2 className="text-xl">Student Submissions</h2>
+              </div>
+              <div className="mt-4 bg-slate-100 border rounded-md p-4">
+                <p className="text-sm text-slate-500 mb-4">View and annotate images submitted by students</p>
+                <Link href={`/teacher/courses/${params.courseId}/chapters/${params.chapterId}/submissions`}>
+                  <Button>View Submissions</Button>
+                </Link>
+              </div>
             </div>
         </div>
       </div>

@@ -42,6 +42,11 @@ export const ourFileRouter = {
         pdf: { maxFileSize: "16MB" },
     })
     .middleware(() => handleAuth())
+    .onUploadComplete(() => {}),
+    chapterSubmission: f({
+        image: { maxFileSize: "16MB", maxFileCount: 15 }
+    })
+    .middleware(() => handleAuth())
     .onUploadComplete(() => {})
 
 } satisfies FileRouter;

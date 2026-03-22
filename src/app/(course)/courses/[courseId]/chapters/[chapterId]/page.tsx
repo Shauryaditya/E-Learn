@@ -9,6 +9,8 @@ import DocumentPreview from "@/components/document-preview";
 import { VideoPlayer } from "./_components/video-player";
 import { QuizGeneratorModal } from "@/components/modals/quiz-generator-modal";
 import { SolutionModal } from "@/components/modals/solution-modal";
+import { ChapterSubmissionForm } from "./_components/chapter-submission-form";
+import { StudentSubmissionsList } from "./_components/student-submissions-list";
 
 type PageProps = {
   params: { courseId: string; chapterId: string };
@@ -44,6 +46,16 @@ export default async function CourseChapterPage({ params }: PageProps) {
   if (!canView) {
     redirect(`/courses/${params.courseId}`);
   }
+
+  const submissions = await db.chapterSubmission.findMany({
+    where: {
+      chapterId: params.chapterId,
+      userId: userId,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   // Lock content for non-buyers (unless chapter is free)
   const isLocked = !chapter.isFree && !purchased;
@@ -137,6 +149,16 @@ export default async function CourseChapterPage({ params }: PageProps) {
             </div>
           </div>
         </>
+      )}
+
+      {/* Chapter Submission Form */}
+      {!isLocked && (
+        <div className="p-4">
+          <Separator className="mb-6" />
+          <ChapterSubmissionForm courseId={params.courseId} chapterId={params.chapterId} />
+          
+          <StudentSubmissionsList submissions={submissions} />
+        </div>
       )}
     </div>
   );
