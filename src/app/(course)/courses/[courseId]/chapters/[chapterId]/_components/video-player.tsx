@@ -26,6 +26,20 @@ export const VideoPlayer = ({
 }: VideoPlayerProps) => {
   const [isReady, setIsReady] = useState(false);
 
+  const getEmbedUrl = (url: string) => {
+    if (!url) return "";
+
+    // already embed
+    if (url.includes("embed")) return url;
+
+    const videoIdMatch =
+      url.match(/v=([^&]+)/) || url.match(/youtu\.be\/([^?]+)/);
+
+    const videoId = videoIdMatch?.[1];
+
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+  };
+
   return (
     <div className="relative aspect-video">
       {!isReady && !isLocked && (
@@ -41,12 +55,9 @@ export const VideoPlayer = ({
       )}
       {!isLocked && (
         <iframe
-          src={videoUrl}
+          src={getEmbedUrl(videoUrl)}
           title={title}
-          className={cn(
-            "w-full h-full border-none",
-            !isReady && "hidden"
-          )}
+          className={cn("w-full h-full border-none", !isReady && "hidden")}
           allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
           onLoad={() => setIsReady(true)}
