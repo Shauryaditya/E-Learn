@@ -1,5 +1,6 @@
 "use client"
 
+import { useClerk } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { CheckCircle, Lock, PlayCircle } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -10,21 +11,32 @@ interface CourseSidebarItemProps {
     isCompleted: boolean;
     courseId: string;
     isLocked: boolean;
+    requiresSignIn?: boolean;
 }
 export const CourseSidebarItem = ({
     label,
     id,
     isCompleted,
     courseId,
-    isLocked
+    isLocked,
+    requiresSignIn = false
 }: CourseSidebarItemProps) => {
     const pathname = usePathname();
     const router = useRouter();
+    const { openSignIn } = useClerk();
 
-    const Icon = isLocked ? Lock : (isCompleted ? CheckCircle : PlayCircle)
+    const Icon = isLocked || requiresSignIn ? Lock : (isCompleted ? CheckCircle : PlayCircle)
     const isActive = pathname?.includes(id);
 
     const onClick = () =>{
+        if (requiresSignIn) {
+            openSignIn({
+                afterSignInUrl: `/courses/${courseId}/chapters/${id}`,
+                afterSignUpUrl: `/courses/${courseId}/chapters/${id}`,
+            });
+            return;
+        }
+
         router.push(`/courses/${courseId}/chapters/${id}`)
     }
 

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { Preview } from "@/components/preview";
 import { CourseEnrollButton } from "./chapters/[chapterId]/_components/course-enroll-button";
+import { AuthPromptButton } from "@/components/auth-prompt-button";
 
 const CourseIdPage = async ({
   params
@@ -11,10 +12,6 @@ const CourseIdPage = async ({
   params: { courseId: string; }
 }) => {
   const { userId } = auth();
-
-  if (!userId) {
-    return redirect("/");
-  }
 
   const course = await db.course.findUnique({
     where: {
@@ -36,14 +33,16 @@ const CourseIdPage = async ({
     return redirect("/");
   }
 
-  const purchase = await db.purchase.findUnique({
-    where: {
-      userId_courseId: {
-        userId,
-        courseId: course.id,
+  const purchase = userId
+    ? await db.purchase.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId: course.id,
+        }
       }
-    }
-  });
+    })
+    : null;
 
   return (
     <div className="p-6">
@@ -63,20 +62,30 @@ const CourseIdPage = async ({
               <div>
                 <h3 className="text-xl font-semibold mb-2">Enroll in this course</h3>
                 <p className="text-3xl font-bold text-sky-700 dark:text-sky-400">
-                  ₹{course.price.toFixed(2)}
+                  INR {course.price.toFixed(2)}
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  One-time payment • Lifetime access
+                  One-time payment. Lifetime access.
                 </p>
               </div>
               <div className="flex flex-col gap-y-2 md:flex-row md:gap-x-2">
                  {course.chapters[0] && (
-                    <a 
-                      href={`/courses/${course.id}/chapters/${course.chapters[0].id}`}
-                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8 py-2 w-full md:w-auto"
-                    >
-                      Start Learning
-                    </a>
+                    userId ? (
+                      <a
+                        href={`/courses/${course.id}/chapters/${course.chapters[0].id}`}
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 px-8 py-2 w-full md:w-auto"
+                      >
+                        Start Learning
+                      </a>
+                    ) : (
+                      <AuthPromptButton
+                        label="Start Learning"
+                        redirectUrl={`/courses/${course.id}/chapters/${course.chapters[0].id}`}
+                        variant="outline"
+                        size="lg"
+                        className="w-full md:w-auto"
+                      />
+                    )
                  )}
                 <CourseEnrollButton courseId={course.id} price={course.price} />
               </div>
@@ -87,7 +96,7 @@ const CourseIdPage = async ({
         {purchase && (
           <div className="border-2 border-emerald-500 rounded-lg p-6 bg-emerald-50 dark:bg-emerald-950">
             <p className="text-emerald-700 dark:text-emerald-300 font-semibold text-lg">
-              ✓ You are enrolled in this course
+              You are enrolled in this course
             </p>
             <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1 mb-4">
               Select a chapter from the sidebar to continue learning
@@ -107,7 +116,7 @@ const CourseIdPage = async ({
         {/* Additional Info */}
         {!purchase && (
           <div className="text-sm text-muted-foreground">
-            <p>💡 Some chapters may be available as free previews. Check the sidebar to see what&apos;s unlocked.</p>
+            <p>Tip: Some chapters may be available as free previews. Check the sidebar to see what&apos;s unlocked.</p>
           </div>
         )}
       </div>

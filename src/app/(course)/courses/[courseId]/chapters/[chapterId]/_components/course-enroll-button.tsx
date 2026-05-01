@@ -6,7 +6,7 @@ import axios from "axios";
 import { useState, useEffect, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 import Script from "next/script";
-import { auth } from "@clerk/nextjs";
+import { useAuth, useClerk } from "@clerk/nextjs";
 
 interface CourseEnrollButtonProps {
   price: number;
@@ -17,8 +17,10 @@ export const CourseEnrollButton = ({
   price,
   courseId,
 }: CourseEnrollButtonProps) => {
+  const { isSignedIn } = useAuth();
+  const { openSignIn } = useClerk();
   const [isLoading, setIsLoading] = useState(false);
-  const [isOrderLoading, setIsOrderLoading] = useState(true);
+  const [isOrderLoading, setIsOrderLoading] = useState(false);
   const orderIdRef = useRef<string | null>(null);
 
   // Create the Razorpay order
@@ -47,6 +49,14 @@ export const CourseEnrollButton = ({
 
   // Trigger payment processing
   const processPayment = async () => {
+    if (!isSignedIn) {
+      openSignIn({
+        afterSignInUrl: `/courses/${courseId}`,
+        afterSignUpUrl: `/courses/${courseId}`,
+      });
+      return;
+    }
+
     const orderId = orderIdRef.current;
 
     if (!orderIdRef.current) {
@@ -104,18 +114,11 @@ export const CourseEnrollButton = ({
     }
   };
 
-  // Fetch order ID on mount
   useEffect(() => {
-    createOrder();
-  }, [createOrder]);
-
-  // Show a loading state until the order is created
-  if (isOrderLoading)
-    return (
-      <div className="container h-screen flex justify-center items-center">
-        <p className="text-lg">Creating order...</p>
-      </div>
-    );
+    if (isSignedIn) {
+      createOrder();
+    }
+  }, [createOrder, isSignedIn]);
 
   return (
     <>
@@ -127,11 +130,17 @@ export const CourseEnrollButton = ({
       />
       <Button
         onClick={processPayment}
-        disabled={isLoading}
+        disabled={isLoading || isOrderLoading}
         size="sm"
         className="w-full md:w-auto"
       >
-        {isLoading ? "Processing..." : `Pay ${formatPrice(price)}`}
+        {!isSignedIn
+          ? "Sign in to enroll"
+          : isOrderLoading
+            ? "Preparing..."
+            : isLoading
+              ? "Processing..."
+              : `Pay ${formatPrice(price)}`}
       </Button>
     </>
   );

@@ -1,5 +1,4 @@
 import { Category, Course } from "@prisma/client";
-import { Item } from "@radix-ui/react-dropdown-menu";
 import { CourseCard } from "@/components/course-card";
 
 type CourseWithProgressWithCategory = Course & {
@@ -15,7 +14,7 @@ interface CourseListProps {
 export const CoursesList = ({ items }: CourseListProps) => {
   return (
     <div className="">
-      <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ">
+      <div className="flex flex-row overflow-x-auto gap-4 py-2">
         {items.map((item) => (
             <CourseCard
             key={item.id}

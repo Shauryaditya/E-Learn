@@ -283,13 +283,13 @@ function HeroSection() {
           learn, collaborate, & grow together.
         </motion.h2>
         <Button
-          onClick={() => navigate.push("/sign-in")}
+          onClick={() => navigate.push("/search")}
           variant="default"
           size="default"
           className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-semibold transition-all transform duration-300 shadow-lg hover:shadow-xl"
           style={{}}
         >
-          Get started
+          Browse courses
         </Button>
       </motion.div>
 

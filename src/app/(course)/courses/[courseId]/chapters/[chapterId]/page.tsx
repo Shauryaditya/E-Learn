@@ -18,7 +18,7 @@ type PageProps = {
 
 export default async function CourseChapterPage({ params }: PageProps) {
   const { userId } = auth();
-  if (!userId) redirect("/");
+  if (!userId) redirect(`/courses/${params.courseId}`);
 
   // Load chapter + parent course + attachments
   const chapter = await db.chapter.findUnique({

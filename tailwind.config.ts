@@ -33,6 +33,16 @@ const config = withUt({
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
+        tertiary: {
+          DEFAULT: "hsl(var(--tertiary))",
+          foreground: "hsl(var(--tertiary-foreground))",
+        },
+        brand: {
+          navy: "#0F172A",
+          primary: "#3B82F6",
+          secondary: "#06B6D4",
+          tertiary: "#F8FAFC",
+        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",

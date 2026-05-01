@@ -1,6 +1,6 @@
 "use client";
 
-import { UserButton, useAuth, useClerk } from "@clerk/nextjs";
+import { useAuth, useClerk } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { LogOut } from "lucide-react";
@@ -15,7 +15,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 
 export const NavbarRoutes = () => {
   const { userId } = useAuth();
-  const { signOut } = useClerk();
+  const { signOut, openSignIn } = useClerk();
   const router = useRouter();
   console.log("userId", userId);
   const pathname = usePathname();
@@ -50,15 +50,21 @@ export const NavbarRoutes = () => {
             <Button>Teacher Mode</Button>
           </Link>
         ) : null}
-        <Button
-          onClick={handleSignOut}
-          variant="ghost"
-          size="sm"
-          className="text-gray-700 hover:text-gray-900"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign Out
-        </Button>
+        {userId ? (
+          <Button
+            onClick={handleSignOut}
+            variant="ghost"
+            size="sm"
+            className="text-gray-700 hover:text-gray-900"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
+        ) : (
+          <Button onClick={() => openSignIn()} variant="ghost" size="sm">
+            Sign In
+          </Button>
+        )}
       </div>
     </>
   );
