@@ -9,15 +9,15 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: 'standalone',
-
-    images: {
-        domains: ["utfs.io"]
-    },
-    webpack: (config) => {
-        config.resolve.alias.canvas = false;
-        return config;
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        canvas: false,
+      };
     }
+    return config;
+  },
 };
 
 export default withPWA(nextConfig);

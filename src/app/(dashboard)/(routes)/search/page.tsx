@@ -5,6 +5,7 @@ import { getCourses } from "@/actions/get-courses"
 import { auth } from "@clerk/nextjs"
 import { CoursesList } from "@/components/courses-list"
 import { ActiveCoursesCard } from "./_components/active-courses-card"
+import { CollectionCard } from "./_components/collection-card"
 
 interface SearchPageProps {
   searchParams: {
@@ -61,7 +62,9 @@ const SearchPage = async ({
             chaptersLength={activeCourse.chapters.length}
           />
         )}
+   
         <CoursesList items={courses} />
+        <CollectionCard />
       </div>
     </>
   )

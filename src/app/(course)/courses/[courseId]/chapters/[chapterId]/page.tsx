@@ -133,7 +133,7 @@ export default async function CourseChapterPage({ params }: PageProps) {
                   <div className="flex items-center justify-between mb-2">
                     {/* Optional name/label above the preview */}
                      <div className="text-sm font-medium text-gray-800">
-                        {attachment.name || "Attachment"}
+                        {attachment.name ? "Chapter Notes & Worksheet" : "Course Attachments" }
                      </div>
                      
                      {/* AI Solution Generator */}
