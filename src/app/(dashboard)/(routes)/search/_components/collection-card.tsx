@@ -34,9 +34,9 @@ const collections: Collection[] = [
     accent: "primary",
   },
   {
-    title: "KVPY Preparation",
+    title: "Madhyamik Preparation",
     description: "Advanced science practice for aptitude and scholarship exams.",
-    href: "/search?title=KVPY",
+    href: "/search?title=Madhyamik",
     icon: Trophy,
     accent: "light",
   },

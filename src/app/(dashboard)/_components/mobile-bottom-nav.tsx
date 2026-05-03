@@ -21,9 +21,9 @@ const routes = [
   },
   {
     icon: Bookmark,
-    label: "Saved",
-    href: "/search/resources",
-    active: (pathname: string) => pathname.startsWith("/search/resources"),
+    label: "Test Series",
+    href: "/testseries",
+    active: (pathname: string) => pathname.startsWith("/testseries"),
   },
   {
     icon: UserRound,

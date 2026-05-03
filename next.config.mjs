@@ -9,6 +9,9 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    domains: ["utfs.io"], // 👈 ADD THIS
+  },
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.resolve.alias = {

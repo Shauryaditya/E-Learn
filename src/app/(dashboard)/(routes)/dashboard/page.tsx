@@ -9,11 +9,11 @@ import { UserButton } from "@clerk/nextjs";
 import { CheckCircle, Clock } from "lucide-react";
 import { InfoCard } from "../(root)/_components/info-card";
 import { CoursesList } from "@/components/courses-list";
-import { GoalsCalendar } from "./_components/goals-calendar";
-import { GoalsList } from "./_components/goals-list";
 import { StudentOnboardingModal } from "@/components/modals/student-onboarding-modal";
 import { RecommendationsSection } from "./_components/recommendations-section";
 import { PerformanceChart } from "./_components/performance-chart";
+import { GoalsSection } from "./_components/goal-section";
+import { TextFlippingBoardDemo } from "./_components/text-flipping";
 
 const StudentDashboard = async () => {
     const { userId } = auth();
@@ -54,8 +54,6 @@ const StudentDashboard = async () => {
     }
 
 
-    // ... items fetch ...
-
     const { completedCourses, coursesInProgress } = await getDashboardCourses(userId);
     const studentProfile = await getStudentProfile();
     const performanceData = await getStudentPerformance(userId);
@@ -76,9 +74,9 @@ const StudentDashboard = async () => {
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
                     {studentProfile ? `${studentProfile.grade} | ${studentProfile.board} | ${studentProfile.subjects.join(", ")}` : "Track your learning goals and progress"}
                 </p>
-                 <div className="mt-4">
+                 {/* <div className="mt-4">
                    <PushNotificationManager />
-                 </div>
+                 </div> */}
             </div>
 
             {/* AI Recommendations Section */}
@@ -108,16 +106,13 @@ const StudentDashboard = async () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     {/* Calendar View - Takes up 4 columns */}
-                    <div className="lg:col-span-4">
-                        <GoalsCalendar goals={goals} />
-                    </div>
-
-                    {/* List View - Takes up 8 columns */}
-                    <div className="lg:col-span-8">
-                        <GoalsList initialGoals={goals} />
-                    </div>
+                    <GoalsSection goals={goals} />
                 </div>
             </div>
+            {}{/* Courses Section */}
+             <div>
+                <TextFlippingBoardDemo />
+              </div>  
 
             <div className="space-y-4">
                  <div className="mb-4">

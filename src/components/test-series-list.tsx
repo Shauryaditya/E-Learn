@@ -19,7 +19,7 @@ export const TestSeriesList = ({
 }: TestSeriesListProps) => {
   return (
     <div>
-      <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-4">
+      <div className="flex flex-row overflow-x-auto gap-4 py-2">
         {items.map((item) => (
           <TestSeriesCard
             key={item.id}
