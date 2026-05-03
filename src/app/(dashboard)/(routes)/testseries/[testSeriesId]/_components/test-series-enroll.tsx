@@ -3,10 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/format";
 import axios from "axios";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 
 interface TestSeriesEnrollButtonProps {
   price: number;
@@ -14,73 +15,55 @@ interface TestSeriesEnrollButtonProps {
 }
 
 declare global {
-  interface Window {
-    Razorpay: any;
-  }
+  interface Window { Razorpay: any; }
 }
 
 export const TestSeriesEnrollButton = ({ price, testSeriesId }: TestSeriesEnrollButtonProps) => {
   const router = useRouter();
+  const { userId } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [isOrderLoading, setIsOrderLoading] = useState(true);
 
-  const orderRef = useRef<{ id: string; amount: number; currency: string } | null>(null);
-  const keyIdRef = useRef<string>("");
-
-  // guards to prevent duplicate calls in dev Strict Mode
-  const mountedRef = useRef(false);
-  const creatingRef = useRef(false);
-
-  const createOrder = useCallback(async () => {
-    if (creatingRef.current) return;          // prevent concurrent calls
-    creatingRef.current = true;
-    try {
-      setIsOrderLoading(true);
-      const res = await axios.post(`/api/testseries/${testSeriesId}/checkout`);
-      if (res.status === 200 && res.data?.order?.id) {
-        orderRef.current = {
-          id: res.data.order.id,
-          amount: res.data.order.amount,
-          currency: res.data.order.currency,
-        };
-        keyIdRef.current = res.data.keyId;
-      } else {
-        toast.error("Failed to create order. Please try again.");
-      }
-    } catch (err) {
-      console.error("TS createOrder error:", err);
-      toast.error("Something went wrong while creating the order.");
-    } finally {
-      setIsOrderLoading(false);
-      creatingRef.current = false;
+  const handleClick = async () => {
+    // Not logged in — push to sign in with return URL
+    if (!userId) {
+      router.push(`/sign-in?redirect_url=/testseries/${testSeriesId}`);
+      return;
     }
-  }, [testSeriesId]);
 
-  useEffect(() => {
-    if (mountedRef.current) return;           // Strict Mode remount guard
-    mountedRef.current = true;
-    createOrder();
-  }, [createOrder]);
+    // Free enroll
+    if (price === 0) {
+      try {
+        setIsLoading(true);
+        await axios.post(`/api/testseries/${testSeriesId}/checkout`);
+        toast.success("Enrolled successfully!");
+        router.refresh();
+      } catch {
+        toast.error("Something went wrong.");
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
 
-  const processPayment = async () => {
-    // fallback: if no order yet (e.g., user clicked fast), create it now
-    if (!orderRef.current?.id) {
-      await createOrder();
-      if (!orderRef.current?.id) {
-        toast.error("Order not created. Please try again.");
+    // Paid — create order then open Razorpay
+    try {
+      setIsLoading(true);
+      const res = await axios.post(`/api/testseries/${testSeriesId}/checkout`);
+
+      if (!res.data?.order?.id) {
+        toast.error("Failed to create order. Please try again.");
         return;
       }
-    }
 
-    setIsLoading(true);
-    try {
+      const { order, keyId } = res.data;
+
       const options = {
-        key: keyIdRef.current || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-        amount: orderRef.current.amount,
-        currency: orderRef.current.currency,
+        key: keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
         name: "Aaccent",
         description: "Test Series Purchase",
-        order_id: orderRef.current.id,
+        order_id: order.id,
         handler: async (response: any) => {
           try {
             await axios.post(`/api/testseries/${testSeriesId}/verify`, {
@@ -89,14 +72,13 @@ export const TestSeriesEnrollButton = ({ price, testSeriesId }: TestSeriesEnroll
               razorpay_signature: response.razorpay_signature,
             });
             toast.success("Payment successful! You can now access this test series.");
-            router.refresh();                 // ✅ refresh the page after verification
-          } catch (e: any) {
-            console.error("Verify failed:", e?.response?.data || e);
+            router.refresh();
+          } catch {
             toast.error("Payment verification failed.");
           }
         },
-        theme: { color: "#3399cc" },
-        modal: { ondismiss: () => toast.error("Payment was cancelled.") },
+        theme: { color: "#2563eb" },
+        modal: { ondismiss: () => toast("Payment cancelled.") },
       };
 
       const razorpay = new window.Razorpay(options);
@@ -105,20 +87,12 @@ export const TestSeriesEnrollButton = ({ price, testSeriesId }: TestSeriesEnroll
       });
       razorpay.open();
     } catch (err) {
-      console.error("TS processPayment error:", err);
+      console.error("Enroll error:", err);
       toast.error("Something went wrong during payment.");
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (isOrderLoading) {
-    return (
-      <div className="container h-screen flex justify-center items-center">
-        <p className="text-lg">Creating order...</p>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -129,12 +103,17 @@ export const TestSeriesEnrollButton = ({ price, testSeriesId }: TestSeriesEnroll
         onError={() => toast.error("Failed to load Razorpay SDK")}
       />
       <Button
-        onClick={processPayment}
+        onClick={handleClick}
         disabled={isLoading}
-        size="sm"
-        className="w-full md:w-auto"
+        size="lg"
+        className="bg-blue-600 hover:bg-blue-500 text-white border-0 rounded-xl px-8"
       >
-        {isLoading ? "Processing..." : `Enroll for ${formatPrice(price)}`}
+        {isLoading
+          ? "Please wait..."
+          : price === 0
+            ? "Enroll for Free"
+            : `Enroll for ${formatPrice(price)}`
+        }
       </Button>
     </>
   );

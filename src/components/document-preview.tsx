@@ -6,8 +6,6 @@ import { Worker } from "@react-pdf-viewer/core";
 import { pageNavigationPlugin } from "@react-pdf-viewer/page-navigation";
 import { scrollModePlugin } from "@react-pdf-viewer/scroll-mode";
 import { FileText, Download, ZoomIn, ZoomOut } from "lucide-react";
-import "@react-pdf-viewer/core/lib/styles/index.css";
-import "@react-pdf-viewer/page-navigation/lib/styles/index.css";
 
 const PDFViewer = dynamic(
   () => import("@react-pdf-viewer/core").then((mod) => mod.Viewer),
@@ -27,7 +25,7 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({ fileUrl, fileName }) 
   const { CurrentPageInput, GoToNextPage, GoToPreviousPage, NumberOfPages } =
     pageNavigationPluginInstance;
 
-  const scrollModePluginInstance = scrollModePlugin({ scrollMode: 2 });
+const scrollModePluginInstance = scrollModePlugin();
 
   const zoomIn = () => setScale((s) => Math.min(s + 0.1, 2.5));
   const zoomOut = () => setScale((s) => Math.max(s - 0.1, 0.5));

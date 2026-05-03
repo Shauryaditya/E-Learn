@@ -19,13 +19,13 @@ const TestSeriesSearchPage = async ({
 }: SearchPageProps) => {
   const { userId } = auth();
 
-  if (!userId) {
-    return redirect("/");
-  }
+  // if (!userId) {
+  //   return redirect("/");
+  // }
 
 
   const testSeries = await getTestSeries({
-    userId,
+    userId: userId ?? null, // pass empty string if not logged in
     ...searchParams,
   });
 

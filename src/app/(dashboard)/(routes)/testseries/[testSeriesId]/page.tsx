@@ -25,7 +25,7 @@ type PageProps = { params: { testSeriesId: string } };
 
 export default async function TestSeriesIdPage({ params }: PageProps) {
   const { userId } = auth();
-  if (!userId) redirect("/");
+  // if (!userId) redirect("/");
 
   const testSeries = await db.testSeries.findUnique({
     where: { id: params.testSeriesId },
@@ -41,15 +41,17 @@ export default async function TestSeriesIdPage({ params }: PageProps) {
 
   if (!testSeries) redirect("/");
 
-  const purchase = await db.testSeriesPurchase.findUnique({
-    where: {
-      userId_testSeriesId: { userId, testSeriesId: params.testSeriesId },
-    },
-  });
+const purchase = userId
+  ? await db.testSeriesPurchase.findUnique({
+      where: {
+        userId_testSeriesId: { userId, testSeriesId: params.testSeriesId },
+      },
+    })
+  : null;
 
   const isPurchased = !!purchase;
-  const canView = testSeries.isPublished || isPurchased;
-  if (!canView) redirect("/");
+const canView = testSeries.isPublished || isPurchased;
+if (!canView) redirect("/testseries");
 
   const remainingChapters = isPurchased
     ? 0

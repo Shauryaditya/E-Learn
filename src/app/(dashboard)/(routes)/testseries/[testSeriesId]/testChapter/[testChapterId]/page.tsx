@@ -2,7 +2,14 @@ import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, FileText, CheckCircle2, Clock, MessageSquare, Star } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  CheckCircle2,
+  Clock,
+  MessageSquare,
+  Star,
+} from "lucide-react";
 
 import { Banner } from "@/components/banner";
 import { Preview } from "@/components/preview";
@@ -54,7 +61,6 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
   return (
     <div className="min-h-full bg-[#0a0f1e] text-white">
       <div className="max-w-4xl mx-auto px-4 md:px-6 pb-20 pt-6 space-y-6">
-
         {/* ── Breadcrumb + header ── */}
         <div>
           <Link
@@ -112,7 +118,8 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
             {isLocked ? (
               <div className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 text-sm text-gray-500">
                 <FileText className="h-4 w-4" />
-                Purchase the test series to view and download the question paper.
+                Purchase the test series to view and download the question
+                paper.
               </div>
             ) : (
               <div className="grid gap-3">
@@ -122,7 +129,9 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                     className="rounded-xl border border-white/6 bg-white/3 p-4 overflow-hidden"
                   >
                     {a.name && (
-                      <p className="text-sm font-medium text-gray-300 mb-3">{a.name}</p>
+                      <p className="text-sm font-medium text-gray-300 mb-3">
+                        {a.name}
+                      </p>
                     )}
                     <DocumentPreview fileUrl={a.url} />
                   </div>
@@ -145,7 +154,6 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
             isReviewed ? (
               /* ── REVIEWED STATE ── */
               <div className="space-y-4">
-
                 {/* Score card row */}
                 <div className="grid grid-cols-2 gap-3">
                   {/* Marks */}
@@ -158,7 +166,9 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                         <span className="text-4xl font-bold text-white">
                           {existingSubmission.marksAwarded}
                         </span>
-                        <span className="text-sm text-gray-500 font-medium">/100</span>
+                        <span className="text-sm text-gray-500 font-medium">
+                          /100
+                        </span>
                       </div>
                     ) : (
                       <p className="text-sm text-gray-500">Not graded</p>
@@ -167,7 +177,9 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                       <div className="mt-3 h-1.5 w-full rounded-full bg-white/8 overflow-hidden">
                         <div
                           className="h-full rounded-full bg-blue-500 transition-all"
-                          style={{ width: `${Math.min(existingSubmission.marksAwarded, 100)}%` }}
+                          style={{
+                            width: `${Math.min(existingSubmission.marksAwarded, 100)}%`,
+                          }}
                         />
                       </div>
                     )}
@@ -180,7 +192,9 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                     </p>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                      <span className="text-base font-semibold text-emerald-400">Reviewed</span>
+                      <span className="text-base font-semibold text-emerald-400">
+                        Reviewed
+                      </span>
                     </div>
                     <a
                       href={existingSubmission.pdfUrl}
@@ -202,8 +216,12 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                         T
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-white">Teacher Feedback</p>
-                        <p className="text-xs text-gray-500">Reviewed by your instructor</p>
+                        <p className="text-sm font-semibold text-white">
+                          Teacher Feedback
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Reviewed by your instructor
+                        </p>
                       </div>
                       <MessageSquare className="h-4 w-4 text-gray-600 ml-auto" />
                     </div>
@@ -211,7 +229,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                     {/* Quote */}
                     <div className="border-l-2 border-blue-500/50 pl-4">
                       <p className="text-sm text-gray-300 leading-relaxed italic whitespace-pre-wrap">
-                        "{existingSubmission.feedback}"
+                        &ldquo;{existingSubmission.feedback}&rdquo;
                       </p>
                     </div>
                   </div>
@@ -232,7 +250,9 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                       <p className="text-sm font-semibold text-blue-400">
                         View Checked Copy
                       </p>
-                      <p className="text-xs text-gray-500">Annotated by your instructor</p>
+                      <p className="text-xs text-gray-500">
+                        Annotated by your instructor
+                      </p>
                     </div>
                     <ArrowLeft className="h-4 w-4 text-blue-400 rotate-180 group-hover:translate-x-0.5 transition-transform" />
                   </a>
@@ -248,7 +268,8 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                   </p>
                 </div>
                 <p className="text-xs text-gray-500 ml-7">
-                  Your answer sheet has been submitted and is awaiting review from your instructor.
+                  Your answer sheet has been submitted and is awaiting review
+                  from your instructor.
                 </p>
                 <a
                   href={existingSubmission.pdfUrl}
@@ -270,7 +291,6 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
