@@ -9,14 +9,14 @@ const DashboardLayout = ({
   children: React.ReactNode
 }) => {
   return (
-    <div className="h-full">
-      <div className="h-[80px] md:pl-56 fixed w-full inset-y-0 z-50">
+    <div className="min-h-full bg-slate-50 text-slate-950 dark:bg-[#0b1120] dark:text-slate-100">
+      <div className="fixed inset-x-0 top-0 z-50 h-16 md:pl-64">
         <Navbar />
       </div>
-      <div className="hidden md:flex h-full w-56 flex-col fixed inset-y-0 z-50">
+      <div className="fixed inset-y-0 z-50 hidden w-64 flex-col md:flex">
         <Sidebar />
       </div>
-      <main className="md:pl-56 pt-[80px] pb-20 md:pb-0 h-full">
+      <main className="min-h-screen pt-16 pb-20 md:pl-64 md:pb-0">
         {children}
       </main>
       <MobileBottomNav />

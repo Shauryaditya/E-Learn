@@ -38,13 +38,12 @@ model Course {
   @@index([categoryId])
 }
 
-
-
 model Category {
-  id      String   @id @default(uuid())
-  name    String   @unique
-  courses Course[]
+  id         String       @id @default(uuid())
+  name       String       @unique
+  courses    Course[]
   testSeries TestSeries[]
+  contests   Contest[]
 }
 
 model Attachment {
@@ -58,13 +57,12 @@ model Attachment {
   chapterId String? // New field to relate attachments to chapters
   chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   testChapterId String?
   testChapter   TestChapter? @relation(fields: [testChapterId], references: [id], onDelete: Cascade)
-  
-  @@index([testChapterId])
 
+  @@index([testChapterId])
   @@index([courseId])
   @@index([chapterId]) // Index for chapterId
 }
@@ -93,17 +91,17 @@ model Chapter {
 }
 
 model ChapterSubmission {
-  id            String @id @default(uuid())
-  userId        String
+  id     String @id @default(uuid())
+  userId String
 
-  chapterId     String
-  chapter       Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapterId String
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
-  images        String[]
+  images          String[]
   annotatedImages String[]
 
-  status        SubmissionStatus @default(SUBMITTED)
-  feedback      String? @db.Text
+  status   SubmissionStatus @default(SUBMITTED)
+  feedback String?          @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -186,70 +184,69 @@ model RazorpayOrder {
 
 model TestSeries {
   id          String  @id @default(uuid())
-  userId      String  // Teacher who created this
+  userId      String // Teacher who created this
   title       String  @db.Text
   description String? @db.Text
   imageUrl    String? @db.Text
   price       Float?
   isPublished Boolean @default(false)
-  
+
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id])
-  
+
   testChapters       TestChapter[]
   testSeriesPurchase TestSeriesPurchase[]
   goals              Goal[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([categoryId])
   @@index([userId])
 }
 
 model TestChapter {
   id          String  @id @default(uuid())
-  title       String  // e.g., "Thermodynamics", "Organic Chemistry"
+  title       String // e.g., "Thermodynamics", "Organic Chemistry"
   description String? @db.Text
   position    Int
   isPublished Boolean @default(false)
-  
+
   testSeriesId String
   testSeries   TestSeries @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
-  
+
   tests Test[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  attachments  Attachment[]
-  submissions   TestSubmission[]
-  
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  attachments Attachment[]
+  submissions TestSubmission[]
+
   @@index([testSeriesId])
 }
 
 model Test {
-  id          String  @id @default(uuid())
-  title       String
-  description String? @db.Text
-  duration    Int
-  totalMarks  Int
+  id           String  @id @default(uuid())
+  title        String
+  description  String? @db.Text
+  duration     Int
+  totalMarks   Int
   passingMarks Int?
-  position    Int
-  isPublished Boolean @default(false)
-  isFree      Boolean @default(false)
+  position     Int
+  isPublished  Boolean @default(false)
+  isFree       Boolean @default(false)
 
-  testMode        TestMode @default(OBJECTIVE)
+  testMode TestMode @default(OBJECTIVE)
 
   testChapterId String
   testChapter   TestChapter @relation(fields: [testChapterId], references: [id], onDelete: Cascade)
 
-  questions     Question[]
-  testAttempts  TestAttempt[]
+  questions    Question[]
+  testAttempts TestAttempt[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
 
 enum QuestionType {
   SINGLE_CHOICE
@@ -259,25 +256,25 @@ enum QuestionType {
 }
 
 model TestSubmission {
-  id            String @id @default(uuid())
-  userId        String
+  id     String @id @default(uuid())
+  userId String
 
   testChapterId String
   testChapter   TestChapter @relation(fields: [testChapterId], references: [id], onDelete: Cascade)
 
-  pdfUrl        String @db.Text
+  pdfUrl String @db.Text
 
-  fileName      String?
-  fileSize      Int?      // in bytes
-  attemptNo     Int       @default(1)
+  fileName  String?
+  fileSize  Int? // in bytes
+  attemptNo Int     @default(1)
 
-  marksAwarded  Float?
-  feedback      String?   @db.Text
-  reviewedAt    DateTime?
-  reviewedBy    String?   // teacher userId (optional but smart)
+  marksAwarded Float?
+  feedback     String?   @db.Text
+  reviewedAt   DateTime?
+  reviewedBy   String? // teacher userId (optional but smart)
 
-  annotatedPdfUrl String?   @db.Text
-  status        SubmissionStatus @default(SUBMITTED)
+  annotatedPdfUrl String?          @db.Text
+  status          SubmissionStatus @default(SUBMITTED)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -291,6 +288,7 @@ enum SubmissionStatus {
   REVIEWED
   NEEDS_REVISION
 }
+
 model Question {
   id            String       @id @default(uuid())
   questionText  String       @db.Text
@@ -300,16 +298,16 @@ model Question {
   position      Int
   explanation   String?      @db.Text
   imageUrl      String?      @db.Text
-  
+
   testId String
   test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
-  
+
   options QuestionOption[]
   answers Answer[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([testId])
 }
 
@@ -318,35 +316,35 @@ model QuestionOption {
   optionText String  @db.Text
   isCorrect  Boolean @default(false)
   position   Int
-  
+
   questionId String
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([questionId])
 }
 
 model TestAttempt {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   userId      String
   score       Float?
   totalMarks  Int
   percentage  Float?
   isPassed    Boolean?
-  isCompleted Boolean  @default(false)
-  startedAt   DateTime @default(now())
+  isCompleted Boolean   @default(false)
+  startedAt   DateTime  @default(now())
   completedAt DateTime?
-  
+
   testId String
   test   Test   @relation(fields: [testId], references: [id], onDelete: Cascade)
-  
+
   answers Answer[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([userId, testId])
   @@index([testId])
   @@index([userId])
@@ -357,16 +355,16 @@ model Answer {
   selectedAnswer String?  @db.Text // For single/multiple choice, store option IDs; for numerical, store the value
   isCorrect      Boolean?
   marksAwarded   Float?
-  
+
   testAttemptId String
   testAttempt   TestAttempt @relation(fields: [testAttemptId], references: [id], onDelete: Cascade)
-  
+
   questionId String
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([testAttemptId, questionId])
   @@index([testAttemptId])
   @@index([questionId])
@@ -375,22 +373,194 @@ model Answer {
 model TestSeriesPurchase {
   id     String @id @default(uuid())
   userId String
-  
+
   testSeriesId String
   testSeries   TestSeries @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([userId, testSeriesId])
   @@index([testSeriesId])
   @@index([userId])
 }
 
-
 enum TestMode {
   OBJECTIVE
   DESCRIPTIVE
+}
+
+// ============================================
+// CONTEST MODELS
+// ============================================
+
+model Contest {
+  id          String  @id @default(uuid())
+  userId      String // Teacher/admin who created this contest
+  title       String  @db.Text
+  description String? @db.Text
+  imageUrl    String? @db.Text
+  price       Float?
+
+  isPublished Boolean @default(false)
+
+  startsAt             DateTime
+  durationMinutes      Int
+  registrationOpensAt  DateTime?
+  registrationClosesAt DateTime?
+  maxParticipants      Int?
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  questions     ContestQuestion[]
+  registrations ContestRegistration[]
+  attempts      ContestAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([startsAt])
+  @@index([isPublished])
+}
+
+model QuestionBank {
+  id            String       @id @default(uuid())
+  userId        String // Teacher/admin who created this reusable question
+  questionText  String       @db.Text
+  questionType  QuestionType @default(SINGLE_CHOICE)
+  defaultMarks  Float
+  negativeMarks Float        @default(0)
+  explanation   String?      @db.Text
+  imageUrl      String?      @db.Text
+
+  options        QuestionBankOption[]
+  contests       ContestQuestion[]
+  contestAnswers ContestAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([questionType])
+}
+
+model QuestionBankOption {
+  id         String  @id @default(uuid())
+  optionText String  @db.Text
+  isCorrect  Boolean @default(false)
+  position   Int
+
+  questionId String
+  question   QuestionBank @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([questionId])
+}
+
+model ContestQuestion {
+  id       String @id @default(uuid())
+  position Int
+  marks    Float?
+
+  contestId String
+  contest   Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question   QuestionBank @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([contestId, questionId])
+  @@unique([contestId, position])
+  @@index([questionId])
+}
+
+model ContestRegistration {
+  id     String                    @id @default(uuid())
+  userId String
+  status ContestRegistrationStatus @default(REGISTERED)
+
+  contestId String
+  contest   Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+
+  attempt ContestAttempt?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, contestId])
+  @@index([contestId])
+  @@index([userId])
+  @@index([status])
+}
+
+model ContestAttempt {
+  id            String               @id @default(uuid())
+  userId        String
+  status        ContestAttemptStatus @default(IN_PROGRESS)
+  score         Float?
+  totalMarks    Float?
+  percentage    Float?
+  startedAt     DateTime             @default(now())
+  submittedAt   DateTime?
+  expiresAt     DateTime
+  autoSubmitted Boolean              @default(false)
+
+  contestId String
+  contest   Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+
+  registrationId String?              @unique
+  registration   ContestRegistration? @relation(fields: [registrationId], references: [id])
+
+  answers ContestAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, contestId])
+  @@index([contestId])
+  @@index([userId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model ContestAnswer {
+  id             String   @id @default(uuid())
+  selectedAnswer String?  @db.Text
+  isCorrect      Boolean?
+  marksAwarded   Float?
+
+  attemptId String
+  attempt   ContestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question   QuestionBank @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+}
+
+enum ContestRegistrationStatus {
+  REGISTERED
+  CANCELLED
+  DISQUALIFIED
+}
+
+enum ContestAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  AUTO_SUBMITTED
+  EVALUATED
 }
 
 model Goal {
@@ -399,23 +569,23 @@ model Goal {
   description String?  @db.Text
   dueDate     DateTime
   isCompleted Boolean  @default(false)
-  
+
   // Student this goal is assigned to
-  studentId   String
-  
+  studentId String
+
   // Teacher who created this goal
-  teacherId   String
-  
+  teacherId String
+
   // Either courseId OR testSeriesId will be set (not both)
-  courseId      String?
-  course        Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  
-  testSeriesId  String?
-  testSeries    TestSeries?  @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
-  
+  courseId String?
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  testSeriesId String?
+  testSeries   TestSeries? @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([studentId])
   @@index([teacherId])
   @@index([courseId])
@@ -423,12 +593,11 @@ model Goal {
   @@index([dueDate])
 }
 
-
 model PushSubscription {
   id        String   @id @default(uuid())
   userId    String
   endpoint  String   @db.Text
-  keys      Json     // Store p256dh and auth keys
+  keys      Json // Store p256dh and auth keys
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -436,12 +605,12 @@ model PushSubscription {
 }
 
 model StudentProfile {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  name      String?
-  grade     String?
-  board     String?
-  subjects  String[]
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  name       String?
+  grade      String?
+  board      String?
+  subjects   String[]
   targetExam String?
 
   createdAt DateTime @default(now())
@@ -449,22 +618,22 @@ model StudentProfile {
 }
 
 model Resource {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   title       String
-  description String?  @db.Text
-  url         String   @db.Text
-  
-  category    ResourceCategory @default(BOARD)
-  type        ResourceType     @default(PAST_PAPER)
-  
-  subject     String
-  grade       String?  // e.g., "Class 10", "Class 12"
-  year        Int?
-  
-  isPaid      Boolean  @default(false)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  description String? @db.Text
+  url         String  @db.Text
+
+  category ResourceCategory @default(BOARD)
+  type     ResourceType     @default(PAST_PAPER)
+
+  subject String
+  grade   String? // e.g., "Class 10", "Class 12"
+  year    Int?
+
+  isPaid Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([category])
   @@index([subject])

@@ -15,19 +15,21 @@ export const GoalsSection = ({ goals }: { goals: any[] }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 space-y-5">
-            <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="w-full rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.03] xl:col-span-7 2xl:col-span-6">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold text-slate-950 dark:text-white">
                     Routine & Goals
                 </h2>
-                <span className="text-sm text-gray-400 dark:text-gray-500">
+                <span className="text-sm text-slate-500 dark:text-slate-400">
                     {(selectedDate ?? new Date()).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
                 </span>
             </div>
 
-            <GoalsWeekStrip goals={goals} onDaySelect={handleDaySelect} selectedDate={selectedDate} />
+            <div className="mt-5">
+                <GoalsWeekStrip goals={goals} onDaySelect={handleDaySelect} selectedDate={selectedDate} />
+            </div>
 
-            <div className="border-t border-gray-100 dark:border-white/5" />
+            <div className="my-5 border-t border-slate-100 dark:border-white/10" />
 
             <GoalsList initialGoals={goals} selectedDate={selectedDate} />
         </div>

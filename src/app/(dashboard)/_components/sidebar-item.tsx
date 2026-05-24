@@ -33,26 +33,23 @@ export const SidebarItem = ({
       onClick={onClick}
       type="button"
       className={cn(
-        "flex items-center gap-x-2 text-slate-500 text-sm font-[500] pl-6 transition-all hover:text-slate-600 hover:bg-slate-300/20",
-        isActive && "text-sky-700 bg-sky-200/20 hover:bg-sky-200/20 hover:text-sky-700"
+        "group relative flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white",
+        isActive && "bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-100 hover:bg-blue-50 hover:text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 dark:ring-blue-500/20 dark:hover:bg-blue-500/10 dark:hover:text-blue-200"
       )}
     >
-      <div className="flex items-center gap-x-2 py-4">
+      <div className="flex min-w-0 items-center gap-x-3">
         <Icon
-          size={22}
+          size={20}
           className={cn(
-            "text-slate-500",
-            isActive && "text-sky-700"
+            "shrink-0 text-slate-400 transition-colors group-hover:text-slate-700 dark:text-slate-500 dark:group-hover:text-white",
+            isActive && "text-blue-600 group-hover:text-blue-600 dark:text-blue-300 dark:group-hover:text-blue-200"
           )}
         />
-        {label}
+        <span className="truncate">{label}</span>
       </div>
-      <div
-        className={cn(
-          "ml-auto opacity-0 border-2 border-sky-700 h-full transition-all",
-          isActive && "opacity-100"
-        )}
-      />
+      {isActive && (
+        <span className="absolute inset-y-2 right-2 w-1 rounded-full bg-blue-600 dark:bg-blue-300" />
+      )}
     </button>
   )
 }

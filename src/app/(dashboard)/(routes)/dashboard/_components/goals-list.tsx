@@ -78,9 +78,8 @@ export const GoalsList = ({ initialGoals, selectedDate }: GoalsListProps) => {
             </div>
         );
     }
-    console.log("Rendering GoalsList with goals:", goals);
     return (
-        <div className="space-y-1">
+        <div className="max-h-[360px] space-y-2 overflow-y-auto pr-1">
             {filtered.map((goal) => {
                 const progress = getProgress(goal);
                 const isUpdating = updatingGoal === goal.id;
@@ -89,8 +88,8 @@ export const GoalsList = ({ initialGoals, selectedDate }: GoalsListProps) => {
                     <div
                         key={goal.id}
                         className={cn(
-                            "group px-4 py-3 rounded-xl transition-colors",
-                            "hover:bg-gray-50 dark:hover:bg-white/5",
+                            "group rounded-lg border border-slate-100 px-4 py-3 transition-colors dark:border-white/10",
+                            "hover:bg-slate-50 dark:hover:bg-white/5",
                             goal.isCompleted && "opacity-50"
                         )}
                     >
@@ -106,7 +105,7 @@ export const GoalsList = ({ initialGoals, selectedDate }: GoalsListProps) => {
                                 }
                             </button>
                             <span className={cn(
-                                "text-sm font-medium flex-1",
+                                "min-w-0 flex-1 text-sm font-medium",
                                 goal.isCompleted
                                     ? "line-through text-gray-400 dark:text-gray-500"
                                     : "text-gray-800 dark:text-gray-100"

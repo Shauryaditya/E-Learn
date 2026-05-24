@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bookmark, Compass, GraduationCap, UserRound } from "lucide-react";
+import { Compass, GraduationCap, Trophy, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -20,10 +20,10 @@ const routes = [
     active: (pathname: string) => pathname === "/dashboard",
   },
   {
-    icon: Bookmark,
-    label: "Test Series",
-    href: "/testseries",
-    active: (pathname: string) => pathname.startsWith("/testseries"),
+    icon: Trophy,
+    label: "Contests",
+    href: "/contests",
+    active: (pathname: string) => pathname.startsWith("/contests"),
   },
   {
     icon: UserRound,

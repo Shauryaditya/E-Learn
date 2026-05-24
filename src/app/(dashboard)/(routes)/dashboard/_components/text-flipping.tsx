@@ -32,7 +32,7 @@ export function TextFlippingBoardDemo() {
   }, [next]);
 
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-8 bg-neutral-950 rounded-2xl">
+    <div className="flex w-full flex-col items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-neutral-950 px-4 py-6 shadow-sm dark:border-white/10 md:min-h-[220px] md:py-8">
       <TextFlippingBoard text={MESSAGES[msgIdx]} />
     </div>
   );

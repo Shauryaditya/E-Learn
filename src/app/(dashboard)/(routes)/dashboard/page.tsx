@@ -64,31 +64,35 @@ const StudentDashboard = async () => {
     // Filter courses based on profile if available (client-side or here? Here is better if we had specific grade/subject fields in Course, but we don't really. We rely on Category. For now, we show all but label them.)
     
     return (
-        <div className="p-6 space-y-8">
+        <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-6 sm:px-6 lg:px-8">
             <StudentOnboardingModal isOpen={!studentProfile} />
             
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {studentProfile?.name ? `Welcome back, ${studentProfile.name}` : "Welcome to Your Dashboard"}
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                    {studentProfile ? `${studentProfile.grade} | ${studentProfile.board} | ${studentProfile.subjects.join(", ")}` : "Track your learning goals and progress"}
-                </p>
-                 {/* <div className="mt-4">
-                   <PushNotificationManager />
-                 </div> */}
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white md:text-3xl">
+                            {studentProfile?.name ? `Welcome back, ${studentProfile.name}` : "Welcome to Your Dashboard"}
+                        </h1>
+                        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 md:text-base">
+                            {studentProfile ? `${studentProfile.grade} | ${studentProfile.board} | ${studentProfile.subjects.join(", ")}` : "Track your learning goals and progress"}
+                        </p>
+                    </div>
+                    {/* <div className="mt-4">
+                      <PushNotificationManager />
+                    </div> */}
+                </div>
             </div>
 
             {/* AI Recommendations Section */}
             {studentProfile && (
-                <div className="mb-8">
+                <div>
                      <RecommendationsSection profile={studentProfile} />
                 </div>
             )}
             
             {/* Performance Chart */}
             {performanceData.length > 0 && (
-                <div className="mb-8">
+                <div>
                     <PerformanceChart data={performanceData} />
                 </div>
             )}
@@ -96,27 +100,25 @@ const StudentDashboard = async () => {
             {/* Goals Section */}
             <div>
                 <div className="mb-4">
-                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1">
+                    <h2 className="mb-1 text-xl font-semibold text-slate-950 dark:text-white md:text-2xl">
                         My Routine & Goals
                     </h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
                         Goals set by your teachers and your personal routine
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    {/* Calendar View - Takes up 4 columns */}
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
                     <GoalsSection goals={goals} />
                 </div>
             </div>
-            {}{/* Courses Section */}
-             <div>
+            <div>
                 <TextFlippingBoardDemo />
-              </div>  
+            </div>  
 
             <div className="space-y-4">
                  <div className="mb-4">
-                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1">
+                    <h2 className="mb-1 text-xl font-semibold text-slate-950 dark:text-white md:text-2xl">
                         My Courses
                     </h2>
                 </div>

@@ -24,7 +24,7 @@ export const GoalsWeekStrip = ({ goals, onDaySelect, selectedDate }: GoalsWeekSt
         goals.some(g => isSameDay(new Date(g.dueDate), day));
 
     return (
-        <div className="flex items-center justify-between px-1">
+        <div className="grid grid-cols-5 gap-2">
             {days.map((day) => {
                 const isSelected = selectedDate ? isSameDay(day, selectedDate) : false;
                 const isToday = isSameDay(day, new Date());
@@ -34,13 +34,13 @@ export const GoalsWeekStrip = ({ goals, onDaySelect, selectedDate }: GoalsWeekSt
                     <button
                         key={day.toISOString()}
                         onClick={() => onDaySelect(day)}
-                        className="flex flex-col items-center gap-1.5 w-12"
+                        className="flex min-w-0 flex-col items-center gap-1.5 rounded-lg px-2 py-2 transition hover:bg-slate-50 dark:hover:bg-white/5"
                     >
-                        <span className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             {format(day, "EEE")}
                         </span>
                         <span className={cn(
-                            "w-9 h-9 flex items-center justify-center rounded-xl text-sm font-semibold transition-all",
+                            "flex h-9 w-9 items-center justify-center rounded-lg text-sm font-semibold transition-all",
                             isSelected
                                 ? "bg-blue-600 text-white"
                                 : isToday

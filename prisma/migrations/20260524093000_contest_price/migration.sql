@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Contest" ADD COLUMN "price" DOUBLE PRECISION;
