@@ -29,7 +29,11 @@ export const Categories = ({
     items,
 }: CategoriesProps) => {
     return (
-        <div className="flex items-center gap-x-2 overflow-x-auto pb-2">
+        <section data-tour="categories" className="space-y-3">
+            <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+                Browse by Subject
+            </h2>
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible md:pb-0">
             {items.map((item) => (
                 <CategoryItem
                 key={item.id}
@@ -38,6 +42,7 @@ export const Categories = ({
                 value={item.id}
                 />
             ))}
-        </div>
+            </div>
+        </section>
     )
 }

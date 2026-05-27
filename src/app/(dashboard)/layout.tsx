@@ -1,6 +1,7 @@
 import { Sidebar } from "./_components/sidebar"
 import { Navbar } from "./_components/navbar"
 import { MobileBottomNav } from "./_components/mobile-bottom-nav"
+import { ApplicationTour } from "./_components/application-tour"
 
 
 const DashboardLayout = ({
@@ -20,6 +21,7 @@ const DashboardLayout = ({
         {children}
       </main>
       <MobileBottomNav />
+      <ApplicationTour />
     </div>
   )
 }

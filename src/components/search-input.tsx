@@ -6,7 +6,6 @@ import { Input } from "./ui/input"
 import { useEffect, useState } from "react"
 import { useDebounce } from "@/hooks/use-debounce"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { title } from "process"
 
 export const SearchInput = () => {
     const [value , setValue] = useState("")
@@ -16,7 +15,7 @@ export const SearchInput = () => {
     const  router = useRouter()
     const pathname = usePathname()
 
-    const currentCategoryId = searchParams ? searchParams.get("CategoryId") : null
+    const currentCategoryId = searchParams ? searchParams.get("categoryId") : null
 
     useEffect(() => {
         const url = qs.stringifyUrl({
@@ -32,7 +31,7 @@ export const SearchInput = () => {
 
 
     return(
-        <div className="relative">
+        <div data-tour="search" className="relative">
             <Search 
             className="h-4 w-4 absolute top-3 left-3 text-slate-600"
             />

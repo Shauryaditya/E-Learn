@@ -13,8 +13,11 @@ interface CourseListProps {
 
 export const CoursesList = ({ items }: CourseListProps) => {
   return (
-    <div className="">
-      <div className="flex flex-row overflow-x-auto gap-4 py-2">
+    <section data-tour="courses" className="space-y-3">
+      <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+        Browse Courses
+      </h2>
+      <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-2 md:overflow-visible md:pb-0 lg:grid-cols-3 2xl:grid-cols-4">
         {items.map((item) => (
             <CourseCard
             key={item.id}
@@ -33,6 +36,6 @@ export const CoursesList = ({ items }: CourseListProps) => {
             No courses found
         </div>
       )}
-    </div>
+    </section>
   );
 };

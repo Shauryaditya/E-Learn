@@ -37,7 +37,7 @@ export const MobileBottomNav = () => {
   const pathname = usePathname() || "";
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-brand-navy px-3 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-12px_30px_rgba(15,23,42,0.25)] md:hidden">
+    <nav data-tour="mobile-nav" className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-brand-navy px-3 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-12px_30px_rgba(15,23,42,0.25)] md:hidden">
       <div className="grid grid-cols-4 gap-1">
         {routes.map((route) => {
           const Icon = route.icon;
