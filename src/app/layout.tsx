@@ -5,6 +5,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ToastProvider } from "@/components/providers/toaster-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { StudyActivityTracker } from "@/components/study-activity-tracker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -49,6 +50,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <ToastProvider />
+            <StudyActivityTracker />
             {children}
           </ThemeProvider>
         </body>

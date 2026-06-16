@@ -135,6 +135,21 @@ model UserProgress {
   @@index([chapterId])
 }
 
+model StudyActivity {
+  id              String   @id @default(uuid())
+  userId          String
+  date            DateTime
+  secondsStudied  Int      @default(0)
+  heartbeatCount  Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
 model Purchase {
   id     String @id @default(uuid())
   userId String

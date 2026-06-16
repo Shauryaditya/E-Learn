@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getDashboardCourses } from "@/actions/get-dashboard-courses";
 import { getStudentProfile } from "@/actions/get-student-profile";
 import { getStudentPerformance } from "@/actions/get-student-performance";
+import { getStudyStats } from "@/actions/get-study-stats";
 import { UserButton } from "@clerk/nextjs";
 import { CheckCircle, Clock } from "lucide-react";
 import { InfoCard } from "../(root)/_components/info-card";
@@ -14,6 +15,8 @@ import { RecommendationsSection } from "./_components/recommendations-section";
 import { PerformanceChart } from "./_components/performance-chart";
 import { GoalsSection } from "./_components/goal-section";
 import { TextFlippingBoardDemo } from "./_components/text-flipping";
+import { StudyStatsSection } from "./_components/study-stats";
+import { recordStudyActivity } from "@/lib/study-activity";
 
 const StudentDashboard = async () => {
     const { userId } = auth();
@@ -54,9 +57,12 @@ const StudentDashboard = async () => {
     }
 
 
+    await recordStudyActivity(userId);
+
     const { completedCourses, coursesInProgress } = await getDashboardCourses(userId);
     const studentProfile = await getStudentProfile();
     const performanceData = await getStudentPerformance(userId);
+    const studyStats = await getStudyStats(userId);
 
     console.log("Student Dashboard - userId:", userId);
     console.log("Student Dashboard - goals count:", goals.length);
@@ -82,6 +88,8 @@ const StudentDashboard = async () => {
                     </div> */}
                 </div>
             </div>
+
+            <StudyStatsSection stats={studyStats} />
 
             {/* AI Recommendations Section */}
             {studentProfile && (
