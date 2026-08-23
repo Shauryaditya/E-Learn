@@ -13,6 +13,7 @@ export async function PATCH(
             marksAwarded,
             feedback,
             annotatedPdfUrl,
+            annotatedImages,
             status
         } = await req.json();
 
@@ -24,6 +25,25 @@ export async function PATCH(
             return new NextResponse("Submission ID required", { status: 400 });
         }
 
+        const existingSubmission = await db.testSubmission.findUnique({
+            where: {
+                id: params.submissionId,
+            },
+            select: {
+                testChapter: {
+                    select: {
+                        testSeries: {
+                            select: { userId: true },
+                        },
+                    },
+                },
+            },
+        });
+
+        if (!existingSubmission || existingSubmission.testChapter.testSeries.userId !== userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
         const submission = await db.testSubmission.update({
             where: {
                 id: params.submissionId,
@@ -32,6 +52,7 @@ export async function PATCH(
                 marksAwarded,
                 feedback,
                 annotatedPdfUrl,
+                ...(Array.isArray(annotatedImages) ? { annotatedImages } : {}),
                 status,
                 reviewedBy: userId,
                 reviewedAt: new Date(),

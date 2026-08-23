@@ -1,7 +1,7 @@
 "use client";
 
 import { TestSubmission } from "@prisma/client";
-import { File, CheckCircle, XCircle } from "lucide-react";
+import { File, Images } from "lucide-react";
 
 interface SubmissionListProps {
     items: TestSubmission[];
@@ -24,16 +24,26 @@ export const SubmissionList = ({ items, testSeriesId }: SubmissionListProps) => 
                         className="flex items-center justify-between border rounded-md p-3 bg-slate-50"
                     >
                         <div className="flex items-center gap-x-2">
-                            <File className="h-5 w-5 text-sky-700" />
+                            {item.images.length > 0 ? (
+                                <Images className="h-5 w-5 text-sky-700" />
+                            ) : (
+                                <File className="h-5 w-5 text-sky-700" />
+                            )}
                             <div className="flex flex-col">
-                                <a
-                                    href={item.pdfUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-sm font-medium hover:underline text-sky-700"
-                                >
-                                    View PDF Submission
-                                </a>
+                                {item.pdfUrl ? (
+                                    <a
+                                        href={item.pdfUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm font-medium hover:underline text-sky-700"
+                                    >
+                                        View PDF submission
+                                    </a>
+                                ) : (
+                                    <span className="text-sm font-medium text-sky-700">
+                                        {item.images.length} image{item.images.length === 1 ? "" : "s"}
+                                    </span>
+                                )}
                                 <span className="text-xs text-muted-foreground">
                                     Submitted on {new Date(item.createdAt).toLocaleDateString()}
                                 </span>

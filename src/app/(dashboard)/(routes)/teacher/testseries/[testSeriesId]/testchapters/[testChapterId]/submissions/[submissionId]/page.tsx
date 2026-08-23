@@ -2,8 +2,8 @@ import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import dynamic from "next/dynamic";
-const GradingInterface = dynamic(
-    () => import("@/components/grading/grading-interface"),
+const TestSubmissionGradingRouter = dynamic(
+    () => import("@/components/grading/test-submission-grading-router"),
     { ssr: false }
 );
 
@@ -23,18 +23,28 @@ const SubmissionGradingPage = async ({
             id: params.submissionId,
         },
         include: {
-            testChapter: true
+            testChapter: {
+                include: {
+                    testSeries: {
+                        select: { userId: true }
+                    }
+                }
+            }
         }
     });
 
-    if (!submission) {
+    if (
+        !submission ||
+        submission.testChapterId !== params.testChapterId ||
+        submission.testChapter.testSeriesId !== params.testSeriesId ||
+        submission.testChapter.testSeries.userId !== userId
+    ) {
         return redirect("/");
     }
 
-    // Pass the submission data to the client component
     return (
         <div className="h-full w-full">
-            <GradingInterface
+            <TestSubmissionGradingRouter
                 submission={submission}
                 testSeriesId={params.testSeriesId}
                 testChapterId={params.testChapterId}

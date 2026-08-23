@@ -38,8 +38,8 @@ export const ourFileRouter = {
     .onUploadComplete(() => {}),
     testSubmission: f({
         text: { maxFileSize: "16MB" },
-        image: { maxFileSize: "16MB" },
-        pdf: { maxFileSize: "16MB" },
+        image: { maxFileSize: "16MB", maxFileCount: 15 },
+        pdf: { maxFileSize: "16MB", maxFileCount: 1 },
     })
     .middleware(() => handleAuth())
     .onUploadComplete(() => {}),

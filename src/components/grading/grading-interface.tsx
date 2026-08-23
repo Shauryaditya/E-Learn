@@ -283,6 +283,9 @@ export const GradingInterface = ({
 
                 // 1. Fetch original PDF (or the latest annotated version if it exists)
                 const pdfSource = submission.annotatedPdfUrl || submission.pdfUrl;
+                if (!pdfSource) {
+                    throw new Error("This submission does not contain a PDF");
+                }
                 console.log("Fetching PDF from:", pdfSource);
                 const existingPdfBytes = await fetch(pdfSource).then(res => res.arrayBuffer());
                 console.log("PDF fetched, bytes:", existingPdfBytes.byteLength);

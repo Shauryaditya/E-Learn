@@ -1,124 +1,203 @@
 "use client";
 
-import * as z from "zod";
 import axios from "axios";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { File, Loader2, X } from "lucide-react";
+import { FileText, Image as ImageIcon, Loader2, UploadCloud, X } from "lucide-react";
 
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormMessage,
-} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { FileUpload } from "@/components/file-upload";
+import { useUploadThing } from "@/lib/uploadthing";
 
 interface TestSubmissionFormProps {
     testSeriesId: string;
     testChapterId: string;
 }
 
-const formSchema = z.object({
-    pdfUrl: z.string().min(1, {
-        message: "PDF is required",
-    }),
-});
+const MAX_IMAGES = 15;
+const MAX_FILE_SIZE = 16 * 1024 * 1024;
 
 export const TestSubmissionForm = ({
     testSeriesId,
     testChapterId,
 }: TestSubmissionFormProps) => {
     const router = useRouter();
+    const { startUpload } = useUploadThing("testSubmission");
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            pdfUrl: "",
-        },
-    });
+    const clearSelection = () => {
+        if (isUploading) return;
+        previewUrls.forEach((url) => URL.revokeObjectURL(url));
+        setPreviewUrls([]);
+        setSelectedFiles([]);
+    };
 
-    const { isSubmitting, isValid } = form.formState;
+    useEffect(() => {
+        return () => previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    }, [previewUrls]);
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const handleFileSelect = (files: FileList | null) => {
+        if (!files?.length) return;
+
+        const chosenFiles = Array.from(files);
+        const pdfFiles = chosenFiles.filter((file) => file.type === "application/pdf");
+        const imageFiles = chosenFiles.filter((file) => file.type.startsWith("image/"));
+
+        if (chosenFiles.some((file) => file.size > MAX_FILE_SIZE)) {
+            toast.error("Each file must be 16MB or smaller");
+            return;
+        }
+
+        if (pdfFiles.length > 0 && imageFiles.length > 0) {
+            toast.error("Choose either one PDF or multiple images");
+            return;
+        }
+
+        if (pdfFiles.length > 1 || imageFiles.length > MAX_IMAGES) {
+            toast.error(`Upload one PDF or up to ${MAX_IMAGES} images`);
+            return;
+        }
+
+        if (pdfFiles.length + imageFiles.length !== chosenFiles.length) {
+            toast.error("Only PDF and image files are supported");
+            return;
+        }
+
+        previewUrls.forEach((url) => URL.revokeObjectURL(url));
+        setSelectedFiles(chosenFiles);
+        setPreviewUrls(imageFiles.map((file) => URL.createObjectURL(file)));
+    };
+
+    const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
+        event.preventDefault();
+        setIsDragging(false);
+        handleFileSelect(event.dataTransfer.files);
+    };
+
+    const handleSubmit = async () => {
+        if (selectedFiles.length === 0) return;
+
         try {
+            setIsUploading(true);
+            const uploadedFiles = await startUpload(selectedFiles);
+
+            if (!uploadedFiles || uploadedFiles.length !== selectedFiles.length) {
+                throw new Error("Not all files were uploaded");
+            }
+
+            const submittingPdf = selectedFiles[0].type === "application/pdf";
             await axios.post(
                 `/api/testseries/${testSeriesId}/testChapter/${testChapterId}/submission`,
-                values
+                {
+                    pdfUrl: submittingPdf ? uploadedFiles[0].url : null,
+                    images: submittingPdf ? [] : uploadedFiles.map((file) => file.url),
+                    fileName: submittingPdf ? selectedFiles[0].name : `${selectedFiles.length} answer-sheet images`,
+                    fileSize: selectedFiles.reduce((total, file) => total + file.size, 0),
+                }
             );
+
             toast.success("Test submitted successfully");
+            previewUrls.forEach((url) => URL.revokeObjectURL(url));
+            setPreviewUrls([]);
+            setSelectedFiles([]);
             router.refresh();
-        } catch {
-            toast.error("Something went wrong");
+        } catch (error) {
+            console.error(error);
+            toast.error("Something went wrong while submitting the test");
+        } finally {
+            setIsUploading(false);
         }
     };
 
+    const isPdf = selectedFiles[0]?.type === "application/pdf";
+
     return (
-        <div className="mt-6 border bg-card rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                Test Submission
+        <div className="space-y-4">
+            <div>
+                <p className="font-medium">Test Submission</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                    Upload one PDF or up to {MAX_IMAGES} answer-sheet images.
+                </p>
             </div>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
-                    <FormField
-                        control={form.control}
-                        name="pdfUrl"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormControl>
-                                    <div>
-                                        {field.value ? (
-                                            <div className="relative flex items-center p-2 mt-2 rounded-md bg-sky-100/50 dark:bg-sky-500/10">
-                                                <File className="h-10 w-10 fill-sky-200 stroke-sky-400" />
-                                                <a
-                                                    href={field.value}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="ml-2 text-sm text-sky-700 hover:underline line-clamp-1"
-                                                >
-                                                    {field.value}
-                                                </a>
-                                                <button
-                                                    onClick={() => field.onChange("")}
-                                                    className="bg-rose-500 text-white p-1 rounded-full absolute -top-2 -right-2 shadow-sm"
-                                                    type="button"
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <FileUpload
-                                                endpoint="testSubmission"
-                                                onChange={(url) => {
-                                                    if (url) {
-                                                        field.onChange(url);
-                                                    }
-                                                }}
-                                            />
-                                        )}
-                                    </div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <div className="flex items-center gap-x-2">
-                        <Button
-                            disabled={!isValid || isSubmitting}
-                            type="submit"
-                        >
-                            {isSubmitting ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : "Submit Test"}
-                        </Button>
+
+            {selectedFiles.length === 0 ? (
+                <label
+                    onDragOver={(event) => {
+                        event.preventDefault();
+                        setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleDrop}
+                    className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-8 transition-colors ${
+                        isDragging
+                            ? "border-blue-400 bg-blue-500/10"
+                            : "border-border bg-muted/40 hover:border-primary/40"
+                    }`}
+                >
+                    <UploadCloud className="h-8 w-8 text-muted-foreground" />
+                    <div className="text-center">
+                        <p className="text-sm font-semibold">Click or drag and drop your answer sheet</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            PDF, JPG, PNG, WEBP and other images · 16MB per file
+                        </p>
                     </div>
-                </form>
-            </Form>
+                    <input
+                        type="file"
+                        accept="application/pdf,image/*"
+                        multiple
+                        className="hidden"
+                        onChange={(event) => {
+                            handleFileSelect(event.target.files);
+                            event.target.value = "";
+                        }}
+                    />
+                </label>
+            ) : isPdf ? (
+                <div className="flex items-center gap-3 rounded-xl border bg-muted/40 p-4">
+                    <FileText className="h-9 w-9 text-sky-500" />
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{selectedFiles[0].name}</p>
+                        <p className="text-xs text-muted-foreground">PDF ready to upload</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {previewUrls.map((url, index) => (
+                            <div key={url} className="relative aspect-[3/4] overflow-hidden rounded-lg border bg-muted">
+                                <img
+                                    src={url}
+                                    alt={`Answer sheet ${index + 1}`}
+                                    className="h-full w-full object-cover"
+                                />
+                                <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
+                                    {index + 1}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    <p className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+                        <ImageIcon className="h-3.5 w-3.5" />
+                        {selectedFiles.length} image{selectedFiles.length === 1 ? "" : "s"} selected
+                    </p>
+                </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2">
+                {selectedFiles.length > 0 && (
+                    <Button type="button" variant="ghost" size="sm" onClick={clearSelection} disabled={isUploading}>
+                        <X className="mr-2 h-4 w-4" />
+                        Clear
+                    </Button>
+                )}
+                <Button type="button" onClick={handleSubmit} disabled={selectedFiles.length === 0 || isUploading}>
+                    {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {isUploading ? "Uploading..." : "Submit Test"}
+                </Button>
+            </div>
         </div>
     );
 };

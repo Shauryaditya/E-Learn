@@ -57,6 +57,8 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
   const isLocked = !purchased;
   const existingSubmission = chapter.submissions[0];
   const isReviewed = existingSubmission?.status === "REVIEWED";
+  const originalImages = existingSubmission?.images || [];
+  const checkedImages = existingSubmission?.annotatedImages || [];
 
   return (
     <div className="min-h-full bg-background text-foreground">
@@ -196,16 +198,32 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                         Reviewed
                       </span>
                     </div>
-                    <a
-                      href={existingSubmission.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition"
-                    >
-                      View original submission
-                    </a>
+                    {existingSubmission.pdfUrl && (
+                      <a
+                        href={existingSubmission.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition"
+                      >
+                        View original submission
+                      </a>
+                    )}
                   </div>
                 </div>
+
+                {originalImages.length > 0 && (
+                  <div className="rounded-2xl border bg-card p-5">
+                    <p className="mb-3 text-sm font-semibold">Original answer sheets</p>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {originalImages.map((url, index) => (
+                        <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="group relative aspect-[3/4] overflow-hidden rounded-lg border bg-muted">
+                          <img src={url} alt={`Original answer sheet ${index + 1}`} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                          <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">{index + 1}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Teacher feedback */}
                 {existingSubmission.feedback && (
@@ -257,6 +275,20 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                     <ArrowLeft className="h-4 w-4 text-blue-400 rotate-180 group-hover:translate-x-0.5 transition-transform" />
                   </a>
                 )}
+
+                {checkedImages.length > 0 && (
+                  <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-5">
+                    <p className="mb-3 text-sm font-semibold text-blue-400">Checked answer sheets</p>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {checkedImages.map((url, index) => (
+                        <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="group relative aspect-[3/4] overflow-hidden rounded-lg border bg-muted">
+                          <img src={url} alt={`Checked answer sheet ${index + 1}`} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                          <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">{index + 1}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               /* ── SUBMITTED, PENDING REVIEW ── */
@@ -271,14 +303,26 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                   Your answer sheet has been submitted and is awaiting review
                   from your instructor.
                 </p>
-                <a
-                  href={existingSubmission.pdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-7 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition"
-                >
-                  View your submission
-                </a>
+                {existingSubmission.pdfUrl && (
+                  <a
+                    href={existingSubmission.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-7 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition"
+                  >
+                    View your submission
+                  </a>
+                )}
+                {originalImages.length > 0 && (
+                  <div className="ml-7 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {originalImages.map((url, index) => (
+                      <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="relative aspect-[3/4] overflow-hidden rounded-lg border bg-muted">
+                        <img src={url} alt={`Submitted answer sheet ${index + 1}`} className="h-full w-full object-cover" />
+                        <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">{index + 1}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             )
           ) : (
