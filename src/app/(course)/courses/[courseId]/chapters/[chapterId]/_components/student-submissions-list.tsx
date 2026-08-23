@@ -17,10 +17,10 @@ export const StudentSubmissionsList = ({ submissions }: StudentSubmissionsListPr
            const isGraded = sub.status === "REVIEWED";
            
            return (
-             <div key={sub.id} className="border bg-white rounded-md p-4 shadow-sm">
+             <div key={sub.id} className="border bg-card rounded-md p-4 shadow-sm">
                <div className="flex items-center justify-between mb-2">
-                 <p className="font-medium text-slate-800">Attempt #{submissions.length - index}</p>
-                 <p className="text-sm text-slate-500">
+                 <p className="font-medium text-foreground">Attempt #{submissions.length - index}</p>
+                 <p className="text-sm text-muted-foreground">
                    {new Date(sub.createdAt).toLocaleDateString()}
                  </p>
                </div>
@@ -32,14 +32,14 @@ export const StudentSubmissionsList = ({ submissions }: StudentSubmissionsListPr
                </div>
 
                {isGraded && sub.feedback && (
-                 <div className="mb-4 p-3 bg-slate-50 rounded-md border text-sm">
-                   <p className="font-medium text-slate-800 mb-1">Teacher Feedback:</p>
-                   <p className="text-slate-600 whitespace-pre-wrap">{sub.feedback}</p>
+                 <div className="mb-4 p-3 bg-muted/50 rounded-md border text-sm">
+                   <p className="font-medium text-foreground mb-1">Teacher Feedback:</p>
+                   <p className="text-muted-foreground whitespace-pre-wrap">{sub.feedback}</p>
                  </div>
                )}
 
                <div>
-                 <p className="text-sm font-medium mb-2 text-slate-700">
+                 <p className="text-sm font-medium mb-2 text-foreground">
                    {isGraded ? "Corrected Images" : "Submitted Images"}
                  </p>
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

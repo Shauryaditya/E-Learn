@@ -59,7 +59,7 @@ export const TestSubmissionForm = ({
     };
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4">
+        <div className="mt-6 border bg-card rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
                 Test Submission
             </div>
@@ -73,7 +73,7 @@ export const TestSubmissionForm = ({
                                 <FormControl>
                                     <div>
                                         {field.value ? (
-                                            <div className="relative flex items-center p-2 mt-2 rounded-md bg-sky-100/50">
+                                            <div className="relative flex items-center p-2 mt-2 rounded-md bg-sky-100/50 dark:bg-sky-500/10">
                                                 <File className="h-10 w-10 fill-sky-200 stroke-sky-400" />
                                                 <a
                                                     href={field.value}

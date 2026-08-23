@@ -113,7 +113,7 @@ export default async function CourseChapterPage({ params }: PageProps) {
         <>
           <Separator className="my-6" />
           <div className="p-4">
-            <h2 className="text-sm font-semibold text-blue-800 mb-3">
+            <h2 className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-3">
               Course Materials
             </h2>
 
@@ -127,12 +127,12 @@ export default async function CourseChapterPage({ params }: PageProps) {
               {chapter.attachments.map((attachment) => (
                 <div
                   key={attachment.id}
-                  className={`bg-white w-full p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition ${isLocked ? "blur-sm select-none pointer-events-none" : ""
+                  className={`bg-card w-full p-4 border rounded-lg shadow-sm hover:shadow-md transition ${isLocked ? "blur-sm select-none pointer-events-none" : ""
                     }`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     {/* Optional name/label above the preview */}
-                     <div className="text-sm font-medium text-gray-800">
+                     <div className="text-sm font-medium text-foreground">
                         {attachment.name ? "Chapter Notes & Worksheet" : "Course Attachments" }
                      </div>
                      

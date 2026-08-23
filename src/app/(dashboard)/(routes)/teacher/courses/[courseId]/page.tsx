@@ -13,6 +13,7 @@ import { AttachmentForm } from "./_components/attachment-form";
 import { ChaptersForm } from "./_components/chapters-form";
 import { Banner } from "@/components/banner";
 import { Actions } from "./_components/actions";
+import { AccessGrantForm } from "@/components/access-grant-form";
 
 const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
   const { userId } = auth();
@@ -35,6 +36,11 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
         orderBy: {
           createdAt: "desc",
         }
+      },
+      _count: {
+        select: {
+          purchases: true,
+        },
       }
     }
   });
@@ -115,6 +121,11 @@ const CourseIdPage = async ({ params }: { params: { courseId: string } }) => {
                 <h2 className="text-xl">Sell your course</h2>
               </div>
               <PriceForm initialData={course} courseId={course.id} />
+              <AccessGrantForm
+                endpoint={`/api/courses/${course.id}/grant-access`}
+                grantedCount={course._count.purchases}
+                label="Grant Course"
+              />
 
               <div className="flex items-center gap-x-2 mt-6">
                 <IconBadge icon={Target} />

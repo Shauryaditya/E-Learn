@@ -25,11 +25,11 @@ export const TestSeriesList = ({
             key={item.id}
             id={item.id}
             title={item.title}
-            imageUrl={item.imageUrl!}
+            imageUrl={item.imageUrl}
             chaptersLength={item.testChapters.length}
-            price={item.price!}
+            price={item.price}
             progress={item.progress}
-            category={item?.category?.name!}
+            category={item.category?.name ?? null}
           />
         ))}
       </div>

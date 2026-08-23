@@ -33,14 +33,14 @@ const scrollModePluginInstance = scrollModePlugin();
   const displayName = fileName || fileUrl.split("/").pop() || "Document";
 
   return (
-    <div className="w-full rounded-xl overflow-hidden border border-gray-200 shadow-md bg-white">
+    <div className="w-full rounded-xl overflow-hidden border shadow-md bg-card">
       
       {/* ── Header ── */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white">
+      <div className="flex items-center justify-between px-4 py-3 border-b bg-card">
         {/* Left: icon + name */}
         <div className="flex items-center gap-2 min-w-0">
           <FileText className="text-blue-500 shrink-0" size={16} />
-          <span className="text-sm font-semibold text-gray-800 truncate max-w-[160px]">
+          <span className="text-sm font-semibold text-foreground truncate max-w-[160px]">
             {displayName}
           </span>
         </div>
@@ -48,19 +48,19 @@ const scrollModePluginInstance = scrollModePlugin();
         {/* Right: zoom + download */}
         <div className="flex items-center gap-2 shrink-0">
           {/* Zoom controls */}
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1">
+          <div className="flex items-center gap-1 bg-muted rounded-lg px-2 py-1">
             <button
               onClick={zoomOut}
-              className="text-gray-600 hover:text-blue-500 transition"
+              className="text-muted-foreground hover:text-blue-500 transition"
             >
               <ZoomOut size={15} />
             </button>
-            <span className="text-xs text-gray-600 w-10 text-center">
+            <span className="text-xs text-muted-foreground w-10 text-center">
               {Math.round(scale * 100)}%
             </span>
             <button
               onClick={zoomIn}
-              className="text-gray-600 hover:text-blue-500 transition"
+              className="text-muted-foreground hover:text-blue-500 transition"
             >
               <ZoomIn size={15} />
             </button>
@@ -81,9 +81,9 @@ const scrollModePluginInstance = scrollModePlugin();
       </div>
 
       {/* ── PDF Viewer ── */}
-      <div className="bg-gray-50">
+      <div className="bg-muted/40">
         {isLoading && (
-          <p className="text-gray-400 text-center text-sm py-4">Loading preview...</p>
+          <p className="text-muted-foreground text-center text-sm py-4">Loading preview...</p>
         )}
 
         <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
@@ -101,20 +101,20 @@ const scrollModePluginInstance = scrollModePlugin();
 
           {/* ── Page Navigation ── */}
           {!isLoading && (
-            <div className="flex items-center justify-center gap-3 py-3 border-t border-gray-100 bg-white">
+            <div className="flex items-center justify-center gap-3 py-3 border-t bg-card">
               <GoToPreviousPage>
                 {({ isDisabled, onClick }) => (
                   <button
                     onClick={onClick}
                     disabled={isDisabled}
-                    className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-40 transition text-gray-700 font-bold"
+                    className="w-7 h-7 flex items-center justify-center rounded-full bg-muted hover:bg-accent disabled:opacity-40 transition text-foreground font-bold"
                   >
                     ‹
                   </button>
                 )}
               </GoToPreviousPage>
 
-              <span className="text-xs text-gray-600 flex items-center gap-1">
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
                 Page <CurrentPageInput /> / <NumberOfPages />
               </span>
 
@@ -123,7 +123,7 @@ const scrollModePluginInstance = scrollModePlugin();
                   <button
                     onClick={onClick}
                     disabled={isDisabled}
-                    className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-40 transition text-gray-700 font-bold"
+                    className="w-7 h-7 flex items-center justify-center rounded-full bg-muted hover:bg-accent disabled:opacity-40 transition text-foreground font-bold"
                   >
                     ›
                   </button>

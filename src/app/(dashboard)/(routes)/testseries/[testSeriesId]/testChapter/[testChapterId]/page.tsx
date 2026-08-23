@@ -59,26 +59,26 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
   const isReviewed = existingSubmission?.status === "REVIEWED";
 
   return (
-    <div className="min-h-full bg-[#0a0f1e] text-white">
+    <div className="min-h-full bg-background text-foreground">
       <div className="max-w-4xl mx-auto px-4 md:px-6 pb-20 pt-6 space-y-6">
         {/* ── Breadcrumb + header ── */}
         <div>
           <Link
             href={`/testseries/${chapter.testSeries.id}`}
-            className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition mb-4"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
             {chapter.testSeries.title}
           </Link>
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
               {chapter.title}
             </h1>
 
             {!purchased && chapter.testSeries.price != null && (
               <div className="flex items-center gap-3 flex-shrink-0">
-                <span className="text-lg font-bold text-white">
+                <span className="text-lg font-bold text-foreground">
                   {formatPrice(chapter.testSeries.price)}
                 </span>
                 <TestSeriesEnrollButton
@@ -100,7 +100,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
 
         {/* ── Description ── */}
         {chapter.description && (
-          <div className="rounded-2xl border border-white/6 bg-white/3 p-5">
+          <div className="rounded-2xl border bg-card p-5">
             <Preview value={chapter.description} />
           </div>
         )}
@@ -110,13 +110,13 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <div className="w-0.5 h-4 bg-blue-500 rounded-full" />
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-white">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">
                 Question Paper
               </h2>
             </div>
 
             {isLocked ? (
-              <div className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-white/10 text-sm text-gray-500">
+              <div className="flex items-center gap-3 p-4 rounded-xl border border-dashed text-sm text-muted-foreground">
                 <FileText className="h-4 w-4" />
                 Purchase the test series to view and download the question
                 paper.
@@ -126,10 +126,10 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                 {chapter.attachments.map((a) => (
                   <div
                     key={a.id}
-                    className="rounded-xl border border-white/6 bg-white/3 p-4 overflow-hidden"
+                    className="rounded-xl border bg-card p-4 overflow-hidden"
                   >
                     {a.name && (
-                      <p className="text-sm font-medium text-gray-300 mb-3">
+                      <p className="text-sm font-medium text-foreground mb-3">
                         {a.name}
                       </p>
                     )}
@@ -145,7 +145,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <div className="w-0.5 h-4 bg-blue-500 rounded-full" />
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-white">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               Answer Sheet
             </h2>
           </div>
@@ -157,24 +157,24 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                 {/* Score card row */}
                 <div className="grid grid-cols-2 gap-3">
                   {/* Marks */}
-                  <div className="rounded-2xl border border-white/6 bg-white/4 p-5 space-y-1">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                  <div className="rounded-2xl border bg-card p-5 space-y-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                       Total Score
                     </p>
                     {existingSubmission.marksAwarded !== null ? (
                       <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-bold text-white">
+                        <span className="text-4xl font-bold text-foreground">
                           {existingSubmission.marksAwarded}
                         </span>
-                        <span className="text-sm text-gray-500 font-medium">
+                        <span className="text-sm text-muted-foreground font-medium">
                           /100
                         </span>
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-500">Not graded</p>
+                      <p className="text-sm text-muted-foreground">Not graded</p>
                     )}
                     {existingSubmission.marksAwarded !== null && (
-                      <div className="mt-3 h-1.5 w-full rounded-full bg-white/8 overflow-hidden">
+                      <div className="mt-3 h-1.5 w-full rounded-full bg-muted overflow-hidden">
                         <div
                           className="h-full rounded-full bg-blue-500 transition-all"
                           style={{
@@ -187,7 +187,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
 
                   {/* Status */}
                   <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 space-y-1 flex flex-col justify-between">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
                       Status
                     </p>
                     <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                       href={existingSubmission.pdfUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-gray-500 hover:text-gray-300 underline underline-offset-2 transition"
+                      className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition"
                     >
                       View original submission
                     </a>
@@ -209,26 +209,26 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
 
                 {/* Teacher feedback */}
                 {existingSubmission.feedback && (
-                  <div className="rounded-2xl border border-white/6 bg-white/4 p-5 space-y-4">
+                  <div className="rounded-2xl border bg-card p-5 space-y-4">
                     {/* Teacher header */}
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
                         T
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-white">
+                        <p className="text-sm font-semibold text-foreground">
                           Teacher Feedback
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           Reviewed by your instructor
                         </p>
                       </div>
-                      <MessageSquare className="h-4 w-4 text-gray-600 ml-auto" />
+                      <MessageSquare className="h-4 w-4 text-muted-foreground ml-auto" />
                     </div>
 
                     {/* Quote */}
                     <div className="border-l-2 border-blue-500/50 pl-4">
-                      <p className="text-sm text-gray-300 leading-relaxed italic whitespace-pre-wrap">
+                      <p className="text-sm text-muted-foreground leading-relaxed italic whitespace-pre-wrap">
                         &ldquo;{existingSubmission.feedback}&rdquo;
                       </p>
                     </div>
@@ -250,7 +250,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                       <p className="text-sm font-semibold text-blue-400">
                         View Checked Copy
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         Annotated by your instructor
                       </p>
                     </div>
@@ -267,7 +267,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                     Submission under review
                   </p>
                 </div>
-                <p className="text-xs text-gray-500 ml-7">
+                <p className="text-xs text-muted-foreground ml-7">
                   Your answer sheet has been submitted and is awaiting review
                   from your instructor.
                 </p>
@@ -275,7 +275,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                   href={existingSubmission.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ml-7 text-xs text-gray-400 hover:text-white underline underline-offset-2 transition"
+                  className="ml-7 text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition"
                 >
                   View your submission
                 </a>
@@ -283,7 +283,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
             )
           ) : (
             /* ── NO SUBMISSION YET ── */
-            <div className="rounded-2xl border border-white/6 bg-white/3 p-5">
+            <div className="rounded-2xl border bg-card p-5">
               <TestSubmissionForm
                 testSeriesId={chapter.testSeries.id}
                 testChapterId={chapter.id}

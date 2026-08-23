@@ -59,9 +59,9 @@ const CourseIdPage = async ({
     : `/courses/${course.id}`;
 
   return (
-    <div className="min-h-full bg-brand-navy text-brand-tertiary">
+    <div className="min-h-full bg-background text-foreground">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <section className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-black/20">
+        <section className="overflow-hidden rounded-2xl border bg-card shadow-2xl shadow-black/10">
           <div className="relative min-h-[360px]">
             {course.imageUrl ? (
               <Image
@@ -72,16 +72,16 @@ const CourseIdPage = async ({
                 className="object-cover"
               />
             ) : (
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(6,182,212,0.35),transparent_35%),linear-gradient(135deg,#0F172A,#111827)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(6,182,212,0.18),transparent_35%),linear-gradient(135deg,hsl(var(--card)),hsl(var(--muted)))] dark:bg-[radial-gradient(circle_at_top_right,rgba(6,182,212,0.35),transparent_35%),linear-gradient(135deg,#0F172A,#111827)]" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-brand-navy via-brand-navy/75 to-brand-navy/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/65 to-background/10 dark:from-brand-navy dark:via-brand-navy/75 dark:to-brand-navy/20" />
             <div className="relative z-10 flex min-h-[360px] flex-col justify-end gap-5 p-5 sm:p-8">
               <div className="flex flex-wrap items-center gap-3">
                 <div className="inline-flex items-center rounded-full bg-brand-secondary/15 px-4 py-2 text-sm font-semibold text-brand-secondary ring-1 ring-brand-secondary/30">
                   <Sparkles className="mr-2 h-4 w-4" />
                   Course Preview
                 </div>
-                <div className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-slate-200">
+                <div className="inline-flex items-center rounded-full bg-muted/80 px-4 py-2 text-sm font-medium text-muted-foreground dark:bg-white/10 dark:text-slate-200">
                   <BookOpen className="mr-2 h-4 w-4" />
                   {course.chapters.length}{" "}
                   {course.chapters.length === 1 ? "Chapter" : "Chapters"}
@@ -89,11 +89,11 @@ const CourseIdPage = async ({
               </div>
 
               <div className="max-w-3xl">
-                <h1 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white sm:text-5xl">
                   {course.title}
                 </h1>
                 {course.description && (
-                  <div className="mt-4 max-w-2xl text-sm leading-7 text-slate-200 sm:text-base [&_.ql-container]:font-sans [&_.ql-editor]:p-0">
+                  <div className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground dark:text-slate-200 sm:text-base [&_.ql-container]:font-sans [&_.ql-editor]:p-0">
                     <Preview value={course.description} />
                   </div>
                 )}
@@ -103,14 +103,14 @@ const CourseIdPage = async ({
         </section>
 
         <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/10 sm:p-6">
+          <div className="rounded-2xl border bg-card p-5 shadow-xl shadow-black/10 sm:p-6">
             {isEnrolled ? (
               <div className="space-y-4">
                 <div>
                   <p className="text-lg font-bold text-emerald-300">
                     You are enrolled in this course
                   </p>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Continue from the curriculum or jump into the first chapter.
                   </p>
                 </div>
@@ -128,21 +128,21 @@ const CourseIdPage = async ({
                   <p className="text-sm font-semibold uppercase tracking-wide text-brand-secondary">
                     Unlock the course
                   </p>
-                  <h2 className="mt-2 text-2xl font-bold text-white">
+                  <h2 className="mt-2 text-2xl font-bold text-foreground">
                     Start learning with a focused curriculum.
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
                     Preview free chapters when available, then enroll to unlock
                     the full course experience.
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-white/10 bg-brand-navy p-4">
-                  <p className="text-sm text-slate-400">Course access</p>
-                  <p className="mt-1 text-3xl font-bold text-white">
+                <div className="rounded-xl border bg-muted/50 p-4">
+                  <p className="text-sm text-muted-foreground">Course access</p>
+                  <p className="mt-1 text-3xl font-bold text-foreground">
                     {course.price !== null ? formatPrice(course.price) : "Free"}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     One-time payment. Lifetime access.
                   </p>
                 </div>
@@ -160,7 +160,7 @@ const CourseIdPage = async ({
                       asChild
                       size="lg"
                       variant="outline"
-                      className="w-full border-white/15 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+                      className="w-full"
                     >
                       <Link href={startHref}>
                         {firstFreeChapter ? "Start Free Preview" : "View Course"}
@@ -176,11 +176,11 @@ const CourseIdPage = async ({
             )}
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-xl shadow-black/10">
-            <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5 sm:p-6">
+          <div className="overflow-hidden rounded-2xl border bg-card shadow-xl shadow-black/10">
+            <div className="flex items-start justify-between gap-4 border-b p-5 sm:p-6">
               <div>
-                <h2 className="text-xl font-bold text-white">Course Curriculum</h2>
-                <p className="mt-1 text-sm text-slate-400">
+                <h2 className="text-xl font-bold text-foreground">Course Curriculum</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
                   {course.chapters.length} published{" "}
                   {course.chapters.length === 1 ? "chapter" : "chapters"}
                 </p>
@@ -191,11 +191,11 @@ const CourseIdPage = async ({
             </div>
 
             {course.chapters.length === 0 ? (
-              <div className="p-6 text-sm text-slate-400">
+              <div className="p-6 text-sm text-muted-foreground">
                 This course does not have published chapters yet.
               </div>
             ) : (
-              <div className="divide-y divide-white/10">
+              <div className="divide-y">
                 {course.chapters.map((chapter, index) => {
                   const canOpen = isEnrolled || chapter.isFree;
                   const requiresSignIn = !userId;
@@ -211,8 +211,8 @@ const CourseIdPage = async ({
                     <div
                       className={cn(
                         "flex items-center gap-4 p-5 transition",
-                        canOpen && userId && "hover:bg-white/5",
-                        isLocked && "text-slate-500"
+                        canOpen && userId && "hover:bg-muted/60",
+                        isLocked && "text-muted-foreground"
                       )}
                     >
                       <div
@@ -221,17 +221,17 @@ const CourseIdPage = async ({
                           isEnrolled
                             ? "bg-emerald-400/15 text-emerald-300"
                             : isLocked || requiresSignIn
-                              ? "bg-white/5 text-slate-500"
+                              ? "bg-muted text-muted-foreground"
                               : "bg-brand-primary/15 text-brand-primary"
                         )}
                       >
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-slate-100">
+                        <p className="font-semibold text-foreground">
                           {index + 1}. {chapter.title}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-muted-foreground">
                           {isEnrolled
                             ? "Unlocked"
                             : chapter.isFree

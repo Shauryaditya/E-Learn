@@ -14,6 +14,7 @@ import { ImageForm } from "./_components/image-form";
 import { PriceForm } from "./_components/price-form";
 import { ChaptersForm } from "./_components/chapters-form";
 import { Actions } from "./_components/actions";
+import { AccessGrantForm } from "@/components/access-grant-form";
 
 const TestSeriesIdPage = async ({
   params
@@ -35,6 +36,11 @@ const TestSeriesIdPage = async ({
       testChapters: {
         orderBy: {
           position: "asc",
+        },
+      },
+      _count: {
+        select: {
+          testSeriesPurchase: true,
         },
       },
     },
@@ -134,6 +140,11 @@ const TestSeriesIdPage = async ({
               <PriceForm
                 initialData={testSeries}
                 testSeriesId={testSeries.id}
+              />
+              <AccessGrantForm
+                endpoint={`/api/testseries/${testSeries.id}/grant-access`}
+                grantedCount={testSeries._count.testSeriesPurchase}
+                label="Grant Test Series"
               />
             </div>
           </div>

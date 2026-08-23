@@ -71,15 +71,15 @@ export const ChapterSubmissionForm = ({
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#1a2236] p-4 space-y-4">
+    <div className="rounded-2xl border bg-card p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="bg-[#243050] p-2 rounded-xl">
+        <div className="bg-muted p-2 rounded-xl">
           <FileText className="h-5 w-5 text-blue-400" />
         </div>
         <div>
-          <p className="text-white font-semibold text-sm">Assignment Submission</p>
-          <p className="text-slate-400 text-xs">
+          <p className="text-foreground font-semibold text-sm">Assignment Submission</p>
+          <p className="text-muted-foreground text-xs">
             {dueDate ? `Due: ${dueDate} • ` : ""}
             {points ? `${points} Points` : ""}
           </p>
@@ -95,15 +95,15 @@ export const ChapterSubmissionForm = ({
           className={`flex flex-col items-center justify-center gap-3 w-full p-8 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
             isDragging
               ? "border-blue-400 bg-blue-500/10"
-              : "border-white/10 bg-[#151d2e] hover:border-white/20"
+              : "border-border bg-muted/40 hover:border-primary/40"
           }`}
         >
-          <UploadCloud className="h-8 w-8 text-slate-400" />
+          <UploadCloud className="h-8 w-8 text-muted-foreground" />
           <div className="text-center">
-            <p className="text-white font-semibold text-sm">
+            <p className="text-foreground font-semibold text-sm">
               Click or drag and drop your solution
             </p>
-            <p className="text-slate-500 text-xs mt-1">
+            <p className="text-muted-foreground text-xs mt-1">
               Supported formats: PDF, DOCX, ZIP (Max 50MB)
             </p>
           </div>
@@ -122,7 +122,7 @@ export const ChapterSubmissionForm = ({
             {previewUrls.map((url, i) => (
               <div
                 key={i}
-                className="relative aspect-square rounded-xl overflow-hidden bg-[#151d2e] border border-white/10"
+                className="relative aspect-square rounded-xl overflow-hidden bg-muted border"
               >
                 <img
                   src={url}
@@ -132,7 +132,7 @@ export const ChapterSubmissionForm = ({
               </div>
             ))}
           </div>
-          <p className="text-xs text-slate-400 text-center">
+          <p className="text-xs text-muted-foreground text-center">
             {previewUrls.length} file{previewUrls.length > 1 ? "s" : ""} selected
           </p>
         </div>
@@ -140,7 +140,7 @@ export const ChapterSubmissionForm = ({
 
       {/* Footer */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-slate-500 leading-tight max-w-[150px]">
+        <p className="text-xs text-muted-foreground leading-tight max-w-[150px]">
           Multiple files can be uploaded as a single .zip
         </p>
 
@@ -149,7 +149,7 @@ export const ChapterSubmissionForm = ({
             <button
               onClick={handleClear}
               disabled={isUploading}
-              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition disabled:opacity-40"
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition disabled:opacity-40"
             >
               <X className="h-4 w-4" />
             </button>
@@ -157,7 +157,7 @@ export const ChapterSubmissionForm = ({
           <button
             onClick={handleSubmit}
             disabled={isUploading || selectedFiles.length === 0}
-            className="bg-indigo-100 hover:bg-white text-indigo-700 font-semibold text-sm px-5 py-2.5 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-sm px-5 py-2.5 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isUploading ? (
               <>
