@@ -1,10 +1,10 @@
 "use client";
 
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { FileText, Image as ImageIcon, Loader2, UploadCloud, X } from "lucide-react";
+import { Camera, FileText, Image as ImageIcon, ImagePlus, Loader2, UploadCloud, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useUploadThing } from "@/lib/uploadthing";
@@ -27,19 +27,21 @@ export const TestSubmissionForm = ({
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const previewUrlsRef = useRef<string[]>([]);
 
     const clearSelection = () => {
         if (isUploading) return;
-        previewUrls.forEach((url) => URL.revokeObjectURL(url));
+        previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+        previewUrlsRef.current = [];
         setPreviewUrls([]);
         setSelectedFiles([]);
     };
 
     useEffect(() => {
-        return () => previewUrls.forEach((url) => URL.revokeObjectURL(url));
-    }, [previewUrls]);
+        return () => previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    }, []);
 
-    const handleFileSelect = (files: FileList | null) => {
+    const handleFileSelect = (files: FileList | null, appendImages = false) => {
         if (!files?.length) return;
 
         const chosenFiles = Array.from(files);
@@ -56,7 +58,16 @@ export const TestSubmissionForm = ({
             return;
         }
 
-        if (pdfFiles.length > 1 || imageFiles.length > MAX_IMAGES) {
+        if (appendImages && pdfFiles.length > 0) {
+            toast.error("A PDF cannot be added to an image submission");
+            return;
+        }
+
+        const totalImageCount = appendImages
+            ? selectedFiles.length + imageFiles.length
+            : imageFiles.length;
+
+        if (pdfFiles.length > 1 || totalImageCount > MAX_IMAGES) {
             toast.error(`Upload one PDF or up to ${MAX_IMAGES} images`);
             return;
         }
@@ -66,9 +77,34 @@ export const TestSubmissionForm = ({
             return;
         }
 
-        previewUrls.forEach((url) => URL.revokeObjectURL(url));
+        const newPreviewUrls = imageFiles.map((file) => URL.createObjectURL(file));
+
+        if (appendImages) {
+            setSelectedFiles((currentFiles) => [...currentFiles, ...imageFiles]);
+            setPreviewUrls((currentUrls) => {
+                const nextUrls = [...currentUrls, ...newPreviewUrls];
+                previewUrlsRef.current = nextUrls;
+                return nextUrls;
+            });
+            return;
+        }
+
+        previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+        previewUrlsRef.current = newPreviewUrls;
         setSelectedFiles(chosenFiles);
-        setPreviewUrls(imageFiles.map((file) => URL.createObjectURL(file)));
+        setPreviewUrls(newPreviewUrls);
+    };
+
+    const removeImage = (indexToRemove: number) => {
+        if (isUploading) return;
+
+        URL.revokeObjectURL(previewUrls[indexToRemove]);
+        setSelectedFiles((files) => files.filter((_, index) => index !== indexToRemove));
+        setPreviewUrls((urls) => {
+            const nextUrls = urls.filter((_, index) => index !== indexToRemove);
+            previewUrlsRef.current = nextUrls;
+            return nextUrls;
+        });
     };
 
     const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
@@ -100,7 +136,8 @@ export const TestSubmissionForm = ({
             );
 
             toast.success("Test submitted successfully");
-            previewUrls.forEach((url) => URL.revokeObjectURL(url));
+            previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+            previewUrlsRef.current = [];
             setPreviewUrls([]);
             setSelectedFiles([]);
             router.refresh();
@@ -176,6 +213,15 @@ export const TestSubmissionForm = ({
                                 <span className="absolute bottom-1 right-1 rounded bg-black/70 px-1.5 py-0.5 text-xs text-white">
                                     {index + 1}
                                 </span>
+                                <button
+                                    type="button"
+                                    aria-label={`Remove answer sheet ${index + 1}`}
+                                    disabled={isUploading}
+                                    onClick={() => removeImage(index)}
+                                    className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white transition hover:bg-rose-600 disabled:opacity-50"
+                                >
+                                    <X className="h-3.5 w-3.5" />
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -183,6 +229,40 @@ export const TestSubmissionForm = ({
                         <ImageIcon className="h-3.5 w-3.5" />
                         {selectedFiles.length} image{selectedFiles.length === 1 ? "" : "s"} selected
                     </p>
+                    {selectedFiles.length < MAX_IMAGES && (
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border bg-card px-4 py-2.5 text-sm font-medium transition hover:bg-muted">
+                                <Camera className="h-4 w-4" />
+                                Take another photo
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    capture="environment"
+                                    disabled={isUploading}
+                                    className="hidden"
+                                    onChange={(event) => {
+                                        handleFileSelect(event.target.files, true);
+                                        event.target.value = "";
+                                    }}
+                                />
+                            </label>
+                            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border bg-card px-4 py-2.5 text-sm font-medium transition hover:bg-muted">
+                                <ImagePlus className="h-4 w-4" />
+                                Add from gallery
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    disabled={isUploading}
+                                    className="hidden"
+                                    onChange={(event) => {
+                                        handleFileSelect(event.target.files, true);
+                                        event.target.value = "";
+                                    }}
+                                />
+                            </label>
+                        </div>
+                    )}
                 </div>
             )}
 
