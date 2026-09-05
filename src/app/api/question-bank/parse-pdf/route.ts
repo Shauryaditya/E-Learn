@@ -7,7 +7,7 @@ import * as z from "zod";
 
 import { model } from "@/lib/gemini";
 
-export const maxDuration = 300;
+export const maxDuration = 60;
 export const runtime = "nodejs";
 
 const MAX_FILE_SIZE_BYTES = 30 * 1024 * 1024;
