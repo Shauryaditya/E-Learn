@@ -10,35 +10,39 @@ import {
   Trophy,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
+import { withPrismaRetry } from "@/lib/prisma-retry";
 import { ContestRegisterButton } from "./_components/contest-register-button";
 
 type ContestWithMeta = Awaited<ReturnType<typeof getContests>>[number];
 
 const getContests = async (userId: string) => {
-  return db.contest.findMany({
-    where: {
-      isPublished: true,
-    },
-    include: {
-      category: true,
-      questions: {
-        select: { id: true },
+  return withPrismaRetry(() =>
+    db.contest.findMany({
+      where: {
+        isPublished: true,
       },
-      registrations: {
-        select: {
-          id: true,
-          userId: true,
+      include: {
+        category: true,
+        questions: {
+          select: { id: true },
+        },
+        registrations: {
+          select: {
+            id: true,
+            userId: true,
+          },
         },
       },
-    },
-    orderBy: {
-      startsAt: "asc",
-    },
-  });
+      orderBy: {
+        startsAt: "asc",
+      },
+    })
+  );
 };
 
 const formatDate = (date: Date) =>
@@ -53,6 +57,16 @@ const isRegistered = (contest: ContestWithMeta, userId: string) =>
 const registrationClosed = (contest: ContestWithMeta) => {
   const now = new Date();
   return !!contest.registrationClosesAt && now > contest.registrationClosesAt;
+};
+
+const getContestEndsAt = (contest: ContestWithMeta) =>
+  new Date(contest.startsAt.getTime() + contest.durationMinutes * 60 * 1000);
+
+const canStartContest = (contest: ContestWithMeta) => {
+  const now = new Date();
+  const endsAt = getContestEndsAt(contest);
+
+  return now >= contest.startsAt && now < endsAt;
 };
 
 const getTimeUntil = (date: Date) => {
@@ -86,47 +100,51 @@ const ContestCard = ({
   const Icon = contestIcon(index);
   const registered = isRegistered(contest, userId);
   const closed = registrationClosed(contest);
+  const isLive = canStartContest(contest);
 
   return (
     <article className="group flex h-full flex-col gap-5 rounded-xl border border-white/10 bg-white/[0.04] p-5 shadow-sm transition hover:border-blue-300/50 hover:bg-white/[0.06]">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-cyan-300/10 text-cyan-200">
-          <Icon className="h-5 w-5" />
+      <Link href={`/contests/${contest.id}`} className="flex flex-1 flex-col gap-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-cyan-300/10 text-cyan-200">
+            <Icon className="h-5 w-5" />
+          </div>
+          <Badge className="border-cyan-300/30 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/10">
+            {isLive ? "Live now" : closed ? "Closed" : registered ? "Registered" : "Registration Open"}
+          </Badge>
         </div>
-        <Badge className="border-cyan-300/30 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/10">
-          {closed ? "Closed" : registered ? "Registered" : "Registration Open"}
-        </Badge>
-      </div>
 
-      <div>
-        <h3 className="line-clamp-2 text-xl font-semibold text-white">
-          {contest.title}
-        </h3>
-        <p className="mt-1 text-sm text-slate-400">
-          {contest.category?.name || "General Contest"}
-        </p>
-        <p className="mt-3 text-2xl font-semibold text-blue-100">
-          {contest.price ? formatPrice(contest.price) : "Free"}
-        </p>
-      </div>
+        <div>
+          <h3 className="line-clamp-2 text-xl font-semibold text-white">
+            {contest.title}
+          </h3>
+          <p className="mt-1 text-sm text-slate-400">
+            {contest.category?.name || "General Contest"}
+          </p>
+          <p className="mt-3 text-2xl font-semibold text-blue-100">
+            {contest.price ? formatPrice(contest.price) : "Free"}
+          </p>
+        </div>
 
-      <div className="mt-auto space-y-3 border-t border-white/10 pt-4 text-sm text-slate-300">
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-4 w-4 text-blue-200" />
-          {formatDate(contest.startsAt)}
+        <div className="mt-auto space-y-3 border-t border-white/10 pt-4 text-sm text-slate-300">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-blue-200" />
+            {formatDate(contest.startsAt)}
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-blue-200" />
+            Duration: {contest.durationMinutes} mins
+          </div>
+          <div className="flex items-center gap-2">
+            <Users className="h-4 w-4 text-blue-200" />
+            {contest.registrations.length}
+            {contest.maxParticipants ? ` / ${contest.maxParticipants}` : ""} registered
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-blue-200" />
-          Duration: {contest.durationMinutes} mins
-        </div>
-        <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-blue-200" />
-          {contest.registrations.length}
-          {contest.maxParticipants ? ` / ${contest.maxParticipants}` : ""} registered
-        </div>
-      </div>
+      </Link>
 
       <ContestRegisterButton
+        canStart={canStartContest(contest)}
         contestId={contest.id}
         isRegistered={registered}
         registrationClosed={closed}
@@ -144,9 +162,11 @@ const ContestsPage = async () => {
 
   const contests = await getContests(userId);
   const now = new Date();
-  const upcoming = contests.filter((contest) => contest.startsAt >= now);
-  const past = contests.filter((contest) => contest.startsAt < now).reverse();
-  const featured = upcoming[0];
+  const activeContests = contests.filter((contest) => getContestEndsAt(contest) >= now);
+  const past = contests.filter((contest) => getContestEndsAt(contest) < now).reverse();
+  const live = activeContests.filter((contest) => canStartContest(contest));
+  const upcoming = activeContests.filter((contest) => !canStartContest(contest));
+  const featured = live[0] || upcoming[0];
 
   return (
     <div className="min-h-screen bg-[#0b1326] text-slate-100">
@@ -174,12 +194,17 @@ const ContestsPage = async () => {
                     Starts In
                   </p>
                   <div className="rounded-lg border border-white/10 bg-white/[0.06] px-5 py-3 text-2xl font-semibold text-blue-200">
-                    {featured ? getTimeUntil(featured.startsAt) : "Coming soon"}
+                    {featured
+                      ? canStartContest(featured)
+                        ? "Live now"
+                        : getTimeUntil(featured.startsAt)
+                      : "Coming soon"}
                   </div>
                 </div>
                 {featured && (
                   <div className="w-full sm:w-52">
                     <ContestRegisterButton
+                      canStart={canStartContest(featured)}
                       contestId={featured.id}
                       isRegistered={isRegistered(featured, userId)}
                       registrationClosed={registrationClosed(featured)}
@@ -209,17 +234,17 @@ const ContestsPage = async () => {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-2xl font-semibold text-white">
-                Upcoming Contests
+                Active Contests
               </h2>
               <p className="text-sm text-slate-400">
-                Register before the contest window closes.
+                Live and upcoming contests stay here until their duration ends.
               </p>
             </div>
             <Sparkles className="h-5 w-5 text-blue-200" />
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {upcoming.map((contest, index) => (
+            {activeContests.map((contest, index) => (
               <ContestCard
                 key={contest.id}
                 contest={contest}
@@ -229,7 +254,7 @@ const ContestsPage = async () => {
             ))}
           </div>
 
-          {upcoming.length === 0 && (
+          {activeContests.length === 0 && (
             <div className="rounded-xl border border-dashed border-white/10 p-10 text-center text-sm text-slate-400">
               No upcoming contests yet.
             </div>

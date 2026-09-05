@@ -1,7 +1,8 @@
 "use client";
 
 import axios from "axios";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, ExternalLink, Loader2, Play } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -12,12 +13,16 @@ interface ContestRegisterButtonProps {
   contestId: string;
   isRegistered: boolean;
   registrationClosed: boolean;
+  canStart?: boolean;
+  showDetailsForRegistered?: boolean;
 }
 
 export const ContestRegisterButton = ({
   contestId,
   isRegistered,
   registrationClosed,
+  canStart = false,
+  showDetailsForRegistered = true,
 }: ContestRegisterButtonProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -38,12 +43,27 @@ export const ContestRegisterButton = ({
   if (isRegistered) {
     return (
       <Button
-        disabled
+        asChild={canStart || showDetailsForRegistered}
+        disabled={!canStart && !showDetailsForRegistered}
         className="w-full border-emerald-500/40 bg-emerald-500/15 text-emerald-200"
         variant="outline"
       >
-        <CheckCircle2 className="mr-2 h-4 w-4" />
-        Registered
+        {canStart ? (
+          <Link href={`/contests/${contestId}/attempt`}>
+            <Play className="mr-2 h-4 w-4" />
+            Start contest
+          </Link>
+        ) : showDetailsForRegistered ? (
+          <Link href={`/contests/${contestId}`}>
+            <ExternalLink className="mr-2 h-4 w-4" />
+            View contest
+          </Link>
+        ) : (
+          <>
+            <CheckCircle2 className="mr-2 h-4 w-4" />
+            Registered
+          </>
+        )}
       </Button>
     );
   }

@@ -64,6 +64,17 @@ type ParsedQuestionDraft = {
   }[];
 };
 
+type PdfParseMeta = {
+  pageCount: number;
+  parserMode: "text" | "vision_ocr";
+  textCharCount: number;
+  chunkCount: number;
+  failedChunks: {
+    startPage: number;
+    endPage: number;
+  }[];
+};
+
 interface ContestQuestionsManagerProps {
   contestId: string;
   contestQuestions: ContestQuestion[];
@@ -106,8 +117,9 @@ export const ContestQuestionsManager = ({
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isParsingPdf, setIsParsingPdf] = useState(false);
   const [parsedQuestions, setParsedQuestions] = useState<ParsedQuestionDraft[]>([]);
-  const [isSavingParsed, setIsSavingParsed] = useState(false);
-  const isSavingParsedRef = useRef(false);
+  const [pdfParseMeta, setPdfParseMeta] = useState<PdfParseMeta | null>(null);
+  const [isAddingParsed, setIsAddingParsed] = useState(false);
+  const isAddingParsedRef = useRef(false);
 
   const attachedIds = useMemo(
     () => new Set(contestQuestions.map((item) => item.question.id)),
@@ -166,22 +178,23 @@ export const ContestQuestionsManager = ({
 
       const response = await axios.post("/api/question-bank/parse-pdf", formData);
       setParsedQuestions(response.data.questions || []);
-      toast.success("PDF parsed");
-    } catch {
-      toast.error("Could not parse PDF");
+      setPdfParseMeta(response.data.meta || null);
+      toast.success(`PDF parsed: ${response.data.questions?.length || 0} questions found`);
+    } catch (error: any) {
+      toast.error(error?.response?.data || "Could not parse PDF");
     } finally {
       setIsParsingPdf(false);
     }
   };
 
-  const onSaveParsedQuestions = async () => {
-    if (isSavingParsedRef.current || parsedQuestions.length === 0) return;
+  const onAddParsedQuestionsToContest = async () => {
+    if (isAddingParsedRef.current || parsedQuestions.length === 0) return;
 
     try {
-      isSavingParsedRef.current = true;
-      setIsSavingParsed(true);
+      isAddingParsedRef.current = true;
+      setIsAddingParsed(true);
 
-      await axios.post("/api/question-bank", {
+      await axios.post(`/api/contests/${contestId}/questions`, {
         questions: parsedQuestions.map((question) => ({
           ...question,
           defaultMarks: question.defaultMarks || 1,
@@ -189,15 +202,16 @@ export const ContestQuestionsManager = ({
         })),
       });
 
-      toast.success("Questions saved to bank");
+      toast.success("Questions added to contest");
       setParsedQuestions([]);
+      setPdfParseMeta(null);
       setPdfFile(null);
       router.refresh();
-    } catch {
-      toast.error("Could not save parsed questions");
+    } catch (error: any) {
+      toast.error(error?.response?.data || "Could not add parsed questions");
     } finally {
-      setIsSavingParsed(false);
-      isSavingParsedRef.current = false;
+      setIsAddingParsed(false);
+      isAddingParsedRef.current = false;
     }
   };
 
@@ -335,7 +349,11 @@ export const ContestQuestionsManager = ({
           <Input
             accept="application/pdf"
             type="file"
-            onChange={(event) => setPdfFile(event.target.files?.[0] || null)}
+            onChange={(event) => {
+              setPdfFile(event.target.files?.[0] || null);
+              setPdfParseMeta(null);
+              setParsedQuestions([]);
+            }}
           />
           <Button
             type="button"
@@ -348,6 +366,25 @@ export const ContestQuestionsManager = ({
           </Button>
         </div>
 
+        {pdfParseMeta && (
+          <div className="mt-4 rounded-md border bg-slate-50 p-3 text-sm dark:bg-slate-950">
+            <p className="font-medium">
+              Parsed with {pdfParseMeta.parserMode === "vision_ocr" ? "OCR-style vision" : "text extraction"}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {pdfParseMeta.pageCount} pages · {pdfParseMeta.chunkCount} chunks · {pdfParseMeta.textCharCount} extracted text characters
+            </p>
+            {pdfParseMeta.failedChunks.length > 0 && (
+              <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
+                Some page ranges could not be parsed:{" "}
+                {pdfParseMeta.failedChunks
+                  .map((chunk) => `${chunk.startPage}-${chunk.endPage}`)
+                  .join(", ")}
+              </p>
+            )}
+          </div>
+        )}
+
         {parsedQuestions.length > 0 && (
           <div className="mt-5 space-y-3">
             <div className="flex items-center justify-between gap-3">
@@ -356,10 +393,10 @@ export const ContestQuestionsManager = ({
               </p>
               <Button
                 type="button"
-                onClick={onSaveParsedQuestions}
-                disabled={isSavingParsed}
+                onClick={onAddParsedQuestionsToContest}
+                disabled={isAddingParsed}
               >
-                {isSavingParsed ? "Saving..." : "Save all to bank"}
+                {isAddingParsed ? "Adding..." : "Add all to contest"}
               </Button>
             </div>
 

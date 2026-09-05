@@ -16,26 +16,37 @@ declare global {
 interface MathTextProps {
   value: string;
   className?: string;
+  forceMath?: boolean;
 }
 
-const asInlineMath = (value: string) => {
+const mathPattern = /\\\(|\\\[|\$\$|\\(?:frac|sqrt|sum|int|lim|theta|alpha|beta|gamma|delta|lambda|phi|pi|times|div|cdot|leq|geq|neq|approx|sin|cos|tan|log|ln|vec|overline|underline|hat|bar|left|right|begin|end)\b|[_^]\{/;
+
+const shouldRenderAsMath = (value: string) => mathPattern.test(value);
+
+const asInlineMath = (value: string, forceMath = false) => {
   const trimmed = value.trim();
 
   if (!trimmed) return "";
+  if (!forceMath && !shouldRenderAsMath(trimmed)) return trimmed;
   if (trimmed.includes("\\(") || trimmed.includes("$$")) return trimmed;
 
   return `\\(${trimmed}\\)`;
 };
 
-export const MathText = ({ value, className }: MathTextProps) => {
+export const MathText = ({ value, className, forceMath = false }: MathTextProps) => {
   const ref = useRef<HTMLSpanElement>(null);
 
   const renderMath = useCallback(() => {
     if (!ref.current) return;
 
-    ref.current.textContent = asInlineMath(value);
+    ref.current.textContent = asInlineMath(value, forceMath);
+
+    if (!forceMath && !shouldRenderAsMath(value)) {
+      return;
+    }
+
     window.MathJax?.typesetPromise?.([ref.current]).catch(() => undefined);
-  }, [value]);
+  }, [forceMath, value]);
 
   useEffect(() => {
     renderMath();
@@ -62,7 +73,7 @@ export const MathText = ({ value, className }: MathTextProps) => {
         onLoad={renderMath}
       />
       <span ref={ref} className={cn("inline-block", className)}>
-        {asInlineMath(value)}
+        {asInlineMath(value, forceMath)}
       </span>
     </>
   );

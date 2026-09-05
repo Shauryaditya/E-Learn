@@ -4,11 +4,12 @@ import * as z from "zod";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Loader2, Pencil, PlusCircle } from "lucide-react";
+import { FileUp, Loader2, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Chapter, Course } from "@prisma/client";
+import type { ClientUploadedFileData } from "uploadthing/types";
 
 import {
   Form,
@@ -19,11 +20,9 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
-import { title } from "process";
 import { Input } from "@/components/ui/input";
 import { ChaptersList } from "./chapters-list";
-import { list } from "postcss";
+import { UploadDropzone } from "@/lib/uploadthing";
 
 interface ChaptersFormProps {
   initialData: Course & { chapters: Chapter[]};
@@ -39,10 +38,17 @@ export const ChaptersForm = ({
   courseId
 }: ChaptersFormProps) => {
   const [isCreating, setIsCreating] = useState(false);
+  const [isBulkUploading, setIsBulkUploading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const toggleCreating = () => {
     setIsCreating((current) => !current);
+    setIsBulkUploading(false);
+  }
+
+  const toggleBulkUploading = () => {
+    setIsBulkUploading((current) => !current);
+    setIsCreating(false);
   }
   const router = useRouter();
 
@@ -63,6 +69,25 @@ export const ChaptersForm = ({
       router.refresh();
     } catch {
       toast.error("Something went wrong");
+    }
+  }
+
+  const onBulkUploadComplete = async (files: ClientUploadedFileData<null>[]) => {
+    try {
+      setIsUpdating(true);
+      await axios.post(`/api/courses/${courseId}/chapters/bulk`, {
+        files: files.map((file) => ({
+          url: file.url,
+          name: file.name,
+        })),
+      });
+      toast.success(`${files.length} chapter${files.length === 1 ? "" : "s"} created`);
+      setIsBulkUploading(false);
+      router.refresh();
+    } catch {
+      toast.error("Files uploaded, but chapters could not be created");
+    } finally {
+      setIsUpdating(false);
     }
   }
 
@@ -91,18 +116,30 @@ export const ChaptersForm = ({
           <Loader2 className="animate-spin w-6 h-6 text-sky-700"/>
         </div>
       )}
-      <div className="font-medium flex items-center justify-between">
+      <div className="font-medium flex items-center justify-between gap-x-2">
         Course Chapters
-        <Button onClick={toggleCreating} variant="ghost">
-          {isCreating ? (
-            <>Cancel</>
-          ) : (
-            <>
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Add a chapter
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-x-2">
+          <Button onClick={toggleBulkUploading} variant="ghost">
+            {isBulkUploading ? (
+              <>Cancel</>
+            ) : (
+              <>
+                <FileUp className="h-4 w-4 mr-2" />
+                Bulk upload
+              </>
+            )}
+          </Button>
+          <Button onClick={toggleCreating} variant="ghost">
+            {isCreating ? (
+              <>Cancel</>
+            ) : (
+              <>
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add a chapter
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {isCreating && (
@@ -138,7 +175,23 @@ export const ChaptersForm = ({
           </form>
         </Form>
       )}
-      {!isCreating && (
+      {isBulkUploading && (
+        <div className="mt-4">
+          <UploadDropzone
+            endpoint="courseBulkChapterAttachment"
+            onClientUploadComplete={(res) => {
+              void onBulkUploadComplete(res);
+            }}
+            onUploadError={(error: Error) => {
+              toast.error(`${error?.message}`);
+            }}
+          />
+          <p className="text-xs text-muted-foreground mt-4">
+            Upload PDFs, DOCX files, images, audio, video, or text files. Each file creates a chapter named from the file name.
+          </p>
+        </div>
+      )}
+      {!isCreating && !isBulkUploading && (
         <div className={cn(
           "text-sm  mt-2",
           !initialData.chapters.length && "text-slate-500 italic"
@@ -151,7 +204,7 @@ export const ChaptersForm = ({
           />
         </div>
       )}
-      {!isCreating && (
+      {!isCreating && !isBulkUploading && (
         <p className="text-xs text-muted-foreground mt-4">
           Drag and drop to reorder the chapters
         </p>
