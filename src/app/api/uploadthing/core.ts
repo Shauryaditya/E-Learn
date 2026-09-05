@@ -3,6 +3,7 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 
  
 const f = createUploadthing();
+const docxMimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
  
 const handleAuth = () => {
     const { userId } = auth();
@@ -21,6 +22,17 @@ export const ourFileRouter = {
         video: { maxFileSize: "16MB" },
         audio: { maxFileSize: "16MB" },
         pdf: { maxFileSize: "16MB" },
+        [docxMimeType]: { maxFileSize: "16MB" },
+      })
+    .middleware(() =>handleAuth())
+    .onUploadComplete(() => {}),
+    courseBulkChapterAttachment: f({
+        text: { maxFileSize: "16MB", maxFileCount: 25 },
+        image: { maxFileSize: "16MB", maxFileCount: 25 },
+        video: { maxFileSize: "16MB", maxFileCount: 25 },
+        audio: { maxFileSize: "16MB", maxFileCount: 25 },
+        pdf: { maxFileSize: "16MB", maxFileCount: 25 },
+        [docxMimeType]: { maxFileSize: "16MB", maxFileCount: 25 },
       })
     .middleware(() =>handleAuth())
     .onUploadComplete(() => {}),
@@ -33,6 +45,7 @@ export const ourFileRouter = {
         video: { maxFileSize: "16MB" },
         audio: { maxFileSize: "16MB" },
         pdf: { maxFileSize: "16MB" },
+        [docxMimeType]: { maxFileSize: "16MB" },
       })
     .middleware(() => handleAuth())
     .onUploadComplete(() => {}),
