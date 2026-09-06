@@ -194,7 +194,7 @@ export const ContestQuestionsManager = ({
       isAddingParsedRef.current = true;
       setIsAddingParsed(true);
 
-      await axios.post(`/api/contests/${contestId}/questions`, {
+      const response = await axios.post(`/api/contests/${contestId}/questions`, {
         questions: parsedQuestions.map((question) => ({
           ...question,
           defaultMarks: question.defaultMarks || 1,
@@ -202,7 +202,13 @@ export const ContestQuestionsManager = ({
         })),
       });
 
-      toast.success("Questions added to contest");
+      const addedCount = response.data.count || 0;
+      const skippedCount = response.data.skippedCount || 0;
+      toast.success(
+        skippedCount > 0
+          ? `${addedCount} questions added, ${skippedCount} skipped`
+          : `${addedCount} questions added to contest`
+      );
       setParsedQuestions([]);
       setPdfParseMeta(null);
       setPdfFile(null);
