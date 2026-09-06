@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { dateTimeLocalToIso } from "@/lib/contest-time";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -57,7 +58,10 @@ export const CreateContestForm = ({ categories }: CreateContestFormProps) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await axios.post("/api/contests", values);
+      const response = await axios.post("/api/contests", {
+        ...values,
+        startsAt: dateTimeLocalToIso(values.startsAt),
+      });
       toast.success("Contest created");
       router.push(`/teacher/contests/${response.data.id}`);
     } catch {

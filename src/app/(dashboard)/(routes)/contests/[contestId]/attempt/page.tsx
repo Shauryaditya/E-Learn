@@ -3,6 +3,7 @@ import { ContestAttemptStatus } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
+import { formatContestDateTime } from "@/lib/contest-time";
 import { db } from "@/lib/db";
 import { ContestAttemptForm } from "./_components/contest-attempt-form";
 import { StartContestButton } from "./_components/start-contest-button";
@@ -10,12 +11,6 @@ import { StartContestButton } from "./_components/start-contest-button";
 type PageProps = {
   params: { contestId: string };
 };
-
-const formatDate = (date: Date) =>
-  date.toLocaleString("en-IN", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 
 const ContestAttemptPage = async ({ params }: PageProps) => {
   const { userId } = auth();
@@ -78,7 +73,7 @@ const ContestAttemptPage = async ({ params }: PageProps) => {
           </Badge>
           <h1 className="mt-4 text-2xl font-semibold text-white">{contest.title}</h1>
           <p className="mt-2 text-sm text-slate-300">
-            The contest starts on {formatDate(contest.startsAt)}.
+            The contest starts on {formatContestDateTime(contest.startsAt)}.
           </p>
         </div>
       </div>
@@ -94,7 +89,7 @@ const ContestAttemptPage = async ({ params }: PageProps) => {
           </Badge>
           <h1 className="mt-4 text-2xl font-semibold text-white">{contest.title}</h1>
           <p className="mt-2 text-sm text-slate-300">
-            This contest ended on {formatDate(endsAt)}.
+            This contest ended on {formatContestDateTime(endsAt)}.
           </p>
         </div>
       </div>

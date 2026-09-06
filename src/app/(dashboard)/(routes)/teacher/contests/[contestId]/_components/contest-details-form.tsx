@@ -25,6 +25,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  dateTimeLocalToIso,
+  toDateTimeLocalInputValue,
+} from "@/lib/contest-time";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -38,12 +42,6 @@ const formSchema = z.object({
   registrationClosesAt: z.string().optional().nullable(),
   maxParticipants: z.coerce.number().optional().nullable(),
 });
-
-const toDateTimeLocal = (date?: Date | null) => {
-  if (!date) return "";
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 16);
-};
 
 interface ContestDetailsFormProps {
   contestId: string;
@@ -77,10 +75,10 @@ export const ContestDetailsForm = ({
       imageUrl: initialData.imageUrl || "",
       price: initialData.price,
       categoryId: initialData.categoryId || "",
-      startsAt: toDateTimeLocal(initialData.startsAt),
+      startsAt: toDateTimeLocalInputValue(initialData.startsAt),
       durationMinutes: initialData.durationMinutes,
-      registrationOpensAt: toDateTimeLocal(initialData.registrationOpensAt),
-      registrationClosesAt: toDateTimeLocal(initialData.registrationClosesAt),
+      registrationOpensAt: toDateTimeLocalInputValue(initialData.registrationOpensAt),
+      registrationClosesAt: toDateTimeLocalInputValue(initialData.registrationClosesAt),
       maxParticipants: initialData.maxParticipants,
     },
   });
@@ -93,6 +91,9 @@ export const ContestDetailsForm = ({
         ...values,
         price: values.price || null,
         maxParticipants: values.maxParticipants || null,
+        startsAt: dateTimeLocalToIso(values.startsAt),
+        registrationOpensAt: dateTimeLocalToIso(values.registrationOpensAt),
+        registrationClosesAt: dateTimeLocalToIso(values.registrationClosesAt),
       });
       toast.success("Contest updated");
       router.refresh();

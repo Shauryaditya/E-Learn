@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { formatContestDateTime } from "@/lib/contest-time";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import { withPrismaRetry } from "@/lib/prisma-retry";
@@ -44,12 +45,6 @@ const getContests = async (userId: string) => {
     })
   );
 };
-
-const formatDate = (date: Date) =>
-  date.toLocaleString("en-IN", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 
 const isRegistered = (contest: ContestWithMeta, userId: string) =>
   contest.registrations.some((registration) => registration.userId === userId);
@@ -129,7 +124,7 @@ const ContestCard = ({
         <div className="mt-auto space-y-3 border-t border-white/10 pt-4 text-sm text-slate-300">
           <div className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-blue-200" />
-            {formatDate(contest.startsAt)}
+            {formatContestDateTime(contest.startsAt)}
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-blue-200" />
@@ -276,7 +271,7 @@ const ContestsPage = async () => {
                   <div>
                     <p className="font-medium text-white">{contest.title}</p>
                     <p className="text-sm text-slate-400">
-                      Completed {formatDate(contest.startsAt)} ·{" "}
+                      Completed {formatContestDateTime(contest.startsAt)} ·{" "}
                       {contest.registrations.length} participants
                     </p>
                   </div>

@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatContestDateTime } from "@/lib/contest-time";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -79,10 +80,7 @@ const TeacherContestsPage = async () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {contest.startsAt.toLocaleString("en-IN", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
+                  {formatContestDateTime(contest.startsAt)}
                 </TableCell>
                 <TableCell>{contest.durationMinutes} min</TableCell>
                 <TableCell>
