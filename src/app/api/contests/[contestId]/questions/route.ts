@@ -29,6 +29,8 @@ const normalizeQuestion = (question: QuestionInput, userId: string) => {
   const parsedType = Object.values(QuestionType).includes(question.questionType as QuestionType)
     ? question.questionType as QuestionType
     : QuestionType.SINGLE_CHOICE;
+  const defaultMarks = Number(question.defaultMarks);
+  const negativeMarks = Number(question.negativeMarks || 0);
 
   const normalizedOptions = (question.options || [])
     .map((option, index) => ({
@@ -37,13 +39,21 @@ const normalizeQuestion = (question: QuestionInput, userId: string) => {
       position: index + 1,
     }))
     .filter((option) => option.optionText);
+  const questionType =
+    optionQuestionTypes.includes(parsedType) && normalizedOptions.length < 2
+      ? QuestionType.NUMERICAL
+      : parsedType;
 
-  if (!question.questionText || !question.defaultMarks) {
+  if (!question.questionText?.trim()) {
+    throw new Error("Question text is required");
+  }
+
+  if (!Number.isFinite(defaultMarks) || defaultMarks <= 0) {
     throw new Error("Question text and marks are required");
   }
 
   if (
-    optionQuestionTypes.includes(parsedType) &&
+    optionQuestionTypes.includes(questionType) &&
     normalizedOptions.length < 2
   ) {
     throw new Error("At least two options are required");
@@ -51,14 +61,14 @@ const normalizeQuestion = (question: QuestionInput, userId: string) => {
 
   return {
     userId,
-    questionText: question.questionText,
-    questionType: parsedType,
-    defaultMarks: Number(question.defaultMarks),
-    negativeMarks: Number(question.negativeMarks || 0),
+    questionText: question.questionText.trim(),
+    questionType,
+    defaultMarks,
+    negativeMarks: Number.isFinite(negativeMarks) && negativeMarks > 0 ? negativeMarks : 0,
     explanation: question.explanation || null,
     imageUrl: question.imageUrl || null,
     options: {
-      create: normalizedOptions,
+      create: questionType === QuestionType.NUMERICAL ? [] : normalizedOptions,
     },
   };
 };
@@ -93,21 +103,46 @@ export async function POST(
       }
 
       const startPosition = contest.questions.length + 1;
-      const operations = parsedQuestions.flatMap((question, index) => {
+      const skippedQuestions: { index: number; reason: string }[] = [];
+      const normalizedQuestions = parsedQuestions.flatMap((question, index) => {
+        try {
+          return [{ question, data: normalizeQuestion(question, userId), originalIndex: index }];
+        } catch (error: any) {
+          skippedQuestions.push({
+            index,
+            reason: error?.message || "Could not normalize question",
+          });
+          return [];
+        }
+      });
+
+      if (normalizedQuestions.length === 0) {
+        return NextResponse.json(
+          {
+            count: 0,
+            skippedCount: skippedQuestions.length,
+            skippedQuestions,
+            message: "No valid questions found in this parsed PDF",
+          },
+          { status: 400 }
+        );
+      }
+
+      const operations = normalizedQuestions.flatMap(({ question, data }, index) => {
         const questionId = randomUUID();
 
         return [
           db.questionBank.create({
             data: {
               id: questionId,
-              ...normalizeQuestion(question, userId),
+              ...data,
             },
           }),
           db.contestQuestion.create({
             data: {
               contestId: params.contestId,
               questionId,
-              marks: question.defaultMarks ? Number(question.defaultMarks) : null,
+              marks: question.defaultMarks ? Number(question.defaultMarks) : data.defaultMarks,
               position: startPosition + index,
             },
           }),
@@ -116,7 +151,11 @@ export async function POST(
 
       await db.$transaction(operations);
 
-      return NextResponse.json({ count: parsedQuestions.length });
+      return NextResponse.json({
+        count: normalizedQuestions.length,
+        skippedCount: skippedQuestions.length,
+        skippedQuestions,
+      });
     }
 
     if (!questionId) {
