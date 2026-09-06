@@ -14,6 +14,7 @@ import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { formatContestDateTime } from "@/lib/contest-time";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import { ContestRegisterButton } from "../_components/contest-register-button";
@@ -21,12 +22,6 @@ import { ContestRegisterButton } from "../_components/contest-register-button";
 type PageProps = {
   params: { contestId: string };
 };
-
-const formatDate = (date: Date) =>
-  date.toLocaleString("en-IN", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 
 const getContestEndsAt = (startsAt: Date, durationMinutes: number) =>
   new Date(startsAt.getTime() + durationMinutes * 60 * 1000);
@@ -126,7 +121,7 @@ const ContestDetailPage = async ({ params }: PageProps) => {
                   Starts
                 </p>
                 <p className="mt-1 text-sm font-medium text-white">
-                  {formatDate(contest.startsAt)}
+                  {formatContestDateTime(contest.startsAt)}
                 </p>
               </div>
               <div className="rounded-md border border-white/10 bg-slate-950/50 p-4">
@@ -176,12 +171,12 @@ const ContestDetailPage = async ({ params }: PageProps) => {
 
             <div className="mt-5 space-y-2 text-sm text-slate-300">
               {contest.registrationOpensAt && (
-                <p>Registration opens: {formatDate(contest.registrationOpensAt)}</p>
+                <p>Registration opens: {formatContestDateTime(contest.registrationOpensAt)}</p>
               )}
               {contest.registrationClosesAt && (
-                <p>Registration closes: {formatDate(contest.registrationClosesAt)}</p>
+                <p>Registration closes: {formatContestDateTime(contest.registrationClosesAt)}</p>
               )}
-              <p>Contest ends: {formatDate(endsAt)}</p>
+              <p>Contest ends: {formatContestDateTime(endsAt)}</p>
             </div>
 
             <div className="mt-6">
@@ -205,7 +200,7 @@ const ContestDetailPage = async ({ params }: PageProps) => {
                 <div className="rounded-md border border-emerald-300/30 bg-emerald-300/10 p-4 text-sm text-emerald-50">
                   <p className="font-medium">You are registered</p>
                   <p className="mt-1 text-xs">
-                    Start button will appear when the contest opens on {formatDate(contest.startsAt)}.
+                    Start button will appear when the contest opens on {formatContestDateTime(contest.startsAt)}.
                   </p>
                 </div>
               ) : (
