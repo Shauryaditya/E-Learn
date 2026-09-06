@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs";
+import { auth, clerkClient } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, CalendarClock, ListChecks } from "lucide-react";
@@ -7,6 +7,7 @@ import { Banner } from "@/components/banner";
 import { IconBadge } from "@/components/icon-badge";
 import { db } from "@/lib/db";
 import { ContestActions } from "./_components/contest-actions";
+import { ContestAttemptsReview } from "./_components/contest-attempts-review";
 import { ContestDetailsForm } from "./_components/contest-details-form";
 import { ContestQuestionsManager } from "./_components/contest-questions-manager";
 
@@ -39,6 +40,16 @@ const ContestSetupPage = async ({
         },
         orderBy: { position: "asc" },
       },
+      registrations: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          attempt: {
+            include: {
+              answers: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -59,6 +70,32 @@ const ContestSetupPage = async ({
     },
     orderBy: { createdAt: "desc" },
   });
+  const registeredStudentIds = contest.registrations.map((registration) => registration.userId);
+  let students = registeredStudentIds.map((studentId) => ({
+    id: studentId,
+    name: "Student",
+    email: studentId,
+  }));
+
+  if (registeredStudentIds.length > 0) {
+    try {
+      const users = await clerkClient.users.getUserList({
+        userId: registeredStudentIds,
+        limit: 100,
+      });
+
+      students = users.map((user) => ({
+        id: user.id,
+        name:
+          user.firstName || user.lastName
+            ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
+            : user.username || "Student",
+        email: user.emailAddresses?.[0]?.emailAddress || user.id,
+      }));
+    } catch (error) {
+      console.error("[CONTEST_STUDENTS_CLERK]", error);
+    }
+  }
 
   const requiredFields = [
     contest.title,
@@ -136,6 +173,14 @@ const ContestSetupPage = async ({
               questionBank={questionBank}
             />
           </div>
+        </div>
+
+        <div className="mt-6">
+          <ContestAttemptsReview
+            questions={contest.questions}
+            registrations={contest.registrations}
+            students={students}
+          />
         </div>
       </div>
     </>
