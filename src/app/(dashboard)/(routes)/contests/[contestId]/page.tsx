@@ -18,6 +18,7 @@ import { formatContestDateTime } from "@/lib/contest-time";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
 import { ContestRegisterButton } from "../_components/contest-register-button";
+import { StudentContestResults } from "./_components/student-contest-results";
 
 type PageProps = {
   params: { contestId: string };
@@ -75,6 +76,59 @@ const ContestDetailPage = async ({ params }: PageProps) => {
   const hasEnded = now >= endsAt;
   const attempt = contest.attempts[0];
   const submitted = attempt && attempt.status !== "IN_PROGRESS";
+  const result = submitted && hasEnded
+    ? await db.contestAttempt.findFirst({
+      where: {
+        id: attempt.id,
+        contestId: contest.id,
+        userId,
+        status: { not: "IN_PROGRESS" },
+      },
+      select: {
+        score: true,
+        totalMarks: true,
+        percentage: true,
+        answers: {
+          select: {
+            questionId: true,
+            selectedAnswer: true,
+            isCorrect: true,
+            marksAwarded: true,
+          },
+        },
+        contest: {
+          select: {
+            questions: {
+              orderBy: { position: "asc" },
+              select: {
+                position: true,
+                marks: true,
+                question: {
+                  select: {
+                    id: true,
+                    questionText: true,
+                    questionType: true,
+                    defaultMarks: true,
+                    imageUrl: true,
+                    explanation: true,
+                    options: {
+                      orderBy: { position: "asc" },
+                      select: {
+                        id: true,
+                        optionText: true,
+                        isCorrect: true,
+                        position: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+    : null;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -220,6 +274,13 @@ const ContestDetailPage = async ({ params }: PageProps) => {
             </div>
           </aside>
         </section>
+
+        {result && (
+          <StudentContestResults
+            attempt={result}
+            questions={result.contest.questions}
+          />
+        )}
 
         <section className="rounded-md border border-amber-300/30 bg-amber-300/10 p-5 text-amber-900 dark:text-amber-50">
           <div className="flex gap-3">

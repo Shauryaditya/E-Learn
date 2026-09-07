@@ -149,6 +149,20 @@ async function main() {
       assert(overflow.document <= overflow.viewport, `analytics page overflow: ${JSON.stringify(overflow)}`);
     }
     console.log("PASS separated analytics tabs, responsive table and dark mode");
+    const resultUrl = `http://127.0.0.1:${server.address().port}/contests/demo`;
+    await page.goto(resultUrl);
+    await expect(page.getByRole("heading", { name: "Answer review" })).toBeVisible();
+    await expect(page.getByRole("article", { name: "Question 1" }).getByText("Correct", { exact: true })).toBeVisible();
+    await expect(page.getByRole("article", { name: "Question 2" }).getByText("Incorrect", { exact: true })).toBeVisible();
+    await expect(page.getByRole("article", { name: "Question 3" }).getByText("Unanswered", { exact: true })).toBeVisible();
+    await expect(page.getByRole("article", { name: "Question 1" }).getByText("Total energy", { exact: true })).toHaveCount(2);
+    for (const [width, theme] of [[1440, "light"], [390, "light"], [390, "dark"]]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.evaluate(theme => document.documentElement.classList.toggle("dark", theme === "dark"), theme);
+      await page.screenshot({ path: path.join(output, `student-results-${width}-${theme}.png`), fullPage: true, animations: "disabled" });
+      assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "student results page overflow");
+    }
+    console.log("PASS student answer review, verdicts, responsive layout and dark mode");
     assert.deepEqual(errors, [], "browser runtime errors");
     await context.close();
   } finally {

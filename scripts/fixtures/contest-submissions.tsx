@@ -10,6 +10,7 @@ import { TeacherDashboardView } from "../../src/app/(dashboard)/(routes)/teacher
 import { TeacherAnalyticsView } from "../../src/app/(dashboard)/(routes)/teacher/analytics/_components/teacher-analytics-view";
 import { SidebarRoutes } from "../../src/app/(dashboard)/_components/sidebar-routes";
 import { MobileBottomNav } from "../../src/app/(dashboard)/_components/mobile-bottom-nav";
+import { StudentContestResults } from "../../src/app/(dashboard)/(routes)/contests/[contestId]/_components/student-contest-results";
 
 const now = new Date("2026-09-07T12:00:00Z");
 const params = parseSubmissionParams(Object.fromEntries(new URLSearchParams(window.location.search)));
@@ -40,6 +41,45 @@ const questions = [
     options: [{ id: "a", optionText: "Total energy", isCorrect: true, position: 1 }] } },
   { position: 2, marks: 6, question: { id: "q2", questionText: "Explain your reasoning.", questionType: "NUMERICAL" as const, defaultMarks: 6, options: [] } },
 ];
+const resultQuestions = [
+  {
+    position: 1, marks: 4,
+    question: {
+      id: "q1", questionText: "Which quantity is conserved in an isolated system?", questionType: "SINGLE_CHOICE" as const,
+      defaultMarks: 4, imageUrl: null, explanation: "Energy can change form, but the total remains constant.",
+      options: [
+        { id: "a", optionText: "Total energy", isCorrect: true, position: 1 },
+        { id: "b", optionText: "Temperature", isCorrect: false, position: 2 },
+      ],
+    },
+  },
+  {
+    position: 2, marks: 3,
+    question: {
+      id: "q2", questionText: "Which value represents acceleration due to gravity?", questionType: "SINGLE_CHOICE" as const,
+      defaultMarks: 3, imageUrl: null, explanation: "Near Earth's surface, g is approximately 9.8 m/s^2.",
+      options: [
+        { id: "c", optionText: "9.8 m/s^2", isCorrect: true, position: 1 },
+        { id: "d", optionText: "3.0 x 10^8 m/s", isCorrect: false, position: 2 },
+      ],
+    },
+  },
+  {
+    position: 3, marks: 3,
+    question: {
+      id: "q3", questionText: "Explain why momentum is conserved.", questionType: "NUMERICAL" as const,
+      defaultMarks: 3, imageUrl: null, explanation: null, options: [],
+    },
+  },
+];
+const resultAttempt = {
+  score: 4, totalMarks: 10, percentage: 40,
+  answers: [
+    { questionId: "q1", selectedAnswer: "a", isCorrect: true, marksAwarded: 4 },
+    { questionId: "q2", selectedAnswer: "d", isCorrect: false, marksAwarded: 0 },
+    { questionId: "q3", selectedAnswer: "", isCorrect: null, marksAwarded: null },
+  ],
+};
 const empty = new URLSearchParams(window.location.search).has("empty");
 const dashboardData = {
   courses: empty ? 0 : 8, testSeries: empty ? 0 : 3, activeAttempts: empty ? 0 : 24, pendingReviews: empty ? 0 : 12,
@@ -100,7 +140,11 @@ const analyticsData = {
 createRoot(document.getElementById("root")!).render(
   <AppRouterContext.Provider value={router}>
     <PathnameContext.Provider value={window.location.pathname}>
-      {window.location.pathname === "/teacher/dashboard" ? <>
+      {window.location.pathname === "/contests/demo" ? (
+        <main className="mx-auto min-w-0 max-w-4xl bg-background px-4 py-6 text-foreground">
+          <StudentContestResults attempt={resultAttempt} questions={resultQuestions} />
+        </main>
+      ) : window.location.pathname === "/teacher/dashboard" ? <>
         <aside className="fixed inset-y-0 left-0 hidden w-64 border-r bg-background px-3 md:block">
           <div className="flex h-16 items-center gap-3 px-3"><img src="/logo.png" alt="Aaccent" className="h-8 w-8" /><span className="font-semibold">Aaccent E-Learn</span></div>
           <SidebarRoutes />
