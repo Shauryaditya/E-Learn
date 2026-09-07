@@ -1,13 +1,11 @@
-import { auth, clerkClient } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, CalendarClock, ListChecks } from "lucide-react";
+import { CalendarClock, ListChecks } from "lucide-react";
 
 import { Banner } from "@/components/banner";
 import { IconBadge } from "@/components/icon-badge";
 import { db } from "@/lib/db";
 import { ContestActions } from "./_components/contest-actions";
-import { ContestAttemptsReview } from "./_components/contest-attempts-review";
 import { ContestDetailsForm } from "./_components/contest-details-form";
 import { ContestQuestionsManager } from "./_components/contest-questions-manager";
 
@@ -40,16 +38,6 @@ const ContestSetupPage = async ({
         },
         orderBy: { position: "asc" },
       },
-      registrations: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          attempt: {
-            include: {
-              answers: true,
-            },
-          },
-        },
-      },
     },
   });
 
@@ -70,32 +58,6 @@ const ContestSetupPage = async ({
     },
     orderBy: { createdAt: "desc" },
   });
-  const registeredStudentIds = contest.registrations.map((registration) => registration.userId);
-  let students = registeredStudentIds.map((studentId) => ({
-    id: studentId,
-    name: "Student",
-    email: studentId,
-  }));
-
-  if (registeredStudentIds.length > 0) {
-    try {
-      const users = await clerkClient.users.getUserList({
-        userId: registeredStudentIds,
-        limit: 100,
-      });
-
-      students = users.map((user) => ({
-        id: user.id,
-        name:
-          user.firstName || user.lastName
-            ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
-            : user.username || "Student",
-        email: user.emailAddresses?.[0]?.emailAddress || user.id,
-      }));
-    } catch (error) {
-      console.error("[CONTEST_STUDENTS_CLERK]", error);
-    }
-  }
 
   const requiredFields = [
     contest.title,
@@ -112,18 +74,10 @@ const ContestSetupPage = async ({
       {!contest.isPublished && (
         <Banner label="This contest is unpublished. Students cannot register yet." />
       )}
-      <div className="p-6">
-        <Link
-          href="/teacher/contests"
-          className="mb-6 flex items-center text-sm transition hover:opacity-75"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to contests
-        </Link>
-
+      <div className="p-4 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">Contest setup</h1>
+            <h2 className="text-xl font-semibold">Contest setup</h2>
             <p className="text-sm text-muted-foreground">
               Complete all fields ({completedFields}/{requiredFields.length})
             </p>
@@ -175,13 +129,6 @@ const ContestSetupPage = async ({
           </div>
         </div>
 
-        <div className="mt-6">
-          <ContestAttemptsReview
-            questions={contest.questions}
-            registrations={contest.registrations}
-            students={students}
-          />
-        </div>
       </div>
     </>
   );

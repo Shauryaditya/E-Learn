@@ -10,6 +10,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test:contests": "node scripts/test-contest-attempts.cjs",
+    "test:contests:browser": "node scripts/test-contest-browser.cjs",
+    "test:submissions": "node scripts/test-contest-submissions.cjs",
+    "test:submissions:browser": "node scripts/test-contest-submissions-browser.cjs",
+    "test:analytics": "node scripts/test-teacher-analytics.cjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -68,6 +73,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "^24",
     "@types/react": "^18",
     "@types/react-dom": "^18",

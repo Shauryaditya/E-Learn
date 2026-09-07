@@ -1,305 +1,129 @@
-import { ContestAttemptStatus, ContestRegistrationStatus, QuestionType } from "@prisma/client";
-import { CheckCircle2, Clock, FileQuestion } from "lucide-react";
-
+import type { QuestionType } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { MathText } from "@/components/math-text";
 import { formatContestDateTime } from "@/lib/contest-time";
-import { cn } from "@/lib/utils";
+import { submissionStatus } from "@/lib/contest-submissions";
 
-type ContestQuestionForReview = {
+export type ContestQuestionForReview = {
   position: number;
   marks: number | null;
   question: {
-    id: string;
-    questionText: string;
-    questionType: QuestionType;
-    defaultMarks: number;
-    options: {
-      id: string;
-      optionText: string;
-      isCorrect: boolean;
-      position: number;
-    }[];
+    id: string; questionText: string; questionType: QuestionType; defaultMarks: number;
+    imageUrl?: string | null; explanation?: string | null;
+    options: { id: string; optionText: string; isCorrect: boolean; position: number }[];
   };
 };
-
-type ContestRegistrationForReview = {
-  id: string;
-  userId: string;
-  status: ContestRegistrationStatus;
-  createdAt: Date;
+export type ContestRegistrationForReview = {
+  id: string; userId: string; status: string; createdAt: Date;
   attempt: {
-    id: string;
-    status: ContestAttemptStatus;
-    score: number | null;
-    totalMarks: number | null;
-    percentage: number | null;
-    startedAt: Date;
-    submittedAt: Date | null;
-    expiresAt: Date;
-    autoSubmitted: boolean;
-    answers: {
-      questionId: string;
-      selectedAnswer: string | null;
-      isCorrect: boolean | null;
-      marksAwarded: number | null;
-    }[];
+    status: string; score: number | null; totalMarks: number | null;
+    startedAt: Date; submittedAt: Date | null; expiresAt: Date;
+    answers: { questionId: string; selectedAnswer: string | null; isCorrect: boolean | null; marksAwarded: number | null }[];
   } | null;
 };
 
-type StudentDetails = {
-  id: string;
-  name: string;
-  email: string;
-};
-
-interface ContestAttemptsReviewProps {
-  registrations: ContestRegistrationForReview[];
-  questions: ContestQuestionForReview[];
-  students: StudentDetails[];
+function selectedText(value: string | null, question: ContestQuestionForReview["question"]) {
+  if (!value?.trim()) return "No answer";
+  if (question.questionType === "NUMERICAL" || !question.options.length) return value;
+  return value.split(",").map(id => question.options.find(option => option.id === id.trim())?.optionText || "Unavailable option").join("; ");
 }
 
-const statusLabel = (attempt: ContestRegistrationForReview["attempt"]) => {
-  if (!attempt) return "Not started";
-  if (attempt.status === ContestAttemptStatus.IN_PROGRESS) return "In progress";
-  if (attempt.status === ContestAttemptStatus.AUTO_SUBMITTED) return "Auto-submitted";
-  if (attempt.status === ContestAttemptStatus.EVALUATED) return "Evaluated";
-  return "Submitted";
-};
-
-const answerBadgeClass = (isCorrect: boolean | null, hasAnswer: boolean) => {
-  if (!hasAnswer) return "border-slate-200 bg-slate-100 text-slate-700";
-  if (isCorrect === true) return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (isCorrect === false) return "border-rose-200 bg-rose-50 text-rose-700";
-  return "border-blue-200 bg-blue-50 text-blue-700";
-};
-
-const getStudentLabel = (userId: string, studentsById: Map<string, StudentDetails>) => {
-  const student = studentsById.get(userId);
-
-  if (!student) {
-    return {
-      name: "Student",
-      email: userId,
-    };
-  }
-
-  return student;
-};
-
-const formatSelectedAnswer = (
-  selectedAnswer: string | null,
-  question: ContestQuestionForReview["question"]
-) => {
-  if (!selectedAnswer) return "No answer";
-
-  if (question.questionType === QuestionType.NUMERICAL || question.options.length === 0) {
-    return selectedAnswer;
-  }
-
-  const selectedIds = selectedAnswer
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
-  const optionById = new Map(question.options.map((option) => [option.id, option]));
-  const selectedOptions = selectedIds
-    .map((id) => optionById.get(id)?.optionText)
-    .filter(Boolean);
-
-  return selectedOptions.length > 0 ? selectedOptions.join(", ") : selectedAnswer;
-};
-
-const formatCorrectAnswer = (question: ContestQuestionForReview["question"]) => {
-  if (question.questionType === QuestionType.NUMERICAL || question.options.length === 0) {
-    return "Manual review";
-  }
-
-  const correctOptions = question.options
-    .filter((option) => option.isCorrect)
-    .map((option) => option.optionText);
-
-  return correctOptions.length > 0 ? correctOptions.join(", ") : "Not marked";
-};
-
-export const ContestAttemptsReview = ({
-  registrations,
-  questions,
-  students,
-}: ContestAttemptsReviewProps) => {
-  const studentsById = new Map(students.map((student) => [student.id, student]));
-  const submittedCount = registrations.filter(
-    (registration) =>
-      registration.attempt &&
-      registration.attempt.status !== ContestAttemptStatus.IN_PROGRESS
-  ).length;
-  const inProgressCount = registrations.filter(
-    (registration) => registration.attempt?.status === ContestAttemptStatus.IN_PROGRESS
-  ).length;
-
+export function ContestAttemptReview({ registration, questions, student, now }: {
+  registration: ContestRegistrationForReview; questions: ContestQuestionForReview[];
+  student: { name: string; email: string }; now: Date;
+}) {
+  const attempt = registration.attempt;
+  const answers = new Map(attempt?.answers.map(answer => [answer.questionId, answer]) || []);
+  const completed = attempt && attempt.status !== "IN_PROGRESS";
+  const awaitingGrading = completed && (attempt.answers.some(answer => answer.marksAwarded === null) || attempt.answers.length < questions.length);
+  const answered = questions.filter(item => answers.get(item.question.id)?.selectedAnswer?.trim()).length;
   return (
-    <div className="rounded-md border bg-background p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h2 className="text-xl font-medium">Student responses</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Review registered students, attempt status, scores, and submitted answers.
-          </p>
+    <div className="min-w-0 space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="break-words text-xl font-semibold">{student.name}</h2>
+          <p className="mt-1 break-all text-sm text-muted-foreground">{student.email}</p>
+          <p className="mt-1 break-all text-xs text-muted-foreground">Student ID: {registration.userId}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Badge variant="outline">{submissionStatus(attempt, now)}</Badge>
+            {registration.status !== "REGISTERED" && <Badge variant="outline">
+              {registration.status === "CANCELLED" ? "Cancelled registration" : "Disqualified"}
+            </Badge>}
+            {awaitingGrading && <Badge variant="outline">Awaiting grading</Badge>}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary">{registrations.length} registered</Badge>
-          <Badge variant="secondary">{inProgressCount} in progress</Badge>
-          <Badge variant="secondary">{submittedCount} submitted</Badge>
-        </div>
-      </div>
-
-      <div className="mt-5 space-y-3">
-        {registrations.map((registration) => {
-          const student = getStudentLabel(registration.userId, studentsById);
-          const attempt = registration.attempt;
-          const answersByQuestionId = new Map(
-            attempt?.answers.map((answer) => [answer.questionId, answer]) || []
-          );
-
-          return (
-            <details
-              key={registration.id}
-              className="rounded-md border bg-slate-50 p-4 dark:bg-slate-900"
-            >
-              <summary className="cursor-pointer list-none">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-medium">{student.name}</p>
-                    <p className="text-xs text-muted-foreground">{student.email}</p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      className={cn(
-                        "border",
-                        attempt
-                          ? "border-blue-200 bg-blue-50 text-blue-700"
-                          : "border-slate-200 bg-slate-100 text-slate-700"
-                      )}
-                    >
-                      {statusLabel(attempt)}
-                    </Badge>
-                    {attempt?.autoSubmitted && (
-                      <Badge className="border-amber-200 bg-amber-50 text-amber-700">
-                        Proctor auto-submit
-                      </Badge>
-                    )}
-                    {attempt && attempt.score !== null && attempt.totalMarks !== null && (
-                      <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700">
-                        {attempt?.score} / {attempt?.totalMarks}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </summary>
-
-              <div className="mt-4 grid gap-3 border-t pt-4 text-sm">
-                <div className="grid gap-2 text-muted-foreground sm:grid-cols-3">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Registered {formatContestDateTime(registration.createdAt)}
-                  </div>
-                  {attempt && (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <FileQuestion className="h-4 w-4" />
-                        Started {formatContestDateTime(attempt.startedAt)}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4" />
-                        {attempt.submittedAt
-                          ? `Submitted ${formatContestDateTime(attempt.submittedAt)}`
-                          : `Expires ${formatContestDateTime(attempt.expiresAt)}`}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {!attempt ? (
-                  <div className="rounded-md border border-dashed bg-background p-5 text-center text-muted-foreground">
-                    This student has registered but has not started the contest yet.
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {questions.map((contestQuestion) => {
-                      const question = contestQuestion.question;
-                      const answer = answersByQuestionId.get(question.id);
-                      const selectedText = formatSelectedAnswer(
-                        answer?.selectedAnswer || null,
-                        question
-                      );
-                      const hasAnswer = !!answer?.selectedAnswer;
-
-                      return (
-                        <div key={question.id} className="rounded-md border bg-background p-3">
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground">
-                                Question {contestQuestion.position} ·{" "}
-                                {contestQuestion.marks ?? question.defaultMarks} marks
-                              </p>
-                              <div className="mt-1 font-medium">
-                                <MathText value={question.questionText} />
-                              </div>
-                            </div>
-                            <Badge
-                              className={cn(
-                                "w-fit border",
-                                answerBadgeClass(answer?.isCorrect ?? null, hasAnswer)
-                              )}
-                            >
-                              {hasAnswer
-                                ? answer?.isCorrect === null
-                                  ? "Manual review"
-                                  : answer?.isCorrect
-                                    ? "Correct"
-                                    : "Incorrect"
-                                : "Unanswered"}
-                            </Badge>
-                          </div>
-
-                          <div className="mt-3 grid gap-2 rounded-md bg-slate-50 p-3 dark:bg-slate-950">
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground">
-                                Student answer
-                              </p>
-                              <div className="mt-1">
-                                <MathText value={selectedText} />
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-muted-foreground">
-                                Correct answer
-                              </p>
-                              <div className="mt-1">
-                                <MathText value={formatCorrectAnswer(question)} />
-                              </div>
-                            </div>
-                            {answer?.marksAwarded !== null && answer?.marksAwarded !== undefined && (
-                              <p className="text-xs text-muted-foreground">
-                                Marks awarded: {answer.marksAwarded}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </details>
-          );
-        })}
-
-        {registrations.length === 0 && (
-          <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-            No students have registered for this contest yet.
+        {completed && attempt.score !== null && attempt.totalMarks !== null && (
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">{awaitingGrading ? "Provisional score" : "Score"}</p>
+            <p className="text-2xl font-semibold tabular-nums">{attempt.score} / {attempt.totalMarks}</p>
           </div>
         )}
       </div>
+
+      <dl className="grid gap-4 border-y py-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          ["Registered", formatContestDateTime(registration.createdAt)],
+          ["Started", attempt ? formatContestDateTime(attempt.startedAt) : "Not started"],
+          ["Submitted", attempt?.submittedAt ? formatContestDateTime(attempt.submittedAt) : "Not submitted"],
+          ["Deadline", attempt ? formatContestDateTime(attempt.expiresAt) : "No attempt"],
+        ].map(([label, value]) => <div key={label}><dt className="text-xs text-muted-foreground">{label}</dt><dd className="mt-1">{value}</dd></div>)}
+      </dl>
+
+      {!attempt ? <p className="py-8 text-sm text-muted-foreground">This student has not started an attempt.</p> : <>
+        {!completed && <p role="status" className="border-l-2 border-amber-500 bg-muted/40 p-3 text-sm">
+          {attempt.expiresAt <= now ? "Time has expired. These are saved responses; submission has not been confirmed." : "This attempt is in progress. Responses may change until submission."}
+        </p>}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-lg font-medium">Responses</h3>
+          <p className="text-sm text-muted-foreground">{answered} of {questions.length} answered</p>
+        </div>
+        <div className="space-y-4">
+          {questions.map((item, index) => {
+            const question = item.question;
+            const answer = answers.get(question.id);
+            const hasAnswer = !!answer?.selectedAnswer?.trim();
+            const correctOptions = question.options.filter(option => option.isCorrect);
+            const verdict = !hasAnswer ? "Unanswered" : !completed ? "Saved response"
+              : answer?.marksAwarded == null ? "Awaiting grading"
+              : answer.isCorrect === true ? "Correct" : answer.isCorrect === false ? "Incorrect" : "Graded";
+            const color = completed && hasAnswer && answer?.isCorrect === true
+              ? "border-green-300 text-green-800 dark:border-green-800 dark:text-green-300"
+              : completed && hasAnswer && answer?.isCorrect === false
+                ? "border-rose-300 text-rose-800 dark:border-rose-800 dark:text-rose-300" : "";
+            return <section key={question.id} aria-label={`Question ${index + 1}`} className="min-w-0 rounded-md border p-4">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <h4 className="text-sm font-medium">Question {index + 1} <span className="text-muted-foreground">/ {item.marks ?? question.defaultMarks} marks</span></h4>
+                <Badge variant="outline" className={color}>{verdict}</Badge>
+              </div>
+              <MathText value={question.questionText} className="max-w-full break-words font-medium" />
+              {question.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={question.imageUrl} alt={`Diagram for question ${index + 1}`} className="mt-3 max-h-80 max-w-full object-contain" />
+              )}
+              <div className="mt-4 grid min-w-0 gap-5 border-t pt-4 md:grid-cols-2">
+                <div className="min-w-0">
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">Student answer</p>
+                  <MathText value={selectedText(answer?.selectedAnswer || null, question)} className="max-w-full whitespace-pre-wrap break-words text-sm" />
+                </div>
+                <div className="min-w-0">
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">Answer key</p>
+                  {question.questionType === "NUMERICAL" || !question.options.length
+                    ? <p className="text-sm">Manual grading required</p>
+                    : correctOptions.length
+                      ? correctOptions.map(option => <MathText key={option.id} value={option.optionText} className="mr-2 max-w-full break-words text-sm" />)
+                      : <p className="text-sm">Not marked</p>}
+                </div>
+              </div>
+              {completed && answer?.marksAwarded != null && <p className="mt-4 text-sm">Marks awarded: {answer.marksAwarded}</p>}
+              {question.explanation && <div className="mt-4 border-t pt-3">
+                <p className="mb-2 text-xs text-muted-foreground">Explanation</p>
+                <MathText value={question.explanation} className="max-w-full break-words text-sm" />
+              </div>}
+            </section>;
+          })}
+          {!questions.length && <p className="text-sm text-muted-foreground">No questions are available for this contest.</p>}
+        </div>
+      </>}
     </div>
   );
-};
+}

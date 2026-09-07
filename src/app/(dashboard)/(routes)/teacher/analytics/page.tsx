@@ -1,42 +1,34 @@
-import { getAnalytics } from "@/actions/get-analytics";
-import { auth } from "@clerk/nextjs"
+import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { DataCard } from "./_components/data-card";
-import { Chart } from "./_components/chart";
 
+import { db } from "@/lib/db";
+import {
+  loadContestAnalytics,
+  loadCourseAnalytics,
+  loadTestSeriesAnalytics,
+  parseAnalyticsView,
+} from "@/lib/teacher-analytics";
+import { isTeacher } from "@/lib/teacher";
+import { TeacherAnalyticsView } from "./_components/teacher-analytics-view";
 
-const Analytics = async() => {
+type AnalyticsPageProps = {
+  searchParams: { view?: string | string[] };
+};
 
-  const {userId} = auth();
+const AnalyticsPage = async ({ searchParams }: AnalyticsPageProps) => {
+  const { userId } = auth();
 
-  if(!userId){
-    return redirect("/")
-  }
+  if (!userId) return redirect("/");
+  if (!isTeacher(userId)) return redirect("/dashboard");
 
-  const {
-    data,
-    totalRevenue,
-    totalSales
-  } = await getAnalytics(userId);
+  const view = parseAnalyticsView(searchParams.view);
+  const data = view === "contests"
+    ? await loadContestAnalytics(db, userId)
+    : view === "test-series"
+      ? await loadTestSeriesAnalytics(db, userId)
+      : await loadCourseAnalytics(db, userId);
 
-  return (
-    <div className="p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <DataCard 
-          label="Total Revenue"
-          value={totalRevenue}
-          shouldFormat
-        />
-        <DataCard 
-          label="Total Sales"
-          value={totalSales}
-        />
-      </div>
-      <Chart
-      data={data}
-      />
-    </div>
-  )
-}
+  return <TeacherAnalyticsView data={data} />;
+};
 
-export default Analytics
+export default AnalyticsPage;

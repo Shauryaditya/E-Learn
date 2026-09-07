@@ -3,14 +3,7 @@ import { ContestAttemptStatus, QuestionType } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
-
-const normalizeSelectedAnswer = (value?: string | null) =>
-  (value || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .sort()
-    .join(",");
+import { gradeAnswer } from "@/lib/contest-attempts";
 
 const submittedStatuses = [
   ContestAttemptStatus.SUBMITTED,
@@ -128,46 +121,32 @@ export async function PATCH(
       );
       let score = 0;
       let totalMarks = 0;
+      let fullyGraded = true;
 
       const answerUpdates = contest.questions.flatMap((item) => {
         const currentQuestion = item.question;
         const answer = answersByQuestionId.get(currentQuestion.id);
         const selectedAnswer = answer?.selectedAnswer || "";
         const marks = item.marks ?? currentQuestion.defaultMarks;
-        const correctAnswer = normalizeSelectedAnswer(
-          currentQuestion.options
-            .filter((option) => option.isCorrect)
-            .map((option) => option.id)
-            .join(",")
-        );
-        const isAutoGradable =
-          currentQuestion.questionType !== QuestionType.NUMERICAL &&
-          currentQuestion.options.length > 0;
-        const normalizedSelectedAnswer = normalizeSelectedAnswer(selectedAnswer);
-        const isCorrect =
-          isAutoGradable &&
-          !!correctAnswer &&
-          normalizedSelectedAnswer === correctAnswer;
-        const marksAwarded = isAutoGradable
-          ? isCorrect
-            ? marks
-            : selectedAnswer
-              ? -currentQuestion.negativeMarks
-              : 0
-          : null;
+        const { isCorrect, marksAwarded } = gradeAnswer(currentQuestion, marks, selectedAnswer);
 
         totalMarks += marks;
 
         if (marksAwarded !== null) {
           score += marksAwarded;
+        } else {
+          fullyGraded = false;
         }
 
-        if (!answer) return [];
+        if (!answer) {
+          fullyGraded = false;
+          return [];
+        }
 
         return db.contestAnswer.update({
           where: { id: answer.id },
           data: {
-            isCorrect: isAutoGradable ? isCorrect : null,
+            isCorrect,
             marksAwarded,
           },
         });
@@ -178,6 +157,7 @@ export async function PATCH(
         db.contestAttempt.update({
           where: { id: attempt.id },
           data: {
+            status: fullyGraded ? ContestAttemptStatus.EVALUATED : attempt.status,
             score,
             totalMarks,
             percentage: totalMarks > 0 ? (score / totalMarks) * 100 : null,
