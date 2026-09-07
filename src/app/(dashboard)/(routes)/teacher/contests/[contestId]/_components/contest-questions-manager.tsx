@@ -6,7 +6,7 @@ import { QuestionType } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { FileText, PlusCircle, Trash } from "lucide-react";
 
@@ -107,6 +107,14 @@ const latexExamples = [
   String.raw`K_{max}=h\nu-\phi`,
 ];
 
+const getAnswerKeyDrafts = (contestQuestions: ContestQuestion[]) =>
+  contestQuestions.reduce<Record<string, string[]>>((acc, item) => {
+    acc[item.id] = item.question.options
+      .filter((option) => option.isCorrect)
+      .map((option) => option.id);
+    return acc;
+  }, {});
+
 export const ContestQuestionsManager = ({
   contestId,
   contestQuestions,
@@ -119,7 +127,15 @@ export const ContestQuestionsManager = ({
   const [parsedQuestions, setParsedQuestions] = useState<ParsedQuestionDraft[]>([]);
   const [pdfParseMeta, setPdfParseMeta] = useState<PdfParseMeta | null>(null);
   const [isAddingParsed, setIsAddingParsed] = useState(false);
+  const [answerKeyDrafts, setAnswerKeyDrafts] = useState(() =>
+    getAnswerKeyDrafts(contestQuestions)
+  );
+  const [savingAnswerKeyId, setSavingAnswerKeyId] = useState<string | null>(null);
   const isAddingParsedRef = useRef(false);
+
+  useEffect(() => {
+    setAnswerKeyDrafts(getAnswerKeyDrafts(contestQuestions));
+  }, [contestQuestions]);
 
   const attachedIds = useMemo(
     () => new Set(contestQuestions.map((item) => item.question.id)),
@@ -242,6 +258,52 @@ export const ContestQuestionsManager = ({
     }
   };
 
+  const onToggleCorrectOption = (
+    contestQuestion: ContestQuestion,
+    optionId: string,
+    checked: boolean
+  ) => {
+    const isMultipleChoice = contestQuestion.question.questionType === QuestionType.MULTIPLE_CHOICE;
+
+    setAnswerKeyDrafts((current) => {
+      const currentIds = current[contestQuestion.id] || [];
+
+      return {
+        ...current,
+        [contestQuestion.id]: isMultipleChoice
+          ? checked
+            ? Array.from(new Set([...currentIds, optionId]))
+            : currentIds.filter((id) => id !== optionId)
+          : checked
+            ? [optionId]
+            : [],
+      };
+    });
+  };
+
+  const onSaveAnswerKey = async (contestQuestion: ContestQuestion) => {
+    try {
+      setSavingAnswerKeyId(contestQuestion.id);
+      const response = await axios.patch(
+        `/api/contests/${contestId}/questions/${contestQuestion.id}`,
+        {
+          correctOptionIds: answerKeyDrafts[contestQuestion.id] || [],
+        }
+      );
+
+      toast.success(
+        response.data.regradedAttempts > 0
+          ? `Answer key saved. ${response.data.regradedAttempts} attempts re-scored`
+          : "Answer key saved"
+      );
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error?.response?.data || "Could not save answer key");
+    } finally {
+      setSavingAnswerKeyId(null);
+    }
+  };
+
   return (
     <div className="grid gap-6">
       <div className="rounded-md border bg-slate-50 p-4 dark:bg-slate-900">
@@ -313,16 +375,56 @@ export const ContestQuestionsManager = ({
                   {item.marks ?? item.question.defaultMarks} marks
                 </p>
                 {item.question.options.length > 0 && (
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {item.question.options.map((option) => (
-                      <div
-                        key={option.id}
-                        className="rounded-md border bg-slate-50 px-3 py-2 text-sm dark:bg-slate-950"
-                      >
-                        <MathText value={option.optionText} />
+                  <div className="mt-3 rounded-md border bg-slate-50 p-3 dark:bg-slate-950">
+                    <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Correct answer key
+                        </p>
+                        {(answerKeyDrafts[item.id] || []).length === 0 && (
+                          <p className="mt-1 text-xs text-amber-600 dark:text-amber-300">
+                            No correct answer marked yet.
+                          </p>
+                        )}
                       </div>
-                    ))}
+                      <Button
+                        disabled={savingAnswerKeyId === item.id}
+                        onClick={() => onSaveAnswerKey(item)}
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                      >
+                        {savingAnswerKeyId === item.id ? "Saving..." : "Save answer key"}
+                      </Button>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {item.question.options.map((option) => {
+                        const checked = (answerKeyDrafts[item.id] || []).includes(option.id);
+
+                        return (
+                          <label
+                            key={option.id}
+                            className="flex cursor-pointer items-start gap-3 rounded-md border bg-background px-3 py-2 text-sm"
+                          >
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(value) =>
+                                onToggleCorrectOption(item, option.id, value === true)
+                              }
+                            />
+                            <span className="min-w-0 flex-1">
+                              <MathText value={option.optionText} />
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
+                )}
+                {item.question.questionType === QuestionType.NUMERICAL && (
+                  <p className="mt-3 rounded-md border border-blue-100 bg-blue-50 p-3 text-xs text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-200">
+                    Free-text or numerical answers need manual review. Objective scoring uses the answer key above.
+                  </p>
                 )}
               </div>
               <Button
