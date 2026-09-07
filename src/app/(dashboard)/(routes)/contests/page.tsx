@@ -38,6 +38,19 @@ const getContests = async (userId: string) => {
             userId: true,
           },
         },
+        attempts: {
+          where: { userId },
+          select: {
+            status: true,
+            score: true,
+            totalMarks: true,
+            answers: {
+              where: { marksAwarded: null },
+              select: { id: true },
+              take: 1,
+            },
+          },
+        },
       },
       orderBy: {
         startsAt: "asc",
@@ -98,40 +111,40 @@ const ContestCard = ({
   const isLive = canStartContest(contest);
 
   return (
-    <article className="group flex h-full flex-col gap-5 rounded-xl border border-white/10 bg-white/[0.04] p-5 shadow-sm transition hover:border-blue-300/50 hover:bg-white/[0.06]">
+    <article className="group flex h-full flex-col gap-5 rounded-lg border border-border bg-card p-5 shadow-sm transition hover:border-blue-300/50 hover:bg-muted">
       <Link href={`/contests/${contest.id}`} className="flex flex-1 flex-col gap-5">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-cyan-300/10 text-cyan-200">
+          <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-cyan-300/10 text-cyan-700 dark:text-cyan-200">
             <Icon className="h-5 w-5" />
           </div>
-          <Badge className="border-cyan-300/30 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/10">
+          <Badge className="border-cyan-300/30 bg-cyan-300/10 text-cyan-800 dark:text-cyan-100 hover:bg-cyan-300/10">
             {isLive ? "Live now" : closed ? "Closed" : registered ? "Registered" : "Registration Open"}
           </Badge>
         </div>
 
         <div>
-          <h3 className="line-clamp-2 text-xl font-semibold text-white">
+          <h3 className="line-clamp-2 text-xl font-semibold text-foreground">
             {contest.title}
           </h3>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-muted-foreground">
             {contest.category?.name || "General Contest"}
           </p>
-          <p className="mt-3 text-2xl font-semibold text-blue-100">
+          <p className="mt-3 text-2xl font-semibold text-blue-800 dark:text-blue-100">
             {contest.price ? formatPrice(contest.price) : "Free"}
           </p>
         </div>
 
-        <div className="mt-auto space-y-3 border-t border-white/10 pt-4 text-sm text-slate-300">
+        <div className="mt-auto space-y-3 border-t border-border pt-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-blue-200" />
+            <CalendarDays className="h-4 w-4 text-blue-700 dark:text-blue-200" />
             {formatContestDateTime(contest.startsAt)}
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-blue-200" />
+            <Clock className="h-4 w-4 text-blue-700 dark:text-blue-200" />
             Duration: {contest.durationMinutes} mins
           </div>
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-blue-200" />
+            <Users className="h-4 w-4 text-blue-700 dark:text-blue-200" />
             {contest.registrations.length}
             {contest.maxParticipants ? ` / ${contest.maxParticipants}` : ""} registered
           </div>
@@ -164,20 +177,20 @@ const ContestsPage = async () => {
   const featured = live[0] || upcoming[0];
 
   return (
-    <div className="min-h-screen bg-[#0b1326] text-slate-100">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto w-full max-w-7xl space-y-10 px-4 py-6 sm:px-6 lg:px-8">
-        <section className="relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.045] p-6 shadow-sm md:p-8">
+        <section className="relative overflow-hidden rounded-lg border border-border bg-card p-6 shadow-sm md:p-8">
           <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-gradient-to-l from-blue-300/15 to-transparent md:block" />
           <div className="relative grid gap-8 md:grid-cols-[1fr_320px] md:items-center">
             <div className="space-y-5">
-              <Badge className="border-blue-300/30 bg-blue-300/10 text-blue-100 hover:bg-blue-300/10">
+              <Badge className="border-blue-300/30 bg-blue-300/10 text-blue-800 dark:text-blue-100 hover:bg-blue-300/10">
                 Featured Event
               </Badge>
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+                <h1 className="text-3xl font-bold tracking-normal text-foreground md:text-5xl">
                   {featured?.title || "Weekly Academic Challenge"}
                 </h1>
-                <p className="mt-3 max-w-2xl text-base leading-7 text-slate-300 md:text-lg">
+                <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
                   {featured?.description ||
                     "Compete in weekly timed contests, sharpen exam skills, and measure your performance against peers."}
                 </p>
@@ -185,10 +198,10 @@ const ContestsPage = async () => {
 
               <div className="flex flex-col gap-5 sm:flex-row sm:items-end">
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     Starts In
                   </p>
-                  <div className="rounded-lg border border-white/10 bg-white/[0.06] px-5 py-3 text-2xl font-semibold text-blue-200">
+                  <div className="rounded-lg border border-border bg-muted px-5 py-3 text-2xl font-semibold text-blue-700 dark:text-blue-200">
                     {featured
                       ? canStartContest(featured)
                         ? "Live now"
@@ -209,14 +222,14 @@ const ContestsPage = async () => {
               </div>
             </div>
 
-            <div className="flex aspect-square items-center justify-center rounded-xl border border-white/10 bg-slate-950/60">
+            <div className="flex aspect-square items-center justify-center rounded-lg border border-border bg-muted/50">
               <div className="grid place-items-center gap-4 text-center">
-                <div className="flex h-24 w-24 items-center justify-center rounded-full border border-blue-300/30 bg-blue-300/10 text-blue-100">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full border border-blue-300/30 bg-blue-300/10 text-blue-800 dark:text-blue-100">
                   <Trophy className="h-12 w-12" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Contest Arena</p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-sm font-semibold text-foreground">Contest Arena</p>
+                  <p className="text-xs text-muted-foreground">
                     {featured?.questions.length || 0} questions ready
                   </p>
                 </div>
@@ -228,14 +241,14 @@ const ContestsPage = async () => {
         <section className="space-y-5">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-semibold text-white">
+              <h2 className="text-2xl font-semibold text-foreground">
                 Active Contests
               </h2>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 Live and upcoming contests stay here until their duration ends.
               </p>
             </div>
-            <Sparkles className="h-5 w-5 text-blue-200" />
+            <Sparkles className="h-5 w-5 text-blue-700 dark:text-blue-200" />
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -250,39 +263,57 @@ const ContestsPage = async () => {
           </div>
 
           {activeContests.length === 0 && (
-            <div className="rounded-xl border border-dashed border-white/10 p-10 text-center text-sm text-slate-400">
+            <div className="rounded-lg border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
               No upcoming contests yet.
             </div>
           )}
         </section>
 
         <section className="space-y-5">
-          <h2 className="text-2xl font-semibold text-white">Past Contests</h2>
+          <h2 className="text-2xl font-semibold text-foreground">Past Contests</h2>
           <div className="space-y-3">
             {past.slice(0, 6).map((contest) => (
-              <div
+              <Link
                 key={contest.id}
-                className="flex flex-col gap-4 rounded-lg border border-white/10 bg-white/[0.04] p-4 transition hover:bg-white/[0.06] sm:flex-row sm:items-center sm:justify-between"
+                href={`/contests/${contest.id}`}
+                className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 transition hover:bg-muted sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/[0.06] text-slate-300">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                     <Trophy className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-medium text-white">{contest.title}</p>
-                    <p className="text-sm text-slate-400">
+                    <p className="font-medium text-foreground">{contest.title}</p>
+                    <p className="text-sm text-muted-foreground">
                       Completed {formatContestDateTime(contest.startsAt)} ·{" "}
                       {contest.registrations.length} participants
                     </p>
                   </div>
                 </div>
-                <Badge className="w-fit border-white/10 bg-white/[0.06] text-slate-200 hover:bg-white/[0.06]">
-                  Results soon
-                </Badge>
-              </div>
+                {(() => {
+                  const attempt = contest.attempts[0];
+                  const completed = attempt && attempt.status !== "IN_PROGRESS";
+                  if (!completed) return (
+                    <Badge variant="outline" className="w-fit">Not attempted</Badge>
+                  );
+                  if (attempt.score === null || attempt.totalMarks === null) return (
+                    <Badge variant="outline" className="w-fit">Results pending</Badge>
+                  );
+                  return (
+                    <div className="text-left sm:text-right">
+                      <p className="text-xs text-muted-foreground">
+                        {attempt.answers.length ? "Provisional score" : "Final score"}
+                      </p>
+                      <p className="mt-1 font-semibold tabular-nums text-foreground">
+                        {attempt.score} / {attempt.totalMarks}
+                      </p>
+                    </div>
+                  );
+                })()}
+              </Link>
             ))}
             {past.length === 0 && (
-              <div className="rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-slate-400">
+              <div className="rounded-lg border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
                 Past contests will appear here.
               </div>
             )}

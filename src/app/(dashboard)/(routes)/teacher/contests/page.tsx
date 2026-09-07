@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { PlusCircle } from "lucide-react";
+import { ClipboardList, Pencil, PlusCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,12 +29,7 @@ const TeacherContestsPage = async () => {
     where: { userId },
     include: {
       category: true,
-      questions: {
-        select: { id: true },
-      },
-      registrations: {
-        select: { id: true },
-      },
+      _count: { select: { questions: true, registrations: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -44,9 +39,6 @@ const TeacherContestsPage = async () => {
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Contests</h1>
-          <p className="text-sm text-muted-foreground">
-            Schedule weekly contests and manage their question sets.
-          </p>
         </div>
         <Button asChild>
           <Link href="/teacher/create-contest">
@@ -86,8 +78,8 @@ const TeacherContestsPage = async () => {
                 <TableCell>
                   {contest.price ? formatPrice(contest.price) : "Free"}
                 </TableCell>
-                <TableCell>{contest.questions.length}</TableCell>
-                <TableCell>{contest.registrations.length}</TableCell>
+                <TableCell>{contest._count.questions}</TableCell>
+                <TableCell>{contest._count.registrations}</TableCell>
                 <TableCell>
                   <Badge
                     className={cn(
@@ -99,9 +91,14 @@ const TeacherContestsPage = async () => {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button asChild variant="ghost" size="sm">
-                    <Link href={`/teacher/contests/${contest.id}`}>Edit</Link>
-                  </Button>
+                  <div className="flex justify-end gap-1">
+                    <Button asChild variant="ghost" size="icon">
+                      <Link href={`/teacher/contests/${contest.id}`} title="Edit contest" aria-label={`Edit ${contest.title}`}><Pencil className="h-4 w-4" /></Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/teacher/contests/${contest.id}/submissions`}><ClipboardList className="mr-2 h-4 w-4" />Submissions</Link>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

@@ -66,13 +66,13 @@ const ContestAttemptPage = async ({ params }: PageProps) => {
 
   if (now < contest.startsAt) {
     return (
-      <div className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
-        <div className="mx-auto max-w-2xl rounded-md border border-white/10 bg-white/[0.04] p-6">
-          <Badge className="border-blue-300/30 bg-blue-300/10 text-blue-100">
+      <div className="min-h-screen bg-background px-4 py-10 text-foreground">
+        <div className="mx-auto max-w-2xl rounded-md border border-border bg-card p-6">
+          <Badge className="border-blue-300/30 bg-blue-300/10 text-blue-800 dark:text-blue-100">
             Registered
           </Badge>
-          <h1 className="mt-4 text-2xl font-semibold text-white">{contest.title}</h1>
-          <p className="mt-2 text-sm text-slate-300">
+          <h1 className="mt-4 text-2xl font-semibold text-foreground">{contest.title}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             The contest starts on {formatContestDateTime(contest.startsAt)}.
           </p>
         </div>
@@ -82,13 +82,13 @@ const ContestAttemptPage = async ({ params }: PageProps) => {
 
   if (now >= endsAt && !attempt) {
     return (
-      <div className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
-        <div className="mx-auto max-w-2xl rounded-md border border-white/10 bg-white/[0.04] p-6">
-          <Badge className="border-slate-300/20 bg-white/[0.06] text-slate-200">
+      <div className="min-h-screen bg-background px-4 py-10 text-foreground">
+        <div className="mx-auto max-w-2xl rounded-md border border-border bg-card p-6">
+          <Badge className="border-slate-300/20 bg-muted text-muted-foreground">
             Ended
           </Badge>
-          <h1 className="mt-4 text-2xl font-semibold text-white">{contest.title}</h1>
-          <p className="mt-2 text-sm text-slate-300">
+          <h1 className="mt-4 text-2xl font-semibold text-foreground">{contest.title}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             This contest ended on {formatContestDateTime(endsAt)}.
           </p>
         </div>
@@ -98,13 +98,13 @@ const ContestAttemptPage = async ({ params }: PageProps) => {
 
   if (!attempt) {
     return (
-      <div className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
-        <div className="mx-auto max-w-2xl rounded-md border border-white/10 bg-white/[0.04] p-6">
-          <Badge className="border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
+      <div className="min-h-screen bg-background px-4 py-10 text-foreground">
+        <div className="mx-auto max-w-2xl rounded-md border border-border bg-card p-6">
+          <Badge className="border-emerald-300/30 bg-emerald-300/10 text-emerald-800 dark:text-emerald-100">
             Live
           </Badge>
-          <h1 className="mt-4 text-2xl font-semibold text-white">{contest.title}</h1>
-          <p className="mt-2 text-sm text-slate-300">
+          <h1 className="mt-4 text-2xl font-semibold text-foreground">{contest.title}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Once you start, do not switch tabs or leave the contest window.
           </p>
           <div className="mt-6">
@@ -117,19 +117,22 @@ const ContestAttemptPage = async ({ params }: PageProps) => {
 
   if (attempt.status !== ContestAttemptStatus.IN_PROGRESS) {
     return (
-      <div className="min-h-screen bg-slate-950 px-4 py-10 text-slate-100">
-        <div className="mx-auto max-w-2xl rounded-md border border-white/10 bg-white/[0.04] p-6">
-          <Badge className="border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
+      <div className="min-h-screen bg-background px-4 py-10 text-foreground">
+        <div className="mx-auto max-w-2xl rounded-md border border-border bg-card p-6">
+          <Badge className="border-emerald-300/30 bg-emerald-300/10 text-emerald-800 dark:text-emerald-100">
             Submitted
           </Badge>
-          <h1 className="mt-4 text-2xl font-semibold text-white">{contest.title}</h1>
-          <p className="mt-2 text-sm text-slate-300">
+          <h1 className="mt-4 text-2xl font-semibold text-foreground">{contest.title}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Your attempt has been submitted.
           </p>
-          {attempt.score !== null && attempt.totalMarks !== null && (
-            <p className="mt-4 text-lg font-semibold text-white">
-              Score: {attempt.score} / {attempt.totalMarks}
+          {now >= endsAt && attempt.score !== null && attempt.totalMarks !== null && (
+            <p className="mt-4 text-lg font-semibold text-foreground">
+              {attempt.answers.some(answer => answer.marksAwarded === null) ? "Provisional score" : "Score"}: {attempt.score} / {attempt.totalMarks}
             </p>
+          )}
+          {attempt.answers.some(answer => answer.marksAwarded === null) && (
+            <p className="mt-2 text-sm text-muted-foreground">Some answers are awaiting grading.</p>
           )}
         </div>
       </div>
@@ -138,9 +141,23 @@ const ContestAttemptPage = async ({ params }: PageProps) => {
 
   return (
     <ContestAttemptForm
+      attemptId={attempt.id}
       contestId={contest.id}
       expiresAt={attempt.expiresAt.toISOString()}
-      questions={contest.questions}
+      questions={contest.questions.map(item => ({
+        id: item.id,
+        marks: item.marks,
+        question: {
+          id: item.question.id,
+          questionText: item.question.questionText,
+          questionType: item.question.questionType,
+          defaultMarks: item.question.defaultMarks,
+          imageUrl: item.question.imageUrl,
+          options: item.question.options.map(option => ({
+            id: option.id, optionText: option.optionText, position: option.position,
+          })),
+        },
+      }))}
       title={contest.title}
     />
   );

@@ -39,6 +39,11 @@ const guestRoutes = [
 
 const teacherRoutes = [
   {
+    icon: Layout,
+    label: "Dashboard",
+    href: "/teacher/dashboard",
+  },
+  {
     icon: List,
     label: "Courses",
     href: "/teacher/courses",

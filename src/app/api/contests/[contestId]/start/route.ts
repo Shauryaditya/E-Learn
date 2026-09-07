@@ -66,13 +66,19 @@ export async function POST(
       return NextResponse.json(existingAttempt);
     }
 
-    const attempt = await db.contestAttempt.create({
-      data: {
+    // Concurrent starts must preserve the first attempt and its original deadline.
+    await db.contestAttempt.createMany({
+      skipDuplicates: true,
+      data: [{
         userId,
         contestId: params.contestId,
         registrationId: contest.registrations[0].id,
         expiresAt: contestEndsAt,
-      },
+      }],
+    });
+
+    const attempt = await db.contestAttempt.findUniqueOrThrow({
+      where: { userId_contestId: { userId, contestId: params.contestId } },
     });
 
     return NextResponse.json(attempt);

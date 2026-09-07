@@ -3,7 +3,7 @@
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
-import { LogOut } from "lucide-react";
+import { ArrowLeft, GraduationCap, LogOut } from "lucide-react";
 import Link from "next/link";
 import { SearchInput } from "./search-input";
 import { isTeacher } from "@/lib/teacher";
@@ -39,23 +39,23 @@ export const NavbarRoutes = () => {
       <div className="flex gap-x-2 ml-auto items-center">
         <ModeToggle />
         {isTeacherPage || isCoursePage ? (
-          <Link href="/">
-            <Button>
-              <LogOut className="h-4 w-4 mr-2" />
-              Exit
-            </Button>
-          </Link>
+          <Button asChild variant="outline">
+            <Link href="/dashboard" aria-label={isTeacherPage ? "Student view" : "Back to learning"} title={isTeacherPage ? "Student view" : "Back to learning"}>
+              <ArrowLeft className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">{isTeacherPage ? "Student view" : "Back to learning"}</span>
+            </Link>
+          </Button>
         ) : isTeacher(userId) ? (
-          <Link href="/teacher/courses">
-            <Button>Teacher Mode</Button>
-          </Link>
+          <Button asChild variant="outline">
+            <Link href="/teacher/dashboard" aria-label="Teacher workspace" title="Teacher workspace"><GraduationCap className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Teacher workspace</span></Link>
+          </Button>
         ) : null}
         {userId ? (
           <Button
             onClick={handleSignOut}
             variant="ghost"
             size="sm"
-            className="text-gray-700 hover:text-gray-900"
+            className="text-muted-foreground hover:text-foreground"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out

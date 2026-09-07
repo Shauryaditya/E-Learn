@@ -1,10 +1,22 @@
-import withPWAInit from "@ducanh2912/next-pwa";
+import withPWAInit, { runtimeCaching } from "@ducanh2912/next-pwa";
 
 const withPWA = withPWAInit({
   dest: "public",
-  disable: false,
+  disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
+  reloadOnOnline: false,
+  workboxOptions: {
+    runtimeCaching: [
+      {
+        urlPattern: ({ url, sameOrigin }) =>
+          sameOrigin && /^\/(?:api\/|teacher\/)?contests(?:\/|$)/.test(url.pathname),
+        handler: "NetworkOnly",
+        method: "GET",
+      },
+      ...runtimeCaching,
+    ],
+  },
 });
 
 /** @type {import('next').NextConfig} */
