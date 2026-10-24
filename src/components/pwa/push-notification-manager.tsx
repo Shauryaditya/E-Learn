@@ -1,8 +1,9 @@
 'use client'
  
 import { useState, useEffect } from 'react'
-import { subscribeUser, unsubscribeUser, sendNotification } from '@/app/actions'
+import { subscribeUser, unsubscribeUser } from '@/app/actions'
 import toast from "react-hot-toast"
+import { Bell } from "lucide-react"
  
 function urlBase64ToUint8Array(base64String: string) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -22,7 +23,6 @@ export function PushNotificationManager() {
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null
   )
-  const [message, setMessage] = useState('')
  
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -75,19 +75,6 @@ export function PushNotificationManager() {
     }
   }
 
-  async function sendTestNotification() {
-    try {
-      if (subscription) {
-        await sendNotification(message)
-        setMessage('')
-        toast.success("Test notification sent!")
-      }
-    } catch (error) {
-      console.error("Failed to send notification", error)
-      toast.error("Failed to send notification")
-    }
-  }
- 
   if (!isSupported) {
     return null; // Don't show anything if not supported
   }
@@ -96,14 +83,14 @@ export function PushNotificationManager() {
     <div className="border rounded-md p-4 flex flex-col sm:flex-row items-center justify-between gap-y-4 shadow-sm bg-white dark:bg-slate-900">
       <div className="flex items-center gap-x-2">
          <div className="p-2 w-fit rounded-md bg-sky-100 text-sky-700">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <Bell className="h-6 w-6" />
          </div>
          <div>
             <h3 className="font-medium text-slate-900 dark:text-slate-100">
                 Push Notifications
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-                {subscription ? "You will receive updates about your course goals." : "Enable notifications to stay updated on your goals."}
+                {subscription ? "You will receive updates about new courses and contests." : "Enable alerts for new courses and contests."}
             </p>
          </div>
       </div>

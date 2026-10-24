@@ -8,6 +8,9 @@ interface GetResourcesProps {
   subject?: string;
   grade?: string;
   year?: number;
+  schoolName?: string;
+  board?: string;
+  examType?: string;
   search?: string;
 }
 
@@ -17,6 +20,9 @@ export const getResources = async ({
   subject,
   grade,
   year,
+  schoolName,
+  board,
+  examType,
   search
 }: GetResourcesProps) => {
   try {
@@ -27,10 +33,15 @@ export const getResources = async ({
         ...(subject && { subject }),
         ...(grade && { grade }),
         ...(year && { year }),
+        ...(schoolName && { schoolName }),
+        ...(board && { board }),
+        ...(examType && { examType }),
         ...(search && {
             OR: [
                 { title: { contains: search, mode: "insensitive" } },
                 { description: { contains: search, mode: "insensitive" } },
+                { subject: { contains: search, mode: "insensitive" } },
+                { schoolName: { contains: search, mode: "insensitive" } },
             ]
         })
       },

@@ -108,6 +108,27 @@ To get a local copy of the project up and running, follow these steps.
 
    Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
+## Notification Delivery
+
+In-app notifications require only the database migration. Email, SMS, and Web Push are enabled when their provider variables are configured:
+
+```env
+NEXT_PUBLIC_APP_URL=https://your-domain.example
+
+RESEND_API_KEY=
+NOTIFICATION_EMAIL_FROM=Aaccent <notifications@your-domain.example>
+
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_PHONE_NUMBER=
+
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:support@your-domain.example
+```
+
+Student email addresses and phone numbers come from Clerk. A missing address, number, or provider configuration skips that delivery channel without blocking publication or the in-app notification.
+
 ## Project Structure
 
 ```

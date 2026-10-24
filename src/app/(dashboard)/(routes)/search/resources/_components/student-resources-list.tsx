@@ -1,59 +1,53 @@
-
 "use client";
 
 import { Resource } from "@prisma/client";
-import { FileText, Download, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowUpRight, Building2, CalendarDays, FileText, GraduationCap } from "lucide-react";
 import Link from "next/link";
+
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { resourceCategoryLabel, resourceTypeLabel } from "@/lib/resource-options";
 
-interface StudentResourcesListProps {
-  items: Resource[];
-}
-
-export const StudentResourcesList = ({ items }: StudentResourcesListProps) => {
-
-    if (items.length === 0) {
-        return (
-            <div className="text-center text-muted-foreground mt-10">
-                No resources found matching your criteria.
-            </div>
-        )
-    }
+export const StudentResourcesList = ({ items }: { items: Resource[] }) => {
+  if (!items.length) {
+    return (
+      <div className="border-y py-16 text-center">
+        <FileText className="mx-auto h-8 w-8 text-muted-foreground" />
+        <h3 className="mt-4 font-semibold">No matching papers</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Try clearing one or more filters.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {items.map((item) => (
-            <Card key={item.id} className="hover:shadow-md transition">
-                <CardContent className="p-4 flex flex-col gap-4 h-full">
-                    <div className="flex items-start justify-between">
-                         <div className="p-2 bg-sky-100 dark:bg-sky-900/20 rounded-md">
-                            <FileText className="h-8 w-8 text-sky-600 dark:text-sky-400" />
-                        </div>
-                        <Badge variant={item.type === "PAST_PAPER" ? "default" : "secondary"}>
-                            {item.type === "PAST_PAPER" ? "Past Paper" : item.type === "SAMPLE_PAPER" ? "Sample" : "Notes"}
-                        </Badge>
-                    </div>
-                    
-                    <div className="flex-1">
-                         <h3 className="font-semibold text-foreground line-clamp-2" title={item.title}>
-                             {item.title}
-                         </h3>
-                         <p className="text-xs text-muted-foreground mt-1">
-                            {item.subject} • {item.grade || "General"} • {item.year || ""}
-                         </p>
-                    </div>
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {items.map(item => (
+        <article key={item.id} className="flex min-w-0 flex-col rounded-md border bg-card p-4 shadow-sm transition hover:border-foreground/20 hover:shadow-md">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-200"><FileText className="h-5 w-5" /></div>
+            <Badge variant="outline" className="max-w-[65%] truncate">{resourceTypeLabel(item.type)}</Badge>
+          </div>
 
-                    <Link href={item.url} target="_blank" className="w-full">
-                        <Button className="w-full bg-sky-600 hover:bg-sky-700">
-                            View / Download
-                            <Download className="h-4 w-4 ml-2" />
-                        </Button>
-                    </Link>
-                </CardContent>
-            </Card>
-        ))}
+          <div className="mt-4 min-w-0 flex-1">
+            <p className="text-xs font-semibold uppercase text-muted-foreground">{resourceCategoryLabel(item.category)}</p>
+            <h3 className="mt-1 line-clamp-2 break-words text-base font-semibold leading-6" title={item.title}>{item.title}</h3>
+            {item.schoolName && <p className="mt-2 flex min-w-0 items-center gap-2 text-sm text-muted-foreground"><Building2 className="h-4 w-4 shrink-0" /><span className="truncate">{item.schoolName}</span></p>}
+            {item.description && <p className="mt-3 line-clamp-2 text-sm leading-5 text-muted-foreground">{item.description}</p>}
+          </div>
+
+          <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 border-t pt-4 text-xs">
+            <div className="min-w-0"><dt className="text-muted-foreground">Subject</dt><dd className="mt-0.5 truncate font-medium">{item.subject}</dd></div>
+            <div className="min-w-0"><dt className="text-muted-foreground">Class</dt><dd className="mt-0.5 truncate font-medium">{item.grade || "All classes"}</dd></div>
+            <div className="min-w-0"><dt className="text-muted-foreground">Year</dt><dd className="mt-0.5 flex items-center gap-1 font-medium"><CalendarDays className="h-3.5 w-3.5" />{item.year || "Not specified"}</dd></div>
+            <div className="min-w-0"><dt className="text-muted-foreground">Board</dt><dd className="mt-0.5 flex items-center gap-1 truncate font-medium"><GraduationCap className="h-3.5 w-3.5 shrink-0" />{item.board || "General"}</dd></div>
+          </dl>
+
+          {item.examType && <p className="mt-3 text-xs text-muted-foreground">Exam: <span className="font-medium text-foreground">{item.examType}</span></p>}
+          <Button asChild className="mt-4 w-full">
+            <Link href={item.url} target="_blank" rel="noreferrer">Open paper<ArrowUpRight className="ml-2 h-4 w-4" /></Link>
+          </Button>
+        </article>
+      ))}
     </div>
-  )
-}
+  );
+};

@@ -9,12 +9,14 @@ interface SidebarItemProps {
   icon: LucideIcon;
   label: string;
   href: string;
+  badge?: string;
 };
 
 export const SidebarItem = ({
   icon: Icon,
   label,
   href,
+  badge,
 }: SidebarItemProps) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -46,6 +48,7 @@ export const SidebarItem = ({
           )}
         />
         <span className="truncate">{label}</span>
+        {badge && <span className="rounded-full bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none text-white">{badge}</span>}
       </div>
       {isActive && (
         <span className="absolute inset-y-2 right-2 w-1 rounded-full bg-blue-600 dark:bg-blue-300" />
