@@ -8,6 +8,7 @@ import Link from "next/link";
 import { SearchInput } from "./search-input";
 import { isTeacher } from "@/lib/teacher";
 import { ModeToggle } from "@/components/mode-toggle";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 // import { isTeacher } from "@/lib/teacher";
 
@@ -17,7 +18,6 @@ export const NavbarRoutes = () => {
   const { userId } = useAuth();
   const { signOut, openSignIn } = useClerk();
   const router = useRouter();
-  console.log("userId", userId);
   const pathname = usePathname();
 
   const isTeacherPage = pathname?.startsWith("/teacher");
@@ -37,6 +37,7 @@ export const NavbarRoutes = () => {
         </div>
       )}
       <div className="flex gap-x-2 ml-auto items-center">
+        <NotificationBell enabled={!!userId} />
         <ModeToggle />
         {isTeacherPage || isCoursePage ? (
           <Button asChild variant="outline">

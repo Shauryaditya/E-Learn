@@ -1,7 +1,10 @@
 import { auth } from "@clerk/nextjs";
+import { NotificationType } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 import { db } from "@/lib/db";
+import { formatContestDateTime } from "@/lib/contest-time";
+import { broadcastNotification } from "@/lib/notifications";
 
 export async function PATCH(
   req: Request,
@@ -36,6 +39,21 @@ export async function PATCH(
       where: { id: params.contestId },
       data: { isPublished: true },
     });
+
+    if (!contest.isPublished) {
+      try {
+        await broadcastNotification({
+          eventKey: `contest:${contest.id}:published`,
+          type: NotificationType.CONTEST_PUBLISHED,
+          title: "New contest announced",
+          body: `${contest.title} starts ${formatContestDateTime(contest.startsAt)}. Register now.`,
+          href: `/contests/${contest.id}`,
+          publisherId: userId,
+        });
+      } catch (error) {
+        console.error("[CONTEST_PUBLISH_NOTIFICATION]", error);
+      }
+    }
 
     return NextResponse.json(published);
   } catch (error) {

@@ -17,7 +17,9 @@ import { Button } from "@/components/ui/button";
 import { formatContestDateTime } from "@/lib/contest-time";
 import { db } from "@/lib/db";
 import { formatPrice } from "@/lib/format";
+import { getContestStudents } from "@/lib/contest-students";
 import { ContestRegisterButton } from "../_components/contest-register-button";
+import { ContestLeaderboard } from "./_components/contest-leaderboard";
 import { StudentContestResults } from "./_components/student-contest-results";
 
 type PageProps = {
@@ -129,6 +131,29 @@ const ContestDetailPage = async ({ params }: PageProps) => {
       },
     })
     : null;
+
+  const rankedAttempts = hasEnded ? await db.contestAttempt.findMany({
+    where: {
+      contestId: contest.id,
+      status: { not: "IN_PROGRESS" },
+      score: { not: null },
+      totalMarks: { not: null },
+      percentage: { not: null },
+      registration: { is: { status: "REGISTERED" } },
+      answers: { none: { marksAwarded: null } },
+    },
+    orderBy: [{ score: "desc" }, { submittedAt: "asc" }],
+    select: { userId: true, score: true, totalMarks: true, percentage: true, submittedAt: true },
+  }) : [];
+  const { students: leaderboardStudents } = await getContestStudents(rankedAttempts.map(item => item.userId));
+  const leaderboard = rankedAttempts.map(item => ({
+    userId: item.userId,
+    name: leaderboardStudents.get(item.userId)?.name || "Student",
+    score: item.score!,
+    totalMarks: item.totalMarks!,
+    percentage: item.percentage!,
+    submittedAt: item.submittedAt,
+  }));
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -281,6 +306,8 @@ const ContestDetailPage = async ({ params }: PageProps) => {
             questions={result.contest.questions}
           />
         )}
+
+        {hasEnded && <ContestLeaderboard entries={leaderboard} currentUserId={userId} />}
 
         <section className="rounded-md border border-amber-300/30 bg-amber-300/10 p-5 text-amber-900 dark:text-amber-50">
           <div className="flex gap-3">

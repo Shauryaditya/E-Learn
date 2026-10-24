@@ -1,93 +1,82 @@
-
 import { auth } from "@clerk/nextjs";
+import { ResourceCategory, ResourceType } from "@prisma/client";
+import { Archive, FileSearch } from "lucide-react";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
+
 import { getResources } from "@/actions/get-resources";
-import { getStudentProfile } from "@/actions/get-student-profile";
-import { ResourcesList } from "@/app/(dashboard)/(routes)/teacher/resources/_components/resources-list"; // Reuse or create new? Let's create a student specific list if needed, but reusing is fine for now. Actually the teacher list has delete buttons. We need a read-only list.
+import { Badge } from "@/components/ui/badge";
+import { db } from "@/lib/db";
+import { ResourceFilters } from "./_components/resource-filters";
 import { StudentResourcesList } from "./_components/student-resources-list";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SearchInput } from "@/components/search-input"; // Assuming you have this
 
-interface SearchPageProps {
-  searchParams: {
-    title: string;
-    categoryId: string;
-    subject: string;
-  }
-};
+type SearchParams = Record<string, string | string[] | undefined>;
 
-const StudentResourcesPage = async ({ searchParams }: SearchPageProps) => {
+const one = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] : value;
+const unique = <T extends string | number>(values: (T | null)[]) => Array.from(new Set(values.filter((value): value is T => value !== null))).sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }));
+
+export default async function StudentResourcesPage({ searchParams }: { searchParams: SearchParams }) {
   const { userId } = auth();
+  if (!userId) redirect("/");
 
-  if (!userId) {
-    return redirect("/");
-  }
+  const requestedCategory = one(searchParams.category) || "SCHOOL";
+  const category = Object.values(ResourceCategory).includes(requestedCategory as ResourceCategory)
+    ? requestedCategory as ResourceCategory
+    : undefined;
+  const requestedType = one(searchParams.type);
+  const type = requestedType && Object.values(ResourceType).includes(requestedType as ResourceType)
+    ? requestedType as ResourceType
+    : undefined;
+  const requestedYear = Number(one(searchParams.year));
 
-  const profile = await getStudentProfile();
+  const [resources, metadata] = await Promise.all([
+    getResources({
+      category,
+      type,
+      search: one(searchParams.q) || one(searchParams.title),
+      schoolName: one(searchParams.school),
+      board: one(searchParams.board),
+      grade: one(searchParams.grade),
+      subject: one(searchParams.subject),
+      examType: one(searchParams.examType),
+      year: Number.isInteger(requestedYear) && requestedYear > 0 ? requestedYear : undefined,
+    }),
+    db.resource.findMany({
+      select: { schoolName: true, board: true, grade: true, subject: true, year: true, examType: true },
+    }),
+  ]);
 
-  // Smart Defaults: If no search params, use profile data
-  // categories: BOARD, JEE_MAINS, JEE_ADVANCED, NEET
-  
-
-  const boardResources = await getResources({ 
-      category: "BOARD", 
-      search: searchParams.title,
-  });
-
-  const jeeMains = await getResources({ 
-      category: "JEE_MAINS", 
-      search: searchParams.title 
-  });
-
-  const jeeAdv = await getResources({ 
-      category: "JEE_ADVANCED", 
-      search: searchParams.title 
-  });
-  
-  const jeeResources = [...jeeMains, ...jeeAdv];
-
-  const neetResources = await getResources({ 
-      category: "NEET", 
-      search: searchParams.title 
-  });
-  
-  const categories = [
-    { label: "Board Scams", value: "BOARD" }, // Typo in original thought? No, "Board Exams".
-  ];
+  const options = {
+    schools: unique(metadata.map(item => item.schoolName)),
+    boards: unique(metadata.map(item => item.board)),
+    grades: unique(metadata.map(item => item.grade)),
+    subjects: unique(metadata.map(item => item.subject)),
+    years: unique(metadata.map(item => item.year)).sort((a, b) => b - a),
+    examTypes: unique(metadata.map(item => item.examType)),
+  };
 
   return (
-    <div className="p-6 space-y-4">
-        <h1 className="text-2xl font-bold">Past Papers & Resources</h1>
-        <p className="text-muted-foreground text-sm">
-            Access past year papers, sample papers, and notes for your exams.
-        </p>
-
-        <div className="w-full md:w-1/3">
-             <SearchInput /> 
+    <div className="min-h-full bg-background">
+      <header className="border-b bg-card">
+        <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-md border bg-muted"><Archive className="h-5 w-5" /></div>
+            <div>
+              <div className="flex items-center gap-2"><h1 className="text-2xl font-bold tracking-normal sm:text-3xl">Paper Vault</h1><Badge className="bg-emerald-600 text-white hover:bg-emerald-600">NEW</Badge></div>
+              <p className="mt-1 text-sm text-muted-foreground">Previous-year school papers, board papers, and exam resources in one searchable library.</p>
+            </div>
+          </div>
         </div>
+      </header>
 
-        <Tabs defaultValue="BOARD" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-[400px]">
-                <TabsTrigger value="BOARD">Board Exams</TabsTrigger>
-                <TabsTrigger value="JEE">JEE</TabsTrigger>
-                <TabsTrigger value="NEET">NEET</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="BOARD" className="mt-6">
-                <StudentResourcesList items={boardResources} />
-            </TabsContent>
-            
-            <TabsContent value="JEE" className="mt-6">
-                 <StudentResourcesList items={jeeResources} />
-            </TabsContent>
-
-            <TabsContent value="NEET" className="mt-6">
-                 <StudentResourcesList items={neetResources} />
-            </TabsContent>
-        </Tabs>
+      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+        <section aria-label="Paper filters" className="border-b pb-6">
+          <ResourceFilters options={options} />
+        </section>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2"><FileSearch className="h-4 w-4 text-muted-foreground" /><h2 className="text-sm font-semibold">{resources.length} {resources.length === 1 ? "paper" : "papers"} found</h2></div>
+        </div>
+        <StudentResourcesList items={resources} />
+      </main>
     </div>
   );
 }
-
-export default StudentResourcesPage;

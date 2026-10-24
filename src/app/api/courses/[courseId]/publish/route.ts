@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
+import { broadcastNotification } from "@/lib/notifications";
 import { auth } from "@clerk/nextjs"
+import { NotificationType } from "@prisma/client";
 import { NextResponse } from "next/server"
 
 export async function PATCH (
@@ -45,6 +47,21 @@ export async function PATCH (
                 isPublished: true
             }
         });
+
+        if (!course.isPublished) {
+            try {
+                await broadcastNotification({
+                    eventKey: `course:${course.id}:published`,
+                    type: NotificationType.COURSE_PUBLISHED,
+                    title: "New course available",
+                    body: `${course.title} is now available on Aaccent.`,
+                    href: `/courses/${course.id}`,
+                    publisherId: userId,
+                });
+            } catch (error) {
+                console.error("[COURSE_PUBLISH_NOTIFICATION]", error);
+            }
+        }
 
         return NextResponse.json(publishedCourse)
     } catch (error) {

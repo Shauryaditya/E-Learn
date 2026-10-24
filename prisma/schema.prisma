@@ -619,6 +619,40 @@ model PushSubscription {
   @@index([userId])
 }
 
+model Notification {
+  id          String             @id @default(uuid())
+  userId      String
+  eventKey    String
+  type        NotificationType
+  title       String
+  body        String             @db.Text
+  href        String?
+  readAt      DateTime?
+  emailStatus DeliveryStatus     @default(PENDING)
+  smsStatus   DeliveryStatus     @default(PENDING)
+  pushStatus  DeliveryStatus     @default(PENDING)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@unique([userId, eventKey])
+  @@index([userId, readAt, createdAt])
+  @@index([eventKey])
+}
+
+enum NotificationType {
+  COURSE_PUBLISHED
+  CONTEST_PUBLISHED
+  CONTEST_RESULT
+  SYSTEM
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  SKIPPED
+  FAILED
+}
+
 model StudentProfile {
   id         String   @id @default(uuid())
   userId     String   @unique
@@ -644,6 +678,9 @@ model Resource {
   subject String
   grade   String? // e.g., "Class 10", "Class 12"
   year    Int?
+  schoolName String?
+  board      String?
+  examType   String?
 
   isPaid Boolean @default(false)
 
@@ -653,9 +690,13 @@ model Resource {
   @@index([category])
   @@index([subject])
   @@index([grade])
+  @@index([schoolName])
+  @@index([board])
+  @@index([year])
 }
 
 enum ResourceCategory {
+  SCHOOL
   BOARD
   JEE_MAINS
   JEE_ADVANCED

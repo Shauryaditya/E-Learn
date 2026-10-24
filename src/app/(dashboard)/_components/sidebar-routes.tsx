@@ -29,6 +29,7 @@ const guestRoutes = [
     icon: FileText,
     label: "Resources",
     href: "/search/resources",
+    badge: "New",
   },
   {
     icon: User,
@@ -67,6 +68,7 @@ const teacherRoutes = [
     icon: FileText,
     label: "Resources",
     href: "/teacher/resources",
+    badge: "New",
   },
 ]
 
@@ -84,6 +86,7 @@ export const SidebarRoutes = () => {
           icon={route.icon}
           label={route.label}
           href={route.href}
+          badge={"badge" in route ? route.badge : undefined}
         />
       ))}
     </div>
