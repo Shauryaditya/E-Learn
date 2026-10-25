@@ -10,6 +10,7 @@
     "dev": "next dev",
     "prebuild": "prisma generate",
     "build": "next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
     "test:contests": "node scripts/test-contest-attempts.cjs",
