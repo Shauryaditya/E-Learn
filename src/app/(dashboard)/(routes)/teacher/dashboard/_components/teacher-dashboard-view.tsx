@@ -25,7 +25,7 @@ export function TeacherDashboardView({ data, now }: {
   now: Date;
 }) {
   const workspace = [
-    { label: "Courses", value: data.courses, icon: BookOpen, href: "/teacher/courses" },
+    { label: "Learning materials", value: data.courses, icon: BookOpen, href: "/teacher/courses" },
     { label: "Test series", value: data.testSeries, icon: Notebook, href: "/teacher/testseries" },
     { label: "Active attempts", value: data.activeAttempts, icon: Activity, href: "/teacher/contests" },
   ];
@@ -213,7 +213,7 @@ export function TeacherDashboardView({ data, now }: {
                 </Button>
               </div>
             ))}
-            {!data.recentContent.length && <p className="py-8 text-sm text-muted-foreground">No courses or test series yet.</p>}
+            {!data.recentContent.length && <p className="py-8 text-sm text-muted-foreground">No learning materials or test series yet.</p>}
           </div>
         </section>
       </div>

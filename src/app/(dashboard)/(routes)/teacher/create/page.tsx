@@ -41,7 +41,7 @@ const CreatePage = () => {
         try {
             const response = await  axios.post("/api/courses", values);
             router.push(`/teacher/courses/${response.data.id}`);
-            toast.success("Course Created");
+            toast.success("Learning material created");
         } catch  {
             toast.error("Something Went wrong");
         }
@@ -51,10 +51,9 @@ const CreatePage = () => {
     <div className="max-w-5xl mx-auto flex md:items-center md:justify-center h-full p-6">
        <div className="">
         <h1 className="text-2xl">
-            Name your course
+            Name your learning material
         </h1>
-        <p className="text-sm text-slate-600">What would you like to name your course .Dont worry 
-            you can change it later
+        <p className="text-sm text-slate-600">Give this collection of notes and assignments a clear name. You can change it later.
         </p>
         <Form {...form}>
             <form 
@@ -67,7 +66,7 @@ const CreatePage = () => {
              render={({field}) => (
                 <FormItem>
                     <FormLabel>
-                        Course Title
+                        Material title
                     </FormLabel>
                     <FormControl>
                         <Input 
@@ -77,7 +76,7 @@ const CreatePage = () => {
                         />
                     </FormControl>
                     <FormDescription>
-                        What will you teach in this course?
+                        What topic will these notes and assignments cover?
                     </FormDescription>
                     <FormMessage />
                 </FormItem>

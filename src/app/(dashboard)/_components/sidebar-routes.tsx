@@ -46,7 +46,7 @@ const teacherRoutes = [
   },
   {
     icon: List,
-    label: "Courses",
+    label: "Learning Materials",
     href: "/teacher/courses",
   },
   {

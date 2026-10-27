@@ -9,6 +9,8 @@ import { CollectionCard } from "./_components/collection-card"
 import Link from "next/link"
 import { Archive, ArrowRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { getStudentProfile } from "@/actions/get-student-profile"
+import { AiStudyMaterialFinder } from "./_components/ai-study-material-finder"
 
 interface SearchPageProps {
   searchParams: {
@@ -40,6 +42,7 @@ const SearchPage = async ({
     return []
   })
   const activeCourse = courses.find((course) => course.progress !== null)
+  const studentProfile = userId ? await getStudentProfile() : null
 
   return (
     <>
@@ -49,9 +52,10 @@ const SearchPage = async ({
       <div className="p-6 space-y-4">
         {categories.length === 0 && courses.length === 0 && (
           <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            Courses are temporarily unavailable. Please check the database connection and refresh.
+            Notes and assignments are temporarily unavailable. Please check the database connection and refresh.
           </div>
         )}
+        {userId && <AiStudyMaterialFinder profile={studentProfile} />}
         <Link href="/search/resources" className="group flex flex-col gap-5 rounded-md border border-emerald-200 bg-emerald-50 p-5 transition hover:border-emerald-400 dark:border-emerald-900 dark:bg-emerald-950/30 sm:flex-row sm:items-center">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-emerald-700 text-white"><Archive className="h-6 w-6" /></div>
           <div className="min-w-0 flex-1">

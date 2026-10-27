@@ -53,14 +53,14 @@ export const ActiveCoursesCard = ({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-brand-primary">
-              Resume Lesson
+              Resume Material
             </p>
             <h3 className="line-clamp-1 text-base font-bold text-brand-tertiary">
               {title}
             </h3>
             <p className="line-clamp-2 text-xs text-slate-400">
               {Math.round(progress)}% complete · {chaptersLength}{" "}
-              {chaptersLength === 1 ? "chapter" : "chapters"}
+              learning {chaptersLength === 1 ? "unit" : "units"}
             </p>
           </div>
           <div

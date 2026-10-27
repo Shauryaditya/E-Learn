@@ -127,7 +127,7 @@ const StudentDashboard = async () => {
             <div className="space-y-4">
                  <div className="mb-4">
                     <h2 className="mb-1 text-xl font-semibold text-slate-950 dark:text-white md:text-2xl">
-                        My Courses
+                        My Notes &amp; Assignments
                     </h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -79,12 +79,12 @@ const CourseIdPage = async ({
               <div className="flex flex-wrap items-center gap-3">
                 <div className="inline-flex items-center rounded-full bg-brand-secondary/15 px-4 py-2 text-sm font-semibold text-brand-secondary ring-1 ring-brand-secondary/30">
                   <Sparkles className="mr-2 h-4 w-4" />
-                  Course Preview
+                  Material Preview
                 </div>
                 <div className="inline-flex items-center rounded-full bg-muted/80 px-4 py-2 text-sm font-medium text-muted-foreground dark:bg-white/10 dark:text-slate-200">
                   <BookOpen className="mr-2 h-4 w-4" />
                   {course.chapters.length}{" "}
-                  {course.chapters.length === 1 ? "Chapter" : "Chapters"}
+                  learning {course.chapters.length === 1 ? "unit" : "units"}
                 </div>
               </div>
 
@@ -108,10 +108,10 @@ const CourseIdPage = async ({
               <div className="space-y-4">
                 <div>
                   <p className="text-lg font-bold text-emerald-300">
-                    You are enrolled in this course
+                    You have access to this material
                   </p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Continue from the curriculum or jump into the first chapter.
+                    Continue from the material list or open the first learning unit.
                   </p>
                 </div>
                 {firstChapter && (
@@ -126,19 +126,19 @@ const CourseIdPage = async ({
               <div className="space-y-5">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wide text-brand-secondary">
-                    Unlock the course
+                    Unlock these notes &amp; assignments
                   </p>
                   <h2 className="mt-2 text-2xl font-bold text-foreground">
                     Start learning with a focused curriculum.
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    Preview free chapters when available, then enroll to unlock
-                    the full course experience.
+                    Preview free learning units when available, then enroll to unlock
+                    all notes, assignments, and learning units.
                   </p>
                 </div>
 
                 <div className="rounded-xl border bg-muted/50 p-4">
-                  <p className="text-sm text-muted-foreground">Course access</p>
+                  <p className="text-sm text-muted-foreground">Material access</p>
                   <p className="mt-1 text-3xl font-bold text-foreground">
                     {course.price !== null ? formatPrice(course.price) : "Free"}
                   </p>
@@ -163,7 +163,7 @@ const CourseIdPage = async ({
                       className="w-full"
                     >
                       <Link href={startHref}>
-                        {firstFreeChapter ? "Start Free Preview" : "View Course"}
+                        {firstFreeChapter ? "Start Free Preview" : "View Material"}
                       </Link>
                     </Button>
                   ) : null}
@@ -179,10 +179,10 @@ const CourseIdPage = async ({
           <div className="overflow-hidden rounded-2xl border bg-card shadow-xl shadow-black/10">
             <div className="flex items-start justify-between gap-4 border-b p-5 sm:p-6">
               <div>
-                <h2 className="text-xl font-bold text-foreground">Course Curriculum</h2>
+                <h2 className="text-xl font-bold text-foreground">Notes &amp; Assignments</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {course.chapters.length} published{" "}
-                  {course.chapters.length === 1 ? "chapter" : "chapters"}
+                  learning {course.chapters.length === 1 ? "unit" : "units"}
                 </p>
               </div>
               <div className="rounded-full bg-brand-secondary/10 px-3 py-1 text-xs font-semibold text-brand-secondary">
@@ -192,7 +192,7 @@ const CourseIdPage = async ({
 
             {course.chapters.length === 0 ? (
               <div className="p-6 text-sm text-muted-foreground">
-                This course does not have published chapters yet.
+                This material does not have published learning units yet.
               </div>
             ) : (
               <div className="divide-y">
