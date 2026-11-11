@@ -7,16 +7,16 @@ import { getStudentProfile } from "@/actions/get-student-profile";
 import { getStudentPerformance } from "@/actions/get-student-performance";
 import { getStudyStats } from "@/actions/get-study-stats";
 import { UserButton } from "@clerk/nextjs";
-import { CheckCircle, Clock } from "lucide-react";
+import { ArrowRight, CalendarRange, CheckCircle, Clock } from "lucide-react";
+import Link from "next/link";
 import { InfoCard } from "../(root)/_components/info-card";
 import { CoursesList } from "@/components/courses-list";
 import { StudentOnboardingModal } from "@/components/modals/student-onboarding-modal";
-import { RecommendationsSection } from "./_components/recommendations-section";
 import { PerformanceChart } from "./_components/performance-chart";
 import { GoalsSection } from "./_components/goal-section";
-import { TextFlippingBoardDemo } from "./_components/text-flipping";
 import { StudyStatsSection } from "./_components/study-stats";
 import { recordStudyActivity } from "@/lib/study-activity";
+import { getRoadmapProgress, type PlannerRoadmap } from "@/lib/study-planner";
 
 const StudentDashboard = async () => {
     const { userId } = auth();
@@ -63,6 +63,10 @@ const StudentDashboard = async () => {
     const studentProfile = await getStudentProfile();
     const performanceData = await getStudentPerformance(userId);
     const studyStats = await getStudyStats(userId);
+    const studyPlan = await db.studyPlan.findUnique({ where: { userId } }).catch(() => null);
+    const planProgress = studyPlan
+        ? getRoadmapProgress(studyPlan.roadmap as unknown as PlannerRoadmap)
+        : null;
 
     console.log("Student Dashboard - userId:", userId);
     console.log("Student Dashboard - goals count:", goals.length);
@@ -89,14 +93,22 @@ const StudentDashboard = async () => {
                 </div>
             </div>
 
-            <StudyStatsSection stats={studyStats} />
-
-            {/* AI Recommendations Section */}
-            {studentProfile && (
-                <div>
-                     <RecommendationsSection profile={studentProfile} />
+            <Link href="/planner" className="group relative overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-700 to-indigo-700 p-5 text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-blue-900 sm:p-6">
+                <div className="absolute -right-12 -top-14 h-40 w-40 rounded-full bg-white/10 blur-2xl transition duration-500 group-hover:scale-125" />
+                <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex gap-4">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15"><CalendarRange className="h-5 w-5" /></div>
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-blue-100">Your study planner</p>
+                            <h2 className="mt-1 text-lg font-semibold sm:text-xl">{studyPlan ? `Continue your ${studyPlan.examName} roadmap` : "Turn your exam goal into a weekly roadmap"}</h2>
+                            <p className="mt-1 max-w-2xl text-sm text-blue-100">{studyPlan && planProgress ? `${planProgress.completed} of ${planProgress.total} tasks completed · ${planProgress.percentage}% progress` : "Choose your subjects, chapters and available time. We will organise what to study and when."}</p>
+                        </div>
+                    </div>
+                    <span className="inline-flex shrink-0 items-center text-sm font-semibold">{studyPlan ? "Open planner" : "Build my plan"}<ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-1" /></span>
                 </div>
-            )}
+            </Link>
+
+            <StudyStatsSection stats={studyStats} />
             
             {/* Performance Chart */}
             {performanceData.length > 0 && (
@@ -120,10 +132,6 @@ const StudentDashboard = async () => {
                     <GoalsSection goals={goals} />
                 </div>
             </div>
-            <div>
-                <TextFlippingBoardDemo />
-            </div>  
-
             <div className="space-y-4">
                  <div className="mb-4">
                     <h2 className="mb-1 text-xl font-semibold text-slate-950 dark:text-white md:text-2xl">

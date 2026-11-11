@@ -52,6 +52,7 @@
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
+    "docx-preview": "^0.4.1",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.334.0",
     "motion": "^12.38.0",

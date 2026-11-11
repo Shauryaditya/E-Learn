@@ -1,6 +1,6 @@
 "use client"
 
-import { BarChart, Compass, Layout, List, Notebook, FileText, Trophy, User } from "lucide-react";
+import { BarChart, CalendarRange, Compass, Layout, List, Notebook, FileText, Trophy, User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { SidebarItem } from "./sidebar-item";
 
@@ -9,6 +9,12 @@ const guestRoutes = [
     icon: Layout,
     label: "Dashboard",
     href: "/dashboard",
+  },
+  {
+    icon: CalendarRange,
+    label: "My Planner",
+    href: "/planner",
+    badge: "New",
   },
   {
     icon: Compass,

@@ -1,0 +1,1 @@
+ALTER TABLE "Goal" ADD COLUMN "href" TEXT;

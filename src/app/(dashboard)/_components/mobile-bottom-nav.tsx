@@ -1,17 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Compass, GraduationCap, LayoutDashboard, Notebook, Trophy, UserRound } from "lucide-react";
+import { BookOpen, CalendarRange, GraduationCap, LayoutDashboard, Notebook, Trophy, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
 const routes = [
   {
-    icon: Compass,
-    label: "Explore",
-    href: "/search",
-    active: (pathname: string) => pathname === "/search",
+    icon: CalendarRange,
+    label: "Planner",
+    href: "/planner",
+    active: (pathname: string) => pathname.startsWith("/planner"),
   },
   {
     icon: GraduationCap,

@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import {
   Select,
   SelectContent,
@@ -158,7 +159,13 @@ export const CreateContestForm = ({ categories }: CreateContestFormProps) => {
                   <FormItem>
                     <FormLabel>Start time</FormLabel>
                     <FormControl>
-                      <Input disabled={isSubmitting} type="datetime-local" {...field} />
+                      <DateTimePicker
+                        disabled={isSubmitting}
+                        value={field.value}
+                        onChange={field.onChange}
+                        minDate={new Date()}
+                        placeholder="Select start date and time"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

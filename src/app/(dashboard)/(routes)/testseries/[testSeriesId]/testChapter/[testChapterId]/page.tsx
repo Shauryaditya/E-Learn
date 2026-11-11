@@ -135,7 +135,7 @@ export default async function TestSeriesChapterPage({ params }: PageProps) {
                         {a.name}
                       </p>
                     )}
-                    <DocumentPreview fileUrl={a.url} />
+                    <DocumentPreview fileUrl={a.url} fileName={a.name} />
                   </div>
                 ))}
               </div>

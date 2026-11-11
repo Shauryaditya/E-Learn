@@ -143,7 +143,7 @@ export default async function CourseChapterPage({ params }: PageProps) {
                   </div>
 
                   {/* Preview the document */}
-                  <DocumentPreview fileUrl={attachment.url} />
+                  <DocumentPreview fileUrl={attachment.url} fileName={attachment.name} />
                 </div>
               ))}
             </div>

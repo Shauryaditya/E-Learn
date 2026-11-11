@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { isSameDay, isPast, isToday } from "date-fns";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle } from "lucide-react";
+import Link from "next/link";
 
 interface Goal {
     id: string;
@@ -16,6 +17,7 @@ interface Goal {
     isCompleted: boolean;
     studentId: string;
     teacherId: string;
+    href: string | null;
     course: { id: string; title: string; imageUrl: string | null } | null;
     testSeries: { id: string; title: string; imageUrl: string | null } | null;
 }
@@ -104,14 +106,15 @@ export const GoalsList = ({ initialGoals, selectedDate }: GoalsListProps) => {
                                     : <Circle className="h-5 w-5" />
                                 }
                             </button>
-                            <span className={cn(
+                            {goal.href ? <Link href={goal.href} className={cn(
                                 "min-w-0 flex-1 text-sm font-medium",
                                 goal.isCompleted
                                     ? "line-through text-gray-400 dark:text-gray-500"
-                                    : "text-gray-800 dark:text-gray-100"
-                            )}>
-                                {goal.title}
-                            </span>
+                                    : "text-gray-800 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
+                            )}>{goal.title}</Link> : <span className={cn(
+                                "min-w-0 flex-1 text-sm font-medium",
+                                goal.isCompleted ? "line-through text-gray-400 dark:text-gray-500" : "text-gray-800 dark:text-gray-100"
+                            )}>{goal.title}</span>}
                         </div>
 
                         {/* Progress bar */}

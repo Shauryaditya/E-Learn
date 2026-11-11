@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
     Select,
     SelectContent,
@@ -51,7 +52,7 @@ export const GoalForm = ({
         existingGoal?.studentId || ""
     );
 
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
         defaultValues: {
             title: existingGoal?.title || "",
             description: existingGoal?.description || "",
@@ -60,6 +61,7 @@ export const GoalForm = ({
                 : "",
         },
     });
+    const dueDate = watch("dueDate");
 
     const onSubmit = async (data: any) => {
         try {
@@ -144,11 +146,14 @@ export const GoalForm = ({
             {/* Due Date */}
             <div className="space-y-2">
                 <Label htmlFor="dueDate">Due Date</Label>
-                <Input
+                <DatePicker
                     id="dueDate"
-                    type="date"
-                    {...register("dueDate", { required: "Due date is required" })}
+                    value={dueDate}
+                    onChange={(value) => setValue("dueDate", value, { shouldDirty: true, shouldValidate: true })}
+                    minDate={new Date()}
+                    placeholder="Select a due date"
                 />
+                <input type="hidden" {...register("dueDate", { required: "Due date is required" })} />
                 {errors.dueDate && (
                     <p className="text-sm text-red-500">{errors.dueDate.message}</p>
                 )}

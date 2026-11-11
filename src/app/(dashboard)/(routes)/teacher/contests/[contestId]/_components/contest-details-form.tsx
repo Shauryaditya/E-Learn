@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import {
   Select,
   SelectContent,
@@ -197,7 +198,12 @@ export const ContestDetailsForm = ({
                 <FormItem>
                   <FormLabel>Starts at</FormLabel>
                   <FormControl>
-                    <Input disabled={isSubmitting} type="datetime-local" {...field} />
+                    <DateTimePicker
+                      disabled={isSubmitting}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select start date and time"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -227,11 +233,12 @@ export const ContestDetailsForm = ({
                 <FormItem>
                   <FormLabel>Registration opens</FormLabel>
                   <FormControl>
-                    <Input
+                    <DateTimePicker
                       disabled={isSubmitting}
-                      type="datetime-local"
-                      {...field}
                       value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="Select opening date and time"
+                      clearable
                     />
                   </FormControl>
                   <FormMessage />
@@ -246,11 +253,12 @@ export const ContestDetailsForm = ({
                 <FormItem>
                   <FormLabel>Registration closes</FormLabel>
                   <FormControl>
-                    <Input
+                    <DateTimePicker
                       disabled={isSubmitting}
-                      type="datetime-local"
-                      {...field}
                       value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="Select closing date and time"
+                      clearable
                     />
                   </FormControl>
                   <FormMessage />

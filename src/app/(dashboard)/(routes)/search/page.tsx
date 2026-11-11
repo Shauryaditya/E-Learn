@@ -5,7 +5,6 @@ import { getCourses } from "@/actions/get-courses"
 import { auth } from "@clerk/nextjs"
 import { CoursesList } from "@/components/courses-list"
 import { ActiveCoursesCard } from "./_components/active-courses-card"
-import { CollectionCard } from "./_components/collection-card"
 import Link from "next/link"
 import { Archive, ArrowRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -79,7 +78,6 @@ const SearchPage = async ({
         )}
    
         <CoursesList items={courses} />
-        <CollectionCard />
       </div>
     </>
   )

@@ -588,6 +588,7 @@ model Goal {
   description String?  @db.Text
   dueDate     DateTime
   isCompleted Boolean  @default(false)
+  href        String?
 
   // Student this goal is assigned to
   studentId String
@@ -668,6 +669,30 @@ model StudentProfile {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model StudyPlan {
+  id            String          @id @default(uuid())
+  userId        String          @unique
+  grade         String
+  examName      String
+  examDate      DateTime
+  weeklyMinutes Int
+  subjects      Json
+  roadmap       Json
+  status        StudyPlanStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([examDate])
+}
+
+enum StudyPlanStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
 }
 
 model Resource {

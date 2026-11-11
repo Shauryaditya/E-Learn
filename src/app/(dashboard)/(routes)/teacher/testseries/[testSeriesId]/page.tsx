@@ -15,6 +15,7 @@ import { PriceForm } from "./_components/price-form";
 import { ChaptersForm } from "./_components/chapters-form";
 import { Actions } from "./_components/actions";
 import { AccessGrantForm } from "@/components/access-grant-form";
+import { TestSeriesAssignmentForm } from "./_components/test-series-assignment-form";
 
 const TestSeriesIdPage = async ({
   params
@@ -145,6 +146,12 @@ const TestSeriesIdPage = async ({
                 endpoint={`/api/testseries/${testSeries.id}/grant-access`}
                 grantedCount={testSeries._count.testSeriesPurchase}
                 label="Grant Test Series"
+              />
+              <TestSeriesAssignmentForm
+                testSeriesId={testSeries.id}
+                chapters={testSeries.testChapters
+                  .filter((chapter) => chapter.isPublished)
+                  .map((chapter) => ({ id: chapter.id, title: chapter.title }))}
               />
             </div>
           </div>
