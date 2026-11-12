@@ -8,7 +8,7 @@ const displayType = (value: string): PracticeQuestion["type"] => value.includes(
 
 export const getPracticeCollections = async (): Promise<PracticeCollection[]> => {
   const resources = await db.resource.findMany({
-    where: { isPublished: true, type: { in: [ResourceType.PAST_PAPER, ResourceType.SAMPLE_PAPER] }, board: { not: null }, grade: { not: null } },
+    where: { type: { in: [ResourceType.PAST_PAPER, ResourceType.SAMPLE_PAPER] }, board: { not: null }, grade: { not: null } },
     include: { questions: { where: { isPublished: true }, include: { chapter: true }, orderBy: { position: "asc" } } },
     orderBy: [{ year: "desc" }, { createdAt: "desc" }],
   });
