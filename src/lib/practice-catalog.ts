@@ -11,6 +11,7 @@ export type PracticeQuestion = {
   formula?: string;
   answer: string;
   solution: string;
+  attemptStatus?: "SOLVED" | "NEEDS_REVIEW";
 };
 
 export type PracticeChapter = {
@@ -220,6 +221,9 @@ export type PracticeCollection = {
   paperCount: number;
   questionCount: number;
   chapterCount: number;
+  attemptedCount?: number;
+  solvedCount?: number;
+  needsReviewCount?: number;
   papers: PracticePaper[];
   chapters: { slug: string; title: string; questionCount: number }[];
   questions: PracticeQuestion[];

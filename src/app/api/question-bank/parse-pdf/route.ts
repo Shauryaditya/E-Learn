@@ -82,11 +82,13 @@ const extractJsonObject = (value: string) => {
 const repairJsonEscapes = (value: string) =>
   value.replace(/(?<!\\)\\(?!["\\/bfnrtu])/g, "\\\\");
 
-const buildPrompt = (sourceDescription: string) => `
+const buildPrompt = (sourceDescription: string, academicContext?: string) => `
 You are extracting exam questions from ${sourceDescription}.
+${academicContext ? `Paper syllabus: ${academicContext}. Assign every question to the best matching chapter from this exact board, class and subject syllabus. Do not use chapters from another class or board.` : ""}
 
 Extract every visible exam question, including multiple-choice, true/false, numerical, short-answer, long-answer, derivation, and diagram-based questions.
 Preserve math and physics formulas as LaTeX text. Do not output SVG.
+Use broad official syllabus chapter names, never a topic, method, question type, or parenthetical subtopic. For example use "Statistics", not "Statistics (Mean)" or "Statistics (Histogram)".
 When writing LaTeX inside JSON string values, escape every backslash as \\\\.
 For MCQ options, convert complex formulas to LaTeX such as:
 \\sqrt{8m(\\frac{hc}{\\lambda}-\\phi)}/eB
@@ -230,22 +232,22 @@ const parseGeminiJson = (value: string) => {
   return result.data.questions;
 };
 
-const parseTextChunk = async (chunk: PdfChunk) => {
+const parseTextChunk = async (chunk: PdfChunk, academicContext?: string) => {
   const result = await model.generateContent([
-    buildPrompt(`PDF text from pages ${chunk.startPage}-${chunk.endPage}`),
+    buildPrompt(`PDF text from pages ${chunk.startPage}-${chunk.endPage}`, academicContext),
     `PDF text:\n${chunk.text}`,
   ]);
 
   return parseGeminiJson(result.response.text());
 };
 
-const parseVisionChunk = async (chunk: PdfChunk) => {
+const parseVisionChunk = async (chunk: PdfChunk, academicContext?: string) => {
   if (!chunk.bytes) {
     return [];
   }
 
   const result = await model.generateContent([
-    buildPrompt(`PDF pages ${chunk.startPage}-${chunk.endPage}. Use OCR if the pages are scanned images.`),
+    buildPrompt(`PDF pages ${chunk.startPage}-${chunk.endPage}. Use OCR if the pages are scanned images.`, academicContext),
     {
       inlineData: {
         data: Buffer.from(chunk.bytes).toString("base64"),
@@ -257,7 +259,7 @@ const parseVisionChunk = async (chunk: PdfChunk) => {
   return parseGeminiJson(result.response.text());
 };
 
-const parseQuestionPdf = async (file: File) => {
+const parseQuestionPdf = async (file: File, academicContext?: string) => {
     if (file.type !== "application/pdf") {
       throw new Error("Only PDF files are supported");
     }
@@ -290,8 +292,8 @@ const parseQuestionPdf = async (file: File) => {
       chunkResults.push(...await Promise.allSettled(batch.map(async (chunk) => ({
         chunk,
         questions: isLikelyScanned
-          ? await parseVisionChunk(chunk)
-          : await parseTextChunk(chunk),
+          ? await parseVisionChunk(chunk, academicContext)
+          : await parseTextChunk(chunk, academicContext),
       }))));
     }
 
@@ -344,6 +346,7 @@ export async function POST(req: Request) {
 
     const resourceId = new URL(req.url).searchParams.get("resourceId");
     let file: File;
+    let academicContext: string | undefined;
 
     if (resourceId) {
       if (!isTeacher(userId)) return new NextResponse("Unauthorized", { status: 401 });
@@ -356,6 +359,7 @@ export async function POST(req: Request) {
         return new NextResponse("Automatic extraction currently supports PDF papers", { status: 415 });
       }
       file = new File([await response.arrayBuffer()], `${resource.title}.pdf`, { type: "application/pdf" });
+      academicContext = [resource.board, resource.grade, resource.subject].filter(Boolean).join(" · ");
     } else {
       const formData = await req.formData();
       const uploadedFile = formData.get("file");
@@ -363,7 +367,7 @@ export async function POST(req: Request) {
       file = uploadedFile;
     }
 
-    return NextResponse.json(await parseQuestionPdf(file));
+    return NextResponse.json(await parseQuestionPdf(file, academicContext));
   } catch (error) {
     console.error("[QUESTION_BANK_PARSE_PDF]", error);
     const message = error instanceof Error ? error.message : "Internal Error";

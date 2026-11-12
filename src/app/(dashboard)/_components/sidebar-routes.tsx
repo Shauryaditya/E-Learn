@@ -11,6 +11,11 @@ const guestRoutes = [
     href: "/dashboard",
   },
   {
+    icon: Notebook,
+    label: "Learning Materials",
+    href: "/search",
+  },
+  {
     icon: CalendarRange,
     label: "My Planner",
     href: "/planner",

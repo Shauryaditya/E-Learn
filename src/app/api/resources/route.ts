@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { isTeacher } from "@/lib/teacher";
 import { ResourceCategory, ResourceType } from "@prisma/client";
 import { z } from "zod";
+import { normalizeBoard, normalizeGrade, normalizeSubject } from "@/lib/academic-taxonomy";
 
 const resourceSchema = z.object({
   title: z.string().trim().min(1).max(160),
@@ -43,7 +44,12 @@ export async function POST(req: Request) {
     }
 
     const resource = await db.resource.create({
-      data: parsed.data,
+      data: {
+        ...parsed.data,
+        board: parsed.data.board ? normalizeBoard(parsed.data.board) : null,
+        grade: parsed.data.grade ? normalizeGrade(parsed.data.grade) : null,
+        subject: normalizeSubject(parsed.data.subject),
+      },
     });
 
     return NextResponse.json(resource);

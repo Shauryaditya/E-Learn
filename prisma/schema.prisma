@@ -80,6 +80,9 @@ model Chapter {
   courseId String
   course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
+  academicChapterId String?
+  academicChapter   AcademicChapter? @relation(fields: [academicChapterId], references: [id], onDelete: SetNull)
+
   userProgress UserProgress[]
   attachments  Attachment[] // New relation to manage attachments for chapters
   submissions  ChapterSubmission[]
@@ -88,6 +91,7 @@ model Chapter {
   updatedAt DateTime @updatedAt
 
   @@index([courseId])
+  @@index([academicChapterId])
 }
 
 model ChapterSubmission {
@@ -230,6 +234,9 @@ model TestChapter {
   testSeriesId String
   testSeries   TestSeries @relation(fields: [testSeriesId], references: [id], onDelete: Cascade)
 
+  academicChapterId String?
+  academicChapter   AcademicChapter? @relation(fields: [academicChapterId], references: [id], onDelete: SetNull)
+
   tests Test[]
 
   createdAt   DateTime         @default(now())
@@ -238,6 +245,7 @@ model TestChapter {
   submissions TestSubmission[]
 
   @@index([testSeriesId])
+  @@index([academicChapterId])
 }
 
 model Test {
@@ -625,19 +633,19 @@ model PushSubscription {
 }
 
 model Notification {
-  id          String             @id @default(uuid())
+  id          String           @id @default(uuid())
   userId      String
   eventKey    String
   type        NotificationType
   title       String
-  body        String             @db.Text
+  body        String           @db.Text
   href        String?
   readAt      DateTime?
-  emailStatus DeliveryStatus     @default(PENDING)
-  smsStatus   DeliveryStatus     @default(PENDING)
-  pushStatus  DeliveryStatus     @default(PENDING)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  emailStatus DeliveryStatus   @default(PENDING)
+  smsStatus   DeliveryStatus   @default(PENDING)
+  pushStatus  DeliveryStatus   @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   @@unique([userId, eventKey])
   @@index([userId, readAt, createdAt])
@@ -704,14 +712,14 @@ model Resource {
   category ResourceCategory @default(BOARD)
   type     ResourceType     @default(PAST_PAPER)
 
-  subject String
-  grade   String? // e.g., "Class 10", "Class 12"
-  year    Int?
+  subject    String
+  grade      String? // e.g., "Class 10", "Class 12"
+  year       Int?
   schoolName String?
   board      String?
   examType   String?
 
-  isPaid Boolean @default(false)
+  isPaid      Boolean @default(false)
   isPublished Boolean @default(false)
 
   questions ResourceQuestion[]
@@ -728,20 +736,39 @@ model Resource {
 }
 
 model AcademicChapter {
-  id      String @id @default(uuid())
-  board   String
-  grade   String
-  subject String
-  title   String
-  slug    String
+  id              String @id @default(uuid())
+  board           String
+  grade           String
+  subject         String
+  syllabusVersion String @default("CURRENT")
+  title           String
+  slug            String
 
-  questions ResourceQuestion[]
+  questions        ResourceQuestion[]
+  aliases          AcademicChapterAlias[]
+  learningChapters Chapter[]
+  testChapters     TestChapter[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([board, grade, subject, slug])
-  @@index([board, grade, subject])
+  @@unique([board, grade, subject, syllabusVersion, slug])
+  @@index([board, grade, subject, syllabusVersion])
+}
+
+model AcademicChapterAlias {
+  id              String @id @default(uuid())
+  alias           String
+  normalizedAlias String
+
+  chapterId String
+  chapter   AcademicChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([chapterId, normalizedAlias])
+  @@index([normalizedAlias])
 }
 
 model ResourceQuestion {
@@ -763,12 +790,35 @@ model ResourceQuestion {
   chapterId String?
   chapter   AcademicChapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
 
+  attempts PracticeQuestionAttempt[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([resourceId, position])
   @@index([resourceId, isPublished])
   @@index([chapterId])
+}
+
+model PracticeQuestionAttempt {
+  id     String                @id @default(uuid())
+  userId String
+  status PracticeAttemptStatus
+
+  questionId String
+  question   ResourceQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, questionId])
+  @@index([userId, status])
+  @@index([questionId])
+}
+
+enum PracticeAttemptStatus {
+  SOLVED
+  NEEDS_REVIEW
 }
 
 enum ResourceCategory {

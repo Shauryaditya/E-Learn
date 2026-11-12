@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { isTeacher } from "@/lib/teacher";
+import { chapterKey, cleanChapterTitle, normalizeBoard, normalizeGrade, normalizeSubject } from "@/lib/academic-taxonomy";
 
 const questionSchema = z.object({
   questionText: z.string().trim().min(1),
@@ -18,7 +19,6 @@ const questionSchema = z.object({
 });
 
 const payloadSchema = z.object({ questions: z.array(questionSchema).min(1), publish: z.boolean().default(true) });
-const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "unclassified";
 
 export async function POST(req: Request, { params }: { params: { resourceId: string } }) {
   try {
@@ -31,21 +31,37 @@ export async function POST(req: Request, { params }: { params: { resourceId: str
     if (!resource) return new NextResponse("Paper not found", { status: 404 });
     if (!resource.board || !resource.grade) return new NextResponse("Board and class are required before publishing questions", { status: 400 });
 
+    const board = normalizeBoard(resource.board);
+    const grade = normalizeGrade(resource.grade);
+    const subject = normalizeSubject(resource.subject);
     const chapterIds = new Map<string, string>();
     for (const question of parsed.data.questions) {
-      const slug = slugify(question.chapterTitle);
+      const title = cleanChapterTitle(question.chapterTitle);
+      const slug = chapterKey(title);
       if (chapterIds.has(slug)) continue;
-      const chapter = await db.academicChapter.upsert({
-        where: { board_grade_subject_slug: { board: resource.board, grade: resource.grade, subject: resource.subject, slug } },
-        create: { board: resource.board, grade: resource.grade, subject: resource.subject, slug, title: question.chapterTitle },
-        update: { title: question.chapterTitle },
+      const existingChapter = await db.academicChapter.findFirst({
+        where: {
+          board,
+          grade,
+          subject,
+          syllabusVersion: "CURRENT",
+          OR: [{ slug }, { aliases: { some: { normalizedAlias: slug } } }],
+        },
+      });
+      const chapter = existingChapter || await db.academicChapter.create({
+        data: { board, grade, subject, syllabusVersion: "CURRENT", slug, title },
+      });
+      await db.academicChapterAlias.upsert({
+        where: { chapterId_normalizedAlias: { chapterId: chapter.id, normalizedAlias: slug } },
+        create: { chapterId: chapter.id, alias: question.chapterTitle.trim(), normalizedAlias: slug },
+        update: { alias: question.chapterTitle.trim() },
       });
       chapterIds.set(slug, chapter.id);
     }
 
     const data: Prisma.ResourceQuestionCreateManyInput[] = parsed.data.questions.map((question, index) => ({
       resourceId: resource.id,
-      chapterId: chapterIds.get(slugify(question.chapterTitle)),
+      chapterId: chapterIds.get(chapterKey(question.chapterTitle)),
       questionText: question.questionText,
       questionType: question.questionType,
       marks: question.marks,
@@ -59,11 +75,12 @@ export async function POST(req: Request, { params }: { params: { resourceId: str
     }));
 
     const result = await db.$transaction([
+      db.practiceQuestionAttempt.deleteMany({ where: { question: { resourceId: resource.id } } }),
       db.resourceQuestion.deleteMany({ where: { resourceId: resource.id } }),
       db.resourceQuestion.createMany({ data }),
-      db.resource.update({ where: { id: resource.id }, data: { isPublished: parsed.data.publish } }),
+      db.resource.update({ where: { id: resource.id }, data: { board, grade, subject, isPublished: parsed.data.publish } }),
     ]);
-    return NextResponse.json({ count: result[1].count, published: parsed.data.publish });
+    return NextResponse.json({ count: result[2].count, published: parsed.data.publish });
   } catch (error) {
     console.error("[RESOURCE_QUESTIONS_POST]", error);
     return new NextResponse("Could not publish paper questions", { status: 500 });
