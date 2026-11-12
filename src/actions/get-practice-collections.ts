@@ -1,6 +1,7 @@
 import { ResourceCategory, ResourceType } from "@prisma/client";
 import { db } from "@/lib/db";
 import { PracticeCollection, PracticeQuestion } from "@/lib/practice-catalog";
+import { normalizeBoard, normalizeGrade, normalizeSubject } from "@/lib/academic-taxonomy";
 
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const makeSlug = (board: string, grade: string, subject: string, school: string) => [board, grade, subject, school].map(slugify).join("--");
@@ -14,10 +15,10 @@ export const getPracticeCollections = async (userId?: string): Promise<PracticeC
   });
   const groups = new Map<string, PracticeCollection>();
   for (const resource of resources) {
-    const board = resource.board!; const grade = resource.grade!;
+    const board = normalizeBoard(resource.board!); const grade = normalizeGrade(resource.grade!); const subject = normalizeSubject(resource.subject);
     const school = resource.category === ResourceCategory.BOARD ? `${board} Board Papers` : resource.schoolName || "School papers";
-    const slug = makeSlug(board, grade, resource.subject, school);
-    const item = groups.get(slug) || { slug, board: board as PracticeCollection["board"], grade: grade as PracticeCollection["grade"], subject: resource.subject, school, source: resource.category === ResourceCategory.BOARD ? "Board papers" as const : "School papers" as const, paperCount: 0, questionCount: 0, chapterCount: 0, attemptedCount: 0, solvedCount: 0, needsReviewCount: 0, papers: [], chapters: [], questions: [] };
+    const slug = makeSlug(board, grade, subject, school);
+    const item = groups.get(slug) || { slug, board: board as PracticeCollection["board"], grade: grade as PracticeCollection["grade"], subject, school, source: resource.category === ResourceCategory.BOARD ? "Board papers" as const : "School papers" as const, paperCount: 0, questionCount: 0, chapterCount: 0, attemptedCount: 0, solvedCount: 0, needsReviewCount: 0, papers: [], chapters: [], questions: [] };
     item.papers.push({ id: resource.id, title: resource.title, year: resource.year || resource.createdAt.getFullYear(), exam: resource.examType || "Question paper", questionCount: resource.questions.length, url: resource.url });
     item.paperCount += 1; item.questionCount += resource.questions.length;
     for (const question of resource.questions) {
