@@ -35,6 +35,11 @@ const parsedQuestionSchema = z.object({
   negativeMarks: z.coerce.number().min(0).default(0),
   options: z.array(optionSchema).default([]),
   explanation: z.string().trim().optional().default(""),
+  chapterTitle: z.string().trim().optional().default("Unclassified"),
+  answer: z.string().trim().optional().default(""),
+  formula: z.string().trim().optional().default(""),
+  sourcePage: z.coerce.number().int().positive().optional(),
+  practiceType: z.enum(["SHORT_ANSWER", "LONG_ANSWER"]).optional(),
 });
 
 const parsedQuestionsSchema = z.object({
@@ -75,9 +80,9 @@ const repairJsonEscapes = (value: string) =>
   value.replace(/(?<!\\)\\(?!["\\/bfnrtu])/g, "\\\\");
 
 const buildPrompt = (sourceDescription: string) => `
-You are extracting exam questions from ${sourceDescription} for a contest question bank.
+You are extracting exam questions from ${sourceDescription}.
 
-Extract multiple-choice, true/false, or numerical questions.
+Extract every visible exam question, including multiple-choice, true/false, numerical, short-answer, long-answer, derivation, and diagram-based questions.
 Preserve math and physics formulas as LaTeX text. Do not output SVG.
 When writing LaTeX inside JSON string values, escape every backslash as \\\\.
 For MCQ options, convert complex formulas to LaTeX such as:
@@ -95,13 +100,20 @@ Return strictly valid JSON only:
         { "optionText": "Option text or LaTeX", "isCorrect": false },
         { "optionText": "Option text or LaTeX", "isCorrect": true }
       ],
-      "explanation": "Short explanation if available, using LaTeX when needed"
+      "explanation": "Short explanation if available, using LaTeX when needed",
+      "chapterTitle": "Best matching syllabus chapter",
+      "answer": "Answer from the paper or answer key when available",
+      "formula": "Primary formula used, if any",
+      "sourcePage": 1,
+      "practiceType": "SHORT_ANSWER"
     }
   ]
 }
 
 Allowed questionType values:
 SINGLE_CHOICE, MULTIPLE_CHOICE, NUMERICAL, TRUE_FALSE.
+
+For subjective questions, set questionType to NUMERICAL so existing contest imports remain compatible, and also set practiceType to SHORT_ANSWER or LONG_ANSWER. Omit practiceType for objective questions.
 
 If the answer key is not visible, set every option's isCorrect to false.
 If a question cannot be confidently parsed, skip it.
@@ -242,29 +254,13 @@ const parseVisionChunk = async (chunk: PdfChunk) => {
   return parseGeminiJson(result.response.text());
 };
 
-export async function POST(req: Request) {
-  try {
-    const { userId } = auth();
-
-    if (!userId) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
-    const formData = await req.formData();
-    const file = formData.get("file");
-
-    if (!(file instanceof File)) {
-      return new NextResponse("PDF file is required", { status: 400 });
-    }
-
+const parseQuestionPdf = async (file: File) => {
     if (file.type !== "application/pdf") {
-      return new NextResponse("Only PDF files are supported", { status: 400 });
+      throw new Error("Only PDF files are supported");
     }
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      return new NextResponse("PDF is too large. Split it into smaller files under 30MB.", {
-        status: 413,
-      });
+      throw new Error("PDF is too large. Split it into smaller files under 30MB.");
     }
 
     const arrayBuffer = await file.arrayBuffer();
@@ -283,6 +279,7 @@ export async function POST(req: Request) {
 
     const questions = [];
     const failedChunks = [];
+    let lastChunkError: unknown = null;
 
     for (const chunk of chunks) {
       try {
@@ -291,6 +288,7 @@ export async function POST(req: Request) {
           : await parseTextChunk(chunk);
         questions.push(...parsedQuestions);
       } catch (error) {
+        lastChunkError = error;
         console.error("[QUESTION_BANK_PARSE_PDF_CHUNK]", {
           startPage: chunk.startPage,
           endPage: chunk.endPage,
@@ -303,7 +301,15 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({
+    if (questions.length === 0 && chunks.length > 0 && failedChunks.length === chunks.length) {
+      const message = lastChunkError instanceof Error ? lastChunkError.message : "Every PDF chunk failed to parse";
+      if (/credits are depleted|payment required/i.test(message)) {
+        throw new Error("Gemini API credits are depleted. Add credits in Google AI Studio or configure an API key with available quota, then retry extraction.");
+      }
+      throw new Error(`The PDF could not be parsed: ${message}`);
+    }
+
+    return {
       questions,
       meta: {
         pageCount,
@@ -312,9 +318,29 @@ export async function POST(req: Request) {
         chunkCount: chunks.length,
         failedChunks,
       },
-    });
+    };
+};
+
+export async function POST(req: Request) {
+  try {
+    const { userId } = auth();
+
+    if (!userId) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const formData = await req.formData();
+    const file = formData.get("file");
+
+    if (!(file instanceof File)) {
+      return new NextResponse("PDF file is required", { status: 400 });
+    }
+
+    return NextResponse.json(await parseQuestionPdf(file));
   } catch (error) {
     console.error("[QUESTION_BANK_PARSE_PDF]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    const message = error instanceof Error ? error.message : "Internal Error";
+    const status = /credits are depleted|payment required/i.test(message) ? 402 : 500;
+    return new NextResponse(message, { status });
   }
 }

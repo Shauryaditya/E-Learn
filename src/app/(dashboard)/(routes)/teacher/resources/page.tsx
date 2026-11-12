@@ -29,7 +29,7 @@ const ResourcesPage = async () => {
         </section>
         <section className="min-w-0">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <div><h2 className="text-lg font-semibold">Published papers</h2><p className="mt-1 text-sm text-muted-foreground">{resources.length} total</p></div>
+            <div><h2 className="text-lg font-semibold">Uploaded papers</h2><p className="mt-1 text-sm text-muted-foreground">{resources.length} total · extract and publish questions from each paper</p></div>
           </div>
           <ResourcesList items={resources} />
         </section>

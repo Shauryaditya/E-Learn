@@ -2,7 +2,7 @@
 
 import { Resource } from "@prisma/client";
 import axios from "axios";
-import { ExternalLink, FileText, Loader2, Trash2 } from "lucide-react";
+import { ExternalLink, FileText, Loader2, Settings2, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -48,10 +48,12 @@ export const ResourcesList = ({ items }: { items: Resource[] }) => {
                 <Badge variant="outline">{resourceCategoryLabel(item.category)}</Badge>
                 <Badge variant="secondary">{resourceTypeLabel(item.type)}</Badge>
                 {item.examType && <Badge variant="outline">{item.examType}</Badge>}
+                <Badge className={item.isPublished ? "bg-emerald-600 text-white hover:bg-emerald-600" : ""} variant={item.isPublished ? "default" : "secondary"}>{item.isPublished ? "In Practice" : "Needs extraction"}</Badge>
               </div>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">
+            <Button asChild variant="outline" size="sm"><Link href={`/teacher/resources/${item.id}`}><Settings2 className="mr-2 h-4 w-4" />Extract questions</Link></Button>
             <Button asChild variant="outline" size="icon" title="Open paper"><Link href={item.url} target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4" /></Link></Button>
             <Button type="button" onClick={() => onDelete(item.id)} variant="destructive" size="icon" disabled={deletingId === item.id} title="Delete paper">
               {deletingId === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}

@@ -21,10 +21,11 @@ const resourceSchema = z.object({
   examType: z.string().trim().max(80).optional().nullable(),
   isPaid: z.boolean().optional().default(false),
 }).superRefine((value, context) => {
-  if (value.category !== ResourceCategory.SCHOOL) return;
-  for (const field of ["schoolName", "board", "grade", "examType"] as const) {
+  if (value.category !== ResourceCategory.SCHOOL && value.category !== ResourceCategory.BOARD) return;
+  for (const field of ["board", "grade", "examType"] as const) {
     if (!value[field]) context.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: "Required for school papers" });
   }
+  if (value.category === ResourceCategory.SCHOOL && !value.schoolName) context.addIssue({ code: z.ZodIssueCode.custom, path: ["schoolName"], message: "Required for school papers" });
   if (!value.year) context.addIssue({ code: z.ZodIssueCode.custom, path: ["year"], message: "Required for school papers" });
 });
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { BarChart, CalendarRange, Compass, Layout, List, Notebook, FileText, Trophy, User } from "lucide-react";
+import { BarChart, CalendarRange, Layout, List, Notebook, FileText, Trophy, User, BookOpenCheck } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { SidebarItem } from "./sidebar-item";
 
@@ -17,25 +17,15 @@ const guestRoutes = [
     badge: "New",
   },
   {
-    icon: Compass,
-    label: "Browse",
-    href: "/search",
-  },
-  {
-    icon: Notebook,
-    label: "Test Series",
-    href: "/testseries",
+    icon: BookOpenCheck,
+    label: "Practice",
+    href: "/practice",
+    badge: "New",
   },
   {
     icon: Trophy,
     label: "Contests",
     href: "/contests",
-  },
-  {
-    icon: FileText,
-    label: "Resources",
-    href: "/search/resources",
-    badge: "New",
   },
   {
     icon: User,

@@ -13,16 +13,13 @@ export const RESOURCE_TYPES = [
   { label: "Notes", value: "NOTES" },
 ] as const;
 
-export const SCHOOL_CLASSES = Array.from({ length: 12 }, (_, index) => `Class ${index + 1}`);
+export const SCHOOL_CLASSES = Array.from({ length: 5 }, (_, index) => `Class ${index + 8}`);
 
 export const SCHOOL_BOARDS = [
   "CBSE",
   "ICSE",
   "ISC",
-  "WBBSE",
-  "WBCHSE",
-  "State Board",
-  "Other",
+  { label: "Madhyamik (WBBSE)", value: "Madhyamik" },
 ];
 
 export const EXAM_TYPES = [

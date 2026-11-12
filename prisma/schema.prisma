@@ -712,6 +712,9 @@ model Resource {
   examType   String?
 
   isPaid Boolean @default(false)
+  isPublished Boolean @default(false)
+
+  questions ResourceQuestion[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -722,6 +725,50 @@ model Resource {
   @@index([schoolName])
   @@index([board])
   @@index([year])
+}
+
+model AcademicChapter {
+  id      String @id @default(uuid())
+  board   String
+  grade   String
+  subject String
+  title   String
+  slug    String
+
+  questions ResourceQuestion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([board, grade, subject, slug])
+  @@index([board, grade, subject])
+}
+
+model ResourceQuestion {
+  id           String  @id @default(uuid())
+  questionText String  @db.Text
+  questionType String
+  marks        Float   @default(1)
+  answer       String? @db.Text
+  solution     String? @db.Text
+  formula      String? @db.Text
+  options      Json?
+  position     Int
+  sourcePage   Int?
+  isPublished  Boolean @default(false)
+
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  chapterId String?
+  chapter   AcademicChapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([resourceId, position])
+  @@index([resourceId, isPublished])
+  @@index([chapterId])
 }
 
 enum ResourceCategory {

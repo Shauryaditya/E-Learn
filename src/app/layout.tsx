@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 // @ts-ignore: CSS import handled by Next.js
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ToastProvider } from "@/components/providers/toaster-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";

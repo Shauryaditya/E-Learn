@@ -1,12 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, CalendarRange, GraduationCap, LayoutDashboard, Notebook, Trophy, UserRound } from "lucide-react";
+import { BookOpen, BookOpenCheck, CalendarRange, LayoutDashboard, Notebook, Trophy, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
 const routes = [
+  {
+    icon: LayoutDashboard,
+    label: "Home",
+    href: "/dashboard",
+    active: (pathname: string) => pathname === "/dashboard",
+  },
   {
     icon: CalendarRange,
     label: "Planner",
@@ -14,10 +20,10 @@ const routes = [
     active: (pathname: string) => pathname.startsWith("/planner"),
   },
   {
-    icon: GraduationCap,
-    label: "Learning",
-    href: "/dashboard",
-    active: (pathname: string) => pathname === "/dashboard",
+    icon: BookOpenCheck,
+    label: "Practice",
+    href: "/practice",
+    active: (pathname: string) => pathname.startsWith("/practice"),
   },
   {
     icon: Trophy,
@@ -45,7 +51,7 @@ export const MobileBottomNav = () => {
 
   return (
     <nav aria-label={teacher ? "Teacher navigation" : "Student navigation"} data-tour="mobile-nav" className="fixed inset-x-0 bottom-0 z-50 border-t bg-background px-3 pb-[env(safe-area-inset-bottom)] pt-2 md:hidden">
-      <div className="grid grid-cols-4 gap-1">
+      <div className={cn("grid gap-1", teacher ? "grid-cols-4" : "grid-cols-5")}>
         {visibleRoutes.map((route) => {
           const Icon = route.icon;
           const isActive = route.active(pathname);

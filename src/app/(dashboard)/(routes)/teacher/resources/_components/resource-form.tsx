@@ -35,10 +35,11 @@ const formSchema = z.object({
   if (value.year && (!/^\d{4}$/.test(value.year) || Number(value.year) < 1990 || Number(value.year) > currentYear)) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["year"], message: `Enter a year from 1990 to ${currentYear}` });
   }
-  if (value.category !== "SCHOOL") return;
-  for (const field of ["schoolName", "board", "grade", "examType", "year"] as const) {
+  if (!["SCHOOL", "BOARD"].includes(value.category)) return;
+  for (const field of ["board", "grade", "examType", "year"] as const) {
     if (!value[field]) context.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: "Required for school papers" });
   }
+  if (value.category === "SCHOOL" && !value.schoolName) context.addIssue({ code: z.ZodIssueCode.custom, path: ["schoolName"], message: "Required for school papers" });
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -76,6 +77,7 @@ export const ResourceForm = () => {
     },
   });
   const isSchoolPaper = form.watch("category") === "SCHOOL";
+  const isQuestionPaper = ["SCHOOL", "BOARD"].includes(form.watch("category"));
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -87,7 +89,7 @@ export const ResourceForm = () => {
         year: values.year ? Number(values.year) : null,
         schoolName: isSchoolPaper ? values.schoolName : null,
         board: values.board || null,
-        examType: isSchoolPaper ? values.examType : null,
+        examType: isQuestionPaper ? values.examType : null,
         isPaid: false,
       });
       toast.success("Added to Paper Vault");
@@ -129,10 +131,10 @@ export const ResourceForm = () => {
           )} />}
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField control={form.control} name="board" render={({ field }) => (
-              <FormItem><FormLabel>Board {!isSchoolPaper && <span className="font-normal text-muted-foreground">(optional)</span>}</FormLabel><ResourceSelect {...field} options={SCHOOL_BOARDS} placeholder="Select board" disabled={isSubmitting} /><FormMessage /></FormItem>
+              <FormItem><FormLabel>Board {!isQuestionPaper && <span className="font-normal text-muted-foreground">(optional)</span>}</FormLabel><ResourceSelect {...field} options={SCHOOL_BOARDS} placeholder="Select board" disabled={isSubmitting} /><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="grade" render={({ field }) => (
-              <FormItem><FormLabel>Class {!isSchoolPaper && <span className="font-normal text-muted-foreground">(optional)</span>}</FormLabel><ResourceSelect {...field} options={SCHOOL_CLASSES} placeholder="Select class" disabled={isSubmitting} /><FormMessage /></FormItem>
+              <FormItem><FormLabel>Class {!isQuestionPaper && <span className="font-normal text-muted-foreground">(optional)</span>}</FormLabel><ResourceSelect {...field} options={SCHOOL_CLASSES} placeholder="Select class" disabled={isSubmitting} /><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="subject" render={({ field }) => (
               <FormItem><FormLabel>Subject</FormLabel><FormControl><Input disabled={isSubmitting} placeholder="e.g. Mathematics" {...field} /></FormControl><FormMessage /></FormItem>
@@ -140,7 +142,7 @@ export const ResourceForm = () => {
             <FormField control={form.control} name="year" render={({ field }) => (
               <FormItem><FormLabel>Paper year</FormLabel><FormControl><Input inputMode="numeric" disabled={isSubmitting} placeholder={String(currentYear)} maxLength={4} {...field} /></FormControl><FormMessage /></FormItem>
             )} />
-            {isSchoolPaper && <FormField control={form.control} name="examType" render={({ field }) => (
+            {isQuestionPaper && <FormField control={form.control} name="examType" render={({ field }) => (
               <FormItem className="sm:col-span-2"><FormLabel>Exam</FormLabel><ResourceSelect {...field} options={EXAM_TYPES} placeholder="Select exam" disabled={isSubmitting} /><FormMessage /></FormItem>
             )} />}
           </div>
