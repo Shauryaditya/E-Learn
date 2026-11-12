@@ -6,6 +6,8 @@ import { NextResponse } from "next/server";
 import * as z from "zod";
 
 import { model } from "@/lib/gemini";
+import { db } from "@/lib/db";
+import { isTeacher } from "@/lib/teacher";
 
 export const maxDuration = 60;
 export const runtime = "nodejs";
@@ -14,6 +16,7 @@ const MAX_FILE_SIZE_BYTES = 30 * 1024 * 1024;
 const MIN_TEXT_CHARS_PER_PAGE = 120;
 const TEXT_CHUNK_CHAR_LIMIT = 16000;
 const VISION_CHUNK_PAGE_LIMIT = 3;
+const CHUNK_CONCURRENCY = 3;
 const pdfWorkerPath = path.join(
   process.cwd(),
   "node_modules",
@@ -281,18 +284,28 @@ const parseQuestionPdf = async (file: File) => {
     const failedChunks = [];
     let lastChunkError: unknown = null;
 
-    for (const chunk of chunks) {
-      try {
-        const parsedQuestions = isLikelyScanned
+    const chunkResults: PromiseSettledResult<{ chunk: PdfChunk; questions: z.infer<typeof parsedQuestionSchema>[] }>[] = [];
+    for (let start = 0; start < chunks.length; start += CHUNK_CONCURRENCY) {
+      const batch = chunks.slice(start, start + CHUNK_CONCURRENCY);
+      chunkResults.push(...await Promise.allSettled(batch.map(async (chunk) => ({
+        chunk,
+        questions: isLikelyScanned
           ? await parseVisionChunk(chunk)
-          : await parseTextChunk(chunk);
-        questions.push(...parsedQuestions);
-      } catch (error) {
-        lastChunkError = error;
+          : await parseTextChunk(chunk),
+      }))));
+    }
+
+    for (let index = 0; index < chunkResults.length; index++) {
+      const result = chunkResults[index];
+      const chunk = chunks[index];
+      if (result.status === "fulfilled") {
+        questions.push(...result.value.questions);
+      } else {
+        lastChunkError = result.reason;
         console.error("[QUESTION_BANK_PARSE_PDF_CHUNK]", {
           startPage: chunk.startPage,
           endPage: chunk.endPage,
-          error,
+          error: result.reason,
         });
         failedChunks.push({
           startPage: chunk.startPage,
@@ -329,11 +342,25 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const formData = await req.formData();
-    const file = formData.get("file");
+    const resourceId = new URL(req.url).searchParams.get("resourceId");
+    let file: File;
 
-    if (!(file instanceof File)) {
-      return new NextResponse("PDF file is required", { status: 400 });
+    if (resourceId) {
+      if (!isTeacher(userId)) return new NextResponse("Unauthorized", { status: 401 });
+      const resource = await db.resource.findUnique({ where: { id: resourceId } });
+      if (!resource) return new NextResponse("Paper not found", { status: 404 });
+      const response = await fetch(resource.url, { cache: "no-store" });
+      if (!response.ok) return new NextResponse("Could not download the uploaded paper", { status: 502 });
+      const contentType = response.headers.get("content-type")?.split(";")[0] || "application/pdf";
+      if (contentType !== "application/pdf" && !resource.url.toLowerCase().includes(".pdf")) {
+        return new NextResponse("Automatic extraction currently supports PDF papers", { status: 415 });
+      }
+      file = new File([await response.arrayBuffer()], `${resource.title}.pdf`, { type: "application/pdf" });
+    } else {
+      const formData = await req.formData();
+      const uploadedFile = formData.get("file");
+      if (!(uploadedFile instanceof File)) return new NextResponse("PDF file is required", { status: 400 });
+      file = uploadedFile;
     }
 
     return NextResponse.json(await parseQuestionPdf(file));
