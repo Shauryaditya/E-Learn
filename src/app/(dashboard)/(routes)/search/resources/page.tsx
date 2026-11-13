@@ -57,22 +57,22 @@ export default async function StudentResourcesPage({ searchParams }: { searchPar
   return (
     <div className="min-h-full bg-background">
       <header className="border-b bg-card">
-        <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 md:py-7 lg:px-8">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-md border bg-muted"><Archive className="h-5 w-5" /></div>
+            <div className="hidden h-11 w-11 items-center justify-center rounded-md border bg-muted md:flex"><Archive className="h-5 w-5" /></div>
             <div>
-              <div className="flex items-center gap-2"><h1 className="text-2xl font-bold tracking-normal sm:text-3xl">Paper Vault</h1><Badge className="bg-emerald-600 text-white hover:bg-emerald-600">NEW</Badge></div>
-              <p className="mt-1 text-sm text-muted-foreground">Previous-year school papers, board papers, and exam resources in one searchable library.</p>
+              <div className="flex items-center gap-2"><h1 className="text-xl font-bold tracking-normal md:text-3xl">Paper Vault</h1><Badge className="hidden bg-emerald-600 text-white hover:bg-emerald-600 md:inline-flex">NEW</Badge></div>
+              <p className="mt-0.5 text-xs text-muted-foreground md:mt-1 md:text-sm">Download school, board and entrance exam papers.</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-        <section aria-label="Paper filters" className="border-b pb-6">
+      <main className="mx-auto max-w-7xl space-y-4 px-4 py-3 pb-24 sm:px-6 md:space-y-6 md:py-6 lg:px-8">
+        <section aria-label="Paper filters" className="md:border-b md:pb-6">
           <ResourceFilters options={options} />
         </section>
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 border-b pb-2 md:border-0 md:pb-0">
           <div className="flex items-center gap-2"><FileSearch className="h-4 w-4 text-muted-foreground" /><h2 className="text-sm font-semibold">{resources.length} {resources.length === 1 ? "paper" : "papers"} found</h2></div>
         </div>
         <StudentResourcesList items={resources} />

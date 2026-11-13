@@ -6,19 +6,24 @@ import { normalizeBoard, normalizeGrade, normalizeSubject } from "@/lib/academic
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const makeSlug = (board: string, grade: string, subject: string, school: string) => [board, grade, subject, school].map(slugify).join("--");
 const displayType = (value: string): PracticeQuestion["type"] => value.includes("LONG") ? "Long answer" : value === "NUMERICAL" ? "Numerical" : "Short answer";
+const goalLabel = (category: ResourceCategory) => category === ResourceCategory.JEE_MAINS ? "JEE Main" : category === ResourceCategory.JEE_ADVANCED ? "JEE Advanced" : category === ResourceCategory.NEET ? "NEET" : category === ResourceCategory.OTHER ? "Other exams" : "School & boards";
+const sourceLabel = (category: ResourceCategory): PracticeCollection["source"] => category === ResourceCategory.SCHOOL ? "School papers" : category === ResourceCategory.BOARD ? "Board papers" : category === ResourceCategory.OTHER ? "Other papers" : "Entrance papers";
 
 export const getPracticeCollections = async (userId?: string): Promise<PracticeCollection[]> => {
   const resources = await db.resource.findMany({
-    where: { type: { in: [ResourceType.PAST_PAPER, ResourceType.SAMPLE_PAPER] }, board: { not: null }, grade: { not: null } },
+    where: { type: { in: [ResourceType.PAST_PAPER, ResourceType.SAMPLE_PAPER] }, questions: { some: { isPublished: true } } },
     include: { questions: { where: { isPublished: true }, include: { chapter: true, attempts: { where: { userId: userId || "__anonymous__" }, select: { status: true }, take: 1 } }, orderBy: { position: "asc" } } },
     orderBy: [{ year: "desc" }, { createdAt: "desc" }],
   });
   const groups = new Map<string, PracticeCollection>();
   for (const resource of resources) {
-    const board = normalizeBoard(resource.board!); const grade = normalizeGrade(resource.grade!); const subject = normalizeSubject(resource.subject);
-    const school = resource.category === ResourceCategory.BOARD ? `${board} Board Papers` : resource.schoolName || "School papers";
-    const slug = makeSlug(board, grade, subject, school);
-    const item = groups.get(slug) || { slug, board: board as PracticeCollection["board"], grade: grade as PracticeCollection["grade"], subject, school, source: resource.category === ResourceCategory.BOARD ? "Board papers" as const : "School papers" as const, paperCount: 0, questionCount: 0, chapterCount: 0, attemptedCount: 0, solvedCount: 0, needsReviewCount: 0, papers: [], chapters: [], questions: [] };
+    const goal = goalLabel(resource.category);
+    const board = resource.board ? normalizeBoard(resource.board) : goal;
+    const grade = resource.grade ? normalizeGrade(resource.grade) : "Entrance exam";
+    const subject = normalizeSubject(resource.subject);
+    const school = resource.category === ResourceCategory.BOARD ? `${board} Board Papers` : resource.schoolName || `${goal} papers`;
+    const slug = `${slugify(resource.category)}--${makeSlug(board, grade, subject, school)}`;
+    const item = groups.get(slug) || { slug, category: resource.category, goal, board, grade, subject, school, source: sourceLabel(resource.category), paperCount: 0, questionCount: 0, chapterCount: 0, attemptedCount: 0, solvedCount: 0, needsReviewCount: 0, papers: [], chapters: [], questions: [] };
     item.papers.push({ id: resource.id, title: resource.title, year: resource.year || resource.createdAt.getFullYear(), exam: resource.examType || "Question paper", questionCount: resource.questions.length, url: resource.url });
     item.paperCount += 1; item.questionCount += resource.questions.length;
     for (const question of resource.questions) {

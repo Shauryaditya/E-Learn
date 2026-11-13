@@ -213,11 +213,13 @@ export type PracticePaper = { id: string; title: string; year: number; exam: str
 
 export type PracticeCollection = {
   slug: string;
+  category: "SCHOOL" | "BOARD" | "JEE_MAINS" | "JEE_ADVANCED" | "NEET" | "OTHER";
+  goal: string;
   board: string;
   grade: string;
   subject: string;
   school: string;
-  source: "School papers" | "Board papers";
+  source: "School papers" | "Board papers" | "Entrance papers" | "Other papers";
   paperCount: number;
   questionCount: number;
   chapterCount: number;
@@ -236,32 +238,32 @@ const sampleQuestions = (school: string, subject: string): PracticeQuestion[] =>
 
 export const practiceCollections: PracticeCollection[] = [
   {
-    slug: "isc-12-physics-st-xaviers", board: "ISC", grade: "Class 12", subject: "Physics", school: "St. Xavier's Collegiate School", source: "School papers", paperCount: 8, questionCount: 247, chapterCount: 14,
+    slug: "isc-12-physics-st-xaviers", category: "SCHOOL", goal: "School & boards", board: "ISC", grade: "Class 12", subject: "Physics", school: "St. Xavier's Collegiate School", source: "School papers", paperCount: 8, questionCount: 247, chapterCount: 14,
     papers: [{ id: "sx-phy-2025", title: "Physics Pre-Board Examination", year: 2025, exam: "Pre-Board", questionCount: 31 }, { id: "sx-phy-2024", title: "Physics Selection Examination", year: 2024, exam: "Selection", questionCount: 29 }, { id: "sx-phy-2023", title: "Physics Annual Examination", year: 2023, exam: "Annual", questionCount: 32 }],
     chapters: [{ slug: "electrostatics", title: "Electrostatics", questionCount: 34 }, { slug: "current-electricity", title: "Current Electricity", questionCount: 41 }, { slug: "magnetic-effects", title: "Magnetic Effects of Current", questionCount: 29 }, { slug: "electromagnetic-induction", title: "Electromagnetic Induction", questionCount: 26 }, { slug: "ray-optics", title: "Ray Optics", questionCount: 31 }, { slug: "modern-physics", title: "Modern Physics", questionCount: 38 }], questions: currentElectricityQuestions,
   },
   {
-    slug: "isc-12-physics-heritage", board: "ISC", grade: "Class 12", subject: "Physics", school: "The Heritage School", source: "School papers", paperCount: 6, questionCount: 186, chapterCount: 13,
+    slug: "isc-12-physics-heritage", category: "SCHOOL", goal: "School & boards", board: "ISC", grade: "Class 12", subject: "Physics", school: "The Heritage School", source: "School papers", paperCount: 6, questionCount: 186, chapterCount: 13,
     papers: [{ id: "heritage-phy-2025", title: "Physics Pre-Board Paper I", year: 2025, exam: "Pre-Board", questionCount: 30 }, { id: "heritage-phy-2024", title: "Physics Selection Examination", year: 2024, exam: "Selection", questionCount: 28 }],
     chapters: [{ slug: "electrostatics", title: "Electrostatics", questionCount: 26 }, { slug: "current-electricity", title: "Current Electricity", questionCount: 32 }, { slug: "ray-optics", title: "Ray Optics", questionCount: 24 }, { slug: "semiconductors", title: "Semiconductor Electronics", questionCount: 19 }], questions: sampleQuestions("The Heritage School", "Physics"),
   },
   {
-    slug: "cbse-10-mathematics-dps", board: "CBSE", grade: "Class 10", subject: "Mathematics", school: "Delhi Public School, Ruby Park", source: "School papers", paperCount: 9, questionCount: 318, chapterCount: 15,
+    slug: "cbse-10-mathematics-dps", category: "SCHOOL", goal: "School & boards", board: "CBSE", grade: "Class 10", subject: "Mathematics", school: "Delhi Public School, Ruby Park", source: "School papers", paperCount: 9, questionCount: 318, chapterCount: 15,
     papers: [{ id: "dps-math-2025", title: "Mathematics Standard Pre-Board", year: 2025, exam: "Pre-Board", questionCount: 38 }, { id: "dps-math-2024", title: "Mathematics Annual Examination", year: 2024, exam: "Annual", questionCount: 40 }],
     chapters: [{ slug: "real-numbers", title: "Real Numbers", questionCount: 18 }, { slug: "polynomials", title: "Polynomials", questionCount: 24 }, { slug: "linear-equations", title: "Pair of Linear Equations", questionCount: 31 }, { slug: "quadratic-equations", title: "Quadratic Equations", questionCount: 29 }, { slug: "trigonometry", title: "Introduction to Trigonometry", questionCount: 36 }], questions: sampleQuestions("Delhi Public School, Ruby Park", "Mathematics"),
   },
   {
-    slug: "icse-10-chemistry-don-bosco", board: "ICSE", grade: "Class 10", subject: "Chemistry", school: "Don Bosco School, Park Circus", source: "School papers", paperCount: 7, questionCount: 224, chapterCount: 12,
+    slug: "icse-10-chemistry-don-bosco", category: "SCHOOL", goal: "School & boards", board: "ICSE", grade: "Class 10", subject: "Chemistry", school: "Don Bosco School, Park Circus", source: "School papers", paperCount: 7, questionCount: 224, chapterCount: 12,
     papers: [{ id: "db-chem-2025", title: "Chemistry Selection Examination", year: 2025, exam: "Selection", questionCount: 34 }, { id: "db-chem-2024", title: "Chemistry Annual Examination", year: 2024, exam: "Annual", questionCount: 32 }],
     chapters: [{ slug: "periodic-properties", title: "Periodic Properties", questionCount: 21 }, { slug: "chemical-bonding", title: "Chemical Bonding", questionCount: 28 }, { slug: "acids-bases-salts", title: "Acids, Bases and Salts", questionCount: 31 }, { slug: "organic-chemistry", title: "Organic Chemistry", questionCount: 37 }], questions: sampleQuestions("Don Bosco School, Park Circus", "Chemistry"),
   },
   {
-    slug: "madhyamik-10-life-science-south-point", board: "Madhyamik", grade: "Class 10", subject: "Life Science", school: "South Point High School", source: "School papers", paperCount: 5, questionCount: 172, chapterCount: 8,
+    slug: "madhyamik-10-life-science-south-point", category: "SCHOOL", goal: "School & boards", board: "Madhyamik", grade: "Class 10", subject: "Life Science", school: "South Point High School", source: "School papers", paperCount: 5, questionCount: 172, chapterCount: 8,
     papers: [{ id: "sp-life-2025", title: "Life Science Test Examination", year: 2025, exam: "Test", questionCount: 36 }, { id: "sp-life-2024", title: "Life Science Annual Examination", year: 2024, exam: "Annual", questionCount: 34 }],
     chapters: [{ slug: "control-coordination", title: "Control and Coordination", questionCount: 28 }, { slug: "continuity-of-life", title: "Continuity of Life", questionCount: 25 }, { slug: "heredity", title: "Heredity and Common Genetic Diseases", questionCount: 31 }, { slug: "environment", title: "Environment and Its Resources", questionCount: 24 }], questions: sampleQuestions("South Point High School", "Life Science"),
   },
   {
-    slug: "cbse-12-physics-board", board: "CBSE", grade: "Class 12", subject: "Physics", school: "CBSE Board Papers", source: "Board papers", paperCount: 10, questionCount: 341, chapterCount: 14,
+    slug: "cbse-12-physics-board", category: "BOARD", goal: "School & boards", board: "CBSE", grade: "Class 12", subject: "Physics", school: "CBSE Board Papers", source: "Board papers", paperCount: 10, questionCount: 341, chapterCount: 14,
     papers: [{ id: "cbse-phy-2025", title: "CBSE Physics Board Examination", year: 2025, exam: "Board", questionCount: 33 }, { id: "cbse-phy-2024", title: "CBSE Physics Board Examination", year: 2024, exam: "Board", questionCount: 33 }],
     chapters: [{ slug: "electric-charges-fields", title: "Electric Charges and Fields", questionCount: 27 }, { slug: "current-electricity", title: "Current Electricity", questionCount: 35 }, { slug: "moving-charges", title: "Moving Charges and Magnetism", questionCount: 29 }, { slug: "optics", title: "Optics", questionCount: 42 }], questions: sampleQuestions("CBSE Board Papers", "Physics"),
   },

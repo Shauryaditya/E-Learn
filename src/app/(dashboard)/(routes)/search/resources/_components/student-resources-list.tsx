@@ -1,7 +1,7 @@
 "use client";
 
 import { Resource } from "@prisma/client";
-import { ArrowUpRight, Building2, CalendarDays, FileText, GraduationCap } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Building2, CalendarDays, FileText, GraduationCap } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,19 @@ export const StudentResourcesList = ({ items }: { items: Resource[] }) => {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <>
+    <div className="overflow-hidden rounded-lg border bg-card md:hidden">
+      <div className="divide-y">
+      {items.map(item => (
+        <Link key={item.id} href={item.url} target="_blank" rel="noreferrer" className="flex min-h-[68px] items-center gap-3 px-3 py-2.5 active:bg-muted">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"><FileText className="h-4 w-4" /></span>
+          <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{item.title}</span><span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{[item.subject, item.grade, item.year, item.schoolName || item.board || resourceCategoryLabel(item.category)].filter(Boolean).join(" · ")}</span></span>
+          <span className="shrink-0 text-[11px] font-medium text-muted-foreground">{resourceTypeLabel(item.type)}</span><ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        </Link>
+      ))}
+      </div>
+    </div>
+    <div className="hidden gap-4 md:grid md:grid-cols-2 xl:grid-cols-3">
       {items.map(item => (
         <article key={item.id} className="flex min-w-0 flex-col rounded-md border bg-card p-4 shadow-sm transition hover:border-foreground/20 hover:shadow-md">
           <div className="flex items-start justify-between gap-3">
@@ -49,5 +61,6 @@ export const StudentResourcesList = ({ items }: { items: Resource[] }) => {
         </article>
       ))}
     </div>
+    </>
   );
 };
