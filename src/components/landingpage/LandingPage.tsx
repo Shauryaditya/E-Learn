@@ -72,7 +72,7 @@ const studentSteps = [
   { number: "03", title: "Review and improve", description: "Track scores, revisit mistakes, and act on teacher feedback." },
 ];
 
-const boardLabels = ["CBSE", "ICSE", "ISC", "State boards", "Classes 6–12"];
+const boardLabels = ["CBSE", "ICSE", "ISC", "Madhyamik", "Classes 8–12"];
 
 const quickTools = [
   { label: "Notes", icon: FileText },
@@ -172,6 +172,7 @@ export default function LandingPage() {
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Brand />
           <nav className="hidden items-center gap-7 md:flex" aria-label="Main navigation">
+            <Link href="/learn" className="text-xs font-medium text-slate-600 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white">Free resources</Link>
             <Link href="#platform" className="text-xs font-medium text-slate-600 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white">Platform</Link>
             <Link href="#students" className="text-xs font-medium text-slate-600 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white">For students</Link>
             <Link href="#teachers" className="text-xs font-medium text-slate-600 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white">For teachers</Link>
@@ -188,17 +189,17 @@ export default function LandingPage() {
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[0.92fr_1.08fr] lg:py-24">
           <div className="max-w-xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-300">
-              <GraduationCap className="h-3.5 w-3.5" /> Built for Indian students in Classes 6–12
+              <GraduationCap className="h-3.5 w-3.5" /> Built for Indian students in Classes 8–12
             </div>
             <h1 className="mt-6 text-balance text-4xl font-bold leading-[1.12] tracking-[-0.035em] sm:text-5xl">
-              Learn, practise and improve—all in one place.
+              CBSE, ICSE, ISC and Madhyamik preparation—made clearer.
             </h1>
             <p className="mt-5 max-w-lg text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-[15px]">
-              Aaccent brings together notes, assignments, test series, live contests, previous-year papers, and useful feedback for school students.
+              Learn with notes and assignments, practise chapter-wise questions from school papers, and improve through test series, contests and teacher feedback.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link href="/sign-up" className="inline-flex h-10 items-center justify-center rounded-md bg-blue-600 px-5 text-xs font-semibold text-white transition hover:bg-blue-700">Start learning for free <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
-              <Link href="#platform" className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-5 text-xs font-semibold transition hover:bg-slate-50 dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10">Explore the platform</Link>
+              <Link href="/learn" className="inline-flex h-10 items-center justify-center rounded-md border border-slate-300 bg-white px-5 text-xs font-semibold transition hover:bg-slate-50 dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10">Browse free questions</Link>
             </div>
             <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-[11px] text-slate-500 dark:text-slate-400">
               <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600" /> Free to get started</span>
@@ -317,7 +318,7 @@ export default function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 md:flex-row md:items-center md:justify-between">
           <Brand />
           <p className="max-w-md text-xs leading-5 text-slate-500">Learning, practice, assessment, and feedback for Indian school students.</p>
-          <div className="flex items-center gap-5 text-xs text-slate-500"><Link href="/sign-in" className="hover:text-slate-950 dark:hover:text-white">Sign in</Link><Link href="/sign-up" className="hover:text-slate-950 dark:hover:text-white">Create account</Link></div>
+          <div className="flex items-center gap-5 text-xs text-slate-500"><Link href="/learn" className="hover:text-slate-950 dark:hover:text-white">Free resources</Link><Link href="/sign-in" className="hover:text-slate-950 dark:hover:text-white">Sign in</Link><Link href="/sign-up" className="hover:text-slate-950 dark:hover:text-white">Create account</Link></div>
         </div>
       </footer>
     </main>

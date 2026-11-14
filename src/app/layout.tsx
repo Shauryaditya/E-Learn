@@ -11,8 +11,9 @@ import { StudyActivityTracker } from "@/components/study-activity-tracker";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://elearn.aaccent.in"),
   title: "Aaccent E-Learn | Learn, Practise and Improve",
-  description: "Notes, assignments, test series, contests, previous-year papers, and feedback for Indian school students in Classes 6–12.",
+  description: "Notes, assignments, test series, contests, previous-year papers, and feedback for Indian school students in Classes 8–12.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
