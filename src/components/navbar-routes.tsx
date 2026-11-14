@@ -36,18 +36,18 @@ export const NavbarRoutes = () => {
           <SearchInput />
         </div>
       )}
-      <div className="flex gap-x-2 ml-auto items-center">
+      <div className="ml-auto flex min-w-0 items-center gap-x-1 sm:gap-x-2">
         <NotificationBell enabled={!!userId} />
         <ModeToggle />
         {isTeacherPage || isCoursePage ? (
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="h-9 w-9 shrink-0 p-0 sm:h-10 sm:w-auto sm:px-4">
             <Link href="/dashboard" aria-label={isTeacherPage ? "Student view" : "Back to learning"} title={isTeacherPage ? "Student view" : "Back to learning"}>
               <ArrowLeft className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">{isTeacherPage ? "Student view" : "Back to learning"}</span>
             </Link>
           </Button>
         ) : isTeacher(userId) ? (
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="h-9 w-9 shrink-0 p-0 sm:h-10 sm:w-auto sm:px-4">
             <Link href="/teacher/dashboard" aria-label="Teacher workspace" title="Teacher workspace"><GraduationCap className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Teacher workspace</span></Link>
           </Button>
         ) : null}
@@ -56,10 +56,10 @@ export const NavbarRoutes = () => {
             onClick={handleSignOut}
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground"
+            className="h-9 w-9 shrink-0 p-0 text-muted-foreground hover:text-foreground sm:w-auto sm:px-3"
           >
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
+            <LogOut className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Sign Out</span>
           </Button>
         ) : (
           <Button onClick={() => openSignIn()} variant="ghost" size="sm">

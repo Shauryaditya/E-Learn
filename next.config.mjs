@@ -9,6 +9,12 @@ const withPWA = withPWAInit({
   workboxOptions: {
     runtimeCaching: [
       {
+        urlPattern: ({ request, sameOrigin }) =>
+          sameOrigin && request.mode === "navigate",
+        handler: "NetworkOnly",
+        method: "GET",
+      },
+      {
         urlPattern: ({ url, sameOrigin }) =>
           sameOrigin && /^\/(?:api\/|teacher\/)?contests(?:\/|$)/.test(url.pathname),
         handler: "NetworkOnly",
