@@ -1,0 +1,1 @@
+ALTER TABLE "StudyPlan" ADD COLUMN "board" TEXT;

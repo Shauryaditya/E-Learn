@@ -14,6 +14,7 @@ const subjectSchema = z.object({
 
 const planSchema = z.object({
   grade: z.string().trim().min(1).max(40),
+  board: z.string().trim().min(1).max(40).optional(),
   examName: z.string().trim().min(1).max(120),
   examDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Select a valid examination date"),
   subjects: z.array(subjectSchema).min(1).max(12),
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
       return new NextResponse("The examination date must be in the future", { status: 400 });
     }
 
-    const [courses, testSeries] = await Promise.all([
+    const [courses, testSeries, paperChapters] = await Promise.all([
       db.course.findMany({
         where: { isPublished: true },
         select: {
@@ -83,6 +84,20 @@ export async function POST(request: Request) {
         orderBy: { updatedAt: "desc" },
         take: 60,
       }),
+      db.academicChapter.findMany({
+        where: { questions: { some: { isPublished: true } } },
+        select: {
+          id: true,
+          board: true,
+          grade: true,
+          subject: true,
+          title: true,
+          slug: true,
+          questions: { where: { isPublished: true }, select: { id: true }, take: 500 },
+        },
+        orderBy: [{ grade: "asc" }, { subject: "asc" }, { title: "asc" }],
+        take: 300,
+      }),
     ]);
 
     const plainText = (value?: string | null) => (value || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
@@ -105,6 +120,15 @@ export async function POST(request: Request) {
         hasAccess: series.testSeriesPurchase.length > 0,
         searchText: [series.title, series.category?.name, plainText(series.description), chapter.title, plainText(chapter.description)].filter(Boolean).join(" "),
       }))),
+      ...paperChapters.map((chapter) => ({
+        id: chapter.id,
+        kind: "PAPER_PRACTICE" as const,
+        title: chapter.title,
+        context: `${chapter.questions.length} questions from uploaded papers`,
+        href: `/practice/questions?${new URLSearchParams({ board: chapter.board, grade: chapter.grade, subject: chapter.subject, chapter: chapter.slug }).toString()}`,
+        hasAccess: true,
+        searchText: [chapter.board, chapter.grade, chapter.subject, chapter.title, "previous year school board paper questions practice"].join(" "),
+      })),
     ];
 
     const roadmap = carryRoadmapProgress(

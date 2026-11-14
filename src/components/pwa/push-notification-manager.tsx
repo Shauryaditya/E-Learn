@@ -25,6 +25,18 @@ export function PushNotificationManager() {
   )
  
   useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      // A production Workbox worker can otherwise keep serving stale Next.js
+      // chunks on localhost after the development server has rebuilt them.
+      void navigator.serviceWorker?.getRegistrations().then((registrations) =>
+        Promise.all(registrations.map((registration) => registration.unregister()))
+      )
+      void window.caches?.keys().then((keys) =>
+        Promise.all(keys.map((key) => window.caches.delete(key)))
+      )
+      return
+    }
+
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       setIsSupported(true)
       registerServiceWorker()

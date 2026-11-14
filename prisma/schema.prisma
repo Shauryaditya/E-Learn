@@ -683,6 +683,7 @@ model StudyPlan {
   id            String          @id @default(uuid())
   userId        String          @unique
   grade         String
+  board         String?
   examName      String
   examDate      DateTime
   weeklyMinutes Int

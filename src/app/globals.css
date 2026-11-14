@@ -1,3 +1,5 @@
+@import "~@uploadthing/react/styles.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -85,4 +87,58 @@
   font-size: 16px !important;
 }
 
-@import "~@uploadthing/react/styles.css"
+@keyframes accent-loader-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  55% {
+    transform: translateX(90%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+@keyframes accent-loader-orbit {
+  from {
+    transform: rotate(0deg) scale(0.96);
+  }
+  to {
+    transform: rotate(360deg) scale(0.96);
+  }
+}
+
+@keyframes accent-loader-halo {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+.accent-loader-progress {
+  animation: accent-loader-progress 1.35s ease-in-out infinite;
+}
+
+.accent-loader-orbit {
+  animation: accent-loader-orbit 3.6s linear infinite;
+}
+
+.accent-loader-halo {
+  animation: accent-loader-halo 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accent-loader-progress,
+  .accent-loader-orbit,
+  .accent-loader-halo {
+    animation: none;
+  }
+
+  .accent-loader-progress {
+    transform: translateX(50%);
+  }
+}

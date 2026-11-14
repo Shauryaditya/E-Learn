@@ -19,7 +19,7 @@ export type PlannerTask = {
 
 export type PlannerResource = {
   id: string;
-  kind: "LEARNING_MATERIAL" | "PRACTICE_SET";
+  kind: "LEARNING_MATERIAL" | "PRACTICE_SET" | "PAPER_PRACTICE";
   title: string;
   context: string;
   href: string;
@@ -79,21 +79,20 @@ export const generateRoadmap = (input: PlannerInput): PlannerRoadmap => {
     const chapters = subject.chapters.length ? subject.chapters : ["Core concepts"];
     const sessionsPerWeek = Math.max(1, Math.min(5, Math.round(subject.weeklyMinutes / 60)));
     const sessionDuration = Math.max(30, Math.round(subject.weeklyMinutes / sessionsPerWeek / 15) * 15);
-    const totalSessions = weekCount * sessionsPerWeek;
     const chapterOccurrences = new Map<string, number>();
     const learningStages = [
-      (chapter: string) => `Understand the core concepts of ${chapter}`,
-      (chapter: string) => `Study the LMS notes and examples for ${chapter}`,
-      (chapter: string) => `Complete the assignment for ${chapter}`,
-      (chapter: string) => `Practise questions from ${chapter}`,
-      (chapter: string) => `Review mistakes and revise ${chapter}`,
+      (chapter: string) => `Learn the key ideas in ${chapter}`,
+      (chapter: string) => `Work through examples from ${chapter}`,
+      (chapter: string) => `Make a one-page recall sheet for ${chapter}`,
+      (chapter: string) => `Practise previous-year questions from ${chapter}`,
+      (chapter: string) => `Complete a timed chapter drill on ${chapter}`,
+      (chapter: string) => `Review mistakes and strengthen ${chapter}`,
     ];
 
     weeks.forEach((week, weekIndex) => {
       for (let sessionIndex = 0; sessionIndex < sessionsPerWeek; sessionIndex += 1) {
         const sessionNumber = weekIndex * sessionsPerWeek + sessionIndex;
-        const chapterIndex = Math.floor(sessionNumber * chapters.length / Math.max(1, totalSessions));
-        const chapter = chapters[Math.min(chapterIndex, chapters.length - 1)];
+        const chapter = chapters[sessionNumber % chapters.length];
         const isFinalWeek = weekIndex === weekCount - 1;
         const occurrence = chapterOccurrences.get(chapter) || 0;
         chapterOccurrences.set(chapter, occurrence + 1);
@@ -104,7 +103,7 @@ export const generateRoadmap = (input: PlannerInput): PlannerRoadmap => {
         ];
         const title = isFinalWeek
           ? finalWeekStages[sessionIndex % finalWeekStages.length]
-          : learningStages[Math.min(occurrence, learningStages.length - 1)](chapter);
+          : learningStages[occurrence % learningStages.length](chapter);
 
         week.tasks.push({
           id: `${subjectIndex}-${weekIndex}-${sessionIndex}-${Date.now()}`,
@@ -202,7 +201,8 @@ export const attachLmsResources = (
 
       const learningMaterial = ranked.find(({ candidate }) => candidate.kind === "LEARNING_MATERIAL")?.candidate;
       const practiceSet = ranked.find(({ candidate }) => candidate.kind === "PRACTICE_SET")?.candidate;
-      const resources = [learningMaterial, practiceSet]
+      const paperPractice = ranked.find(({ candidate }) => candidate.kind === "PAPER_PRACTICE")?.candidate;
+      const resources = [learningMaterial, practiceSet, paperPractice]
         .filter((candidate): candidate is PlannerResourceCandidate => Boolean(candidate))
         .map(({ searchText: _searchText, ...resource }) => resource);
 
